@@ -122,14 +122,31 @@
     "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "chain": "ethereum",
     "analysisType": "quick-index",
-    "status": "running",
+    "status": "failed",
     "progress": 20,
     "metadata": {
       "isDefaultContract": true,
       "startedAt": "2026-02-17T16:06:15.624Z"
     },
     "createdAt": "2026-02-17T16:06:15.626Z",
-    "updatedAt": "2026-02-17T16:06:15.908Z",
+    "updatedAt": "2026-02-17T16:09:59.885Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "fetch failed"
+  },
+  {
+    "id": "824ec15d-fa9b-4a39-9f4e-bd613e4fd0c6",
+    "userId": "8e45b0ef-535d-44d3-af26-09d7462179d1",
+    "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "running",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-20T12:41:53.114Z"
+    },
+    "createdAt": "2026-02-20T12:41:53.243Z",
+    "updatedAt": "2026-02-20T12:41:53.648Z",
     "currentStep": "Fetching contract transactions..."
   }
 ]

@@ -838,5 +838,78 @@
     "createdAt": "2026-02-19T08:17:05.614Z",
     "updatedAt": "2026-02-19T08:27:54.039Z",
     "lastLogin": "2026-02-19T08:27:54.038Z"
+  },
+  {
+    "id": "8e45b0ef-535d-44d3-af26-09d7462179d1",
+    "email": "soyaya101576@gmail.com",
+    "password": "$2a$06$1KZCIhVGu97OB3yT1wBQ1u9kTr8c7X.0eoqH.qiWfvNqGfCF1VSyy",
+    "name": "David David",
+    "tier": "pro",
+    "apiKey": "956616235c01e2d8a33694a541d084b4bcf53a068561b17056d32cf2844ea9f6",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-20T12:37:08.230Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guy\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"guy\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Withdrawal\",\"type\":\"event\"}]",
+        "name": "Defi",
+        "purpose": "this is a defi project that handles every token transfers and activities that unify growth accross different sectors ",
+        "category": "defi",
+        "startDate": "1988-12-22",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null,
+        "currentStep": "Error: RPC Error: Unauthorized: You must authenticate your request with an API key. Create an account on https://www.ankr.com/rpc/ and generate your personal API key for free.",
+        "subscriptionTier": "Pro"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-20T12:37:08.232Z",
+    "updatedAt": "2026-02-20T14:09:39.025Z",
+    "walletAddress": "0x0200e2958c35D1daD0A35E261a4Bff1BC6c90ea5",
+    "subscription": {
+      "tier": 2,
+      "tierName": "Pro",
+      "isActive": true,
+      "endTime": 1772468074,
+      "features": {
+        "apiCallsPerMonth": 50000,
+        "maxProjects": 100,
+        "maxAlerts": 50,
+        "exportAccess": true,
+        "comparisonTool": true,
+        "walletIntelligence": true,
+        "apiAccess": true,
+        "prioritySupport": false,
+        "customInsights": false
+      },
+      "limits": {
+        "historicalData": 31536000,
+        "teamMembers": 10,
+        "dataRefreshRate": 21600
+      },
+      "lastSynced": "2026-02-20T14:09:37.808Z"
+    }
   }
 ]

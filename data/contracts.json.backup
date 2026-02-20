@@ -577,5 +577,54 @@
     "analysisCount": 0,
     "createdAt": "2026-02-19T08:08:02.833Z",
     "updatedAt": "2026-02-19T08:08:02.833Z"
+  },
+  {
+    "id": "367d7f59-ac9c-4534-9021-b0e873b9e378",
+    "userId": "80639222-aacd-4849-9d4b-2fcbfc9079cd",
+    "name": "USD Coin (USDC)",
+    "description": "Default contract for USD Coin (USDC) - Stablecoin for testing data accuracy",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USD Coin (USDC)",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-19T08:17:07.773Z",
+    "updatedAt": "2026-02-19T08:17:07.773Z"
   }
 ]

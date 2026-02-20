@@ -1,0 +1,16 @@
+[
+  {
+    "id": "58554b24-264a-4094-a2cf-c12252af4688",
+    "userId": "8e45b0ef-535d-44d3-af26-09d7462179d1",
+    "contractAddress": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "contractChain": "ethereum",
+    "contractName": "Defi",
+    "title": "Chat: Defi...",
+    "isActive": true,
+    "lastMessageAt": "2026-02-20T14:20:11.991Z",
+    "messageCount": 3,
+    "metadata": {},
+    "createdAt": "2026-02-20T14:09:55.949Z",
+    "updatedAt": "2026-02-20T14:20:11.997Z"
+  }
+]
