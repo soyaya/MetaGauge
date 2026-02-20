@@ -72,7 +72,7 @@ ETHEREUM_RPC_URL3=https://eth.nownodes.io/YOUR_API_KEY
 LISK_RPC_URL1=https://lisk.drpc.org
 LISK_RPC_URL2=https://lisk.gateway.tenderly.co/YOUR_KEY
 
-STARKNET_RPC_URL1=https://rpc.starknet.lava.build
+STARKNET_RPC_URL1=https://rpc.starknet.l2.4
 STARKNET_RPC_URL2=https://starknet-rpc.publicnode.com
 
 # AI Integration (optional)
