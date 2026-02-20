@@ -1,66 +1,45 @@
-# 🚀 Metagauge
+# 🚀 MetaGauge
 
-[![MVP Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com/your-repo/multi-chain-analytics)
-[![Chains Supported](https://img.shields.io/badge/Chains-Lisk%20%7C%20Starknet%20%7C%20Ethereum-blue)](https://github.com/your-repo/multi-chain-analytics)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com/soyaya/MetaGauge)
+[![Chains](https://img.shields.io/badge/Chains-Ethereum%20%7C%20Lisk%20%7C%20Starknet-blue)](https://github.com/soyaya/MetaGauge)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
-A comprehensive blockchain analytics platform with full-stack web application, REST API, and intelligent AI-powered insights. Automatically adapts to analyze smart contracts across multiple chains with enterprise-grade reliability and modern React frontend.
+> **Enterprise-grade blockchain analytics platform** with AI-powered insights, real-time indexing, and multi-chain support. Built for startups, investors, and developers who need deep contract intelligence.
 
-## ✨ Features
+---
 
-### 🌐 **Full-Stack Web Application**
-- **Modern React Frontend** - Next.js 16 with TypeScript and Tailwind CSS
-- **Professional UI/UX** - Responsive design with shadcn/ui components
-- **Real-time Dashboard** - Live analysis monitoring and progress tracking
-- **User Authentication** - Secure JWT-based auth with registration/login
-- **Interactive Charts** - Comprehensive data visualization with Recharts
+## ✨ What is MetaGauge?
 
-### 🤖 **AI-Powered Analytics**
-- **GeminiAI Integration** - Advanced AI interpretation and insights
-- **Real-time Alerts** - Security, performance, and anomaly detection
-- **Market Sentiment** - Competitive positioning and growth predictions
-- **Optimization Suggestions** - Gas efficiency and performance improvements
-- **Quick Insights** - Instant AI-generated performance scoring
+MetaGauge is a comprehensive blockchain analytics platform that transforms raw smart contract data into actionable business intelligence. Whether you're a startup tracking user engagement, an investor analyzing DeFi protocols, or a developer optimizing gas costs, MetaGauge provides the insights you need.
 
-### 🔒 **Intelligent Chain Isolation**
-- Automatically detects target blockchain from configuration
-- Only initializes RPC providers for the target chain
-- **70% faster startup** and **60% lower memory usage**
+### 🎯 Key Highlights
 
-### 🌐 **Multi-Chain Support**
-- **Lisk Mainnet** - Primary implementation with DRPC + Tenderly failover
-- **Starknet** - Specialized transaction handling and RPC client
-- **Ethereum** - Standard EVM-compatible analysis
-- **Modular Architecture** - Easy to extend for additional chains
+- **🤖 AI-Powered Analytics** - Google Gemini integration for intelligent insights and recommendations
+- **⚡ Real-Time Indexing** - Streaming blockchain data with WebSocket updates
+- **🌐 Multi-Chain Support** - Ethereum, Lisk, and Starknet with automatic chain detection
+- **💬 AI Chat Assistant** - Natural language queries about your contracts
+- **📊 Comprehensive Dashboards** - User behavior, transactions, metrics, and competitive analysis
+- **🔐 Subscription-Based** - Flexible tiers from Free to Enterprise
+- **💳 Multi-Chain Payments** - Pay with Lisk (LSK/ETH) or Stellar (XLM/USDC)
 
-### 📊 **Comprehensive Analytics**
-- **Contract Events** - All smart contract logs and interactions
-- **Transaction Analysis** - Complete transaction details, gas usage, values
-- **User Behavior** - Unique users, transaction patterns, lifecycle analysis
-- **Financial Metrics** - Total value transferred, gas costs, whale detection
-- **Competitive Analysis** - Multi-contract comparison and ranking
+---
 
-### 🛡️ **Enterprise Reliability**
-- **REST API** - Full-featured backend with OpenAPI documentation
-- **Rate Limiting** - Configurable request throttling and user tiers
-- **Automatic Failover** - Seamless RPC provider switching
-- **Health Monitoring** - Real-time provider health checks
-- **Error Recovery** - Comprehensive error handling
-- **File-based Storage** - No database dependencies required
-
-## 🚀 Quick Start
+## 🎬 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Google Gemini API key (optional, for AI features)
+
+- **Node.js** 18+ and npm/yarn
+- **Google Gemini API Key** (optional, for AI features)
+- **RPC Endpoints** for your target blockchain
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/multi-chain-analytics.git
-cd multi-chain-analytics
+git clone https://github.com/soyaya/MetaGauge.git
+cd MetaGauge
 
 # Install backend dependencies
 npm install
@@ -70,475 +49,669 @@ cd frontend
 npm install
 cd ..
 
-# Copy environment templates
+# Setup environment files
 cp .env.example .env
 cp frontend/.env.example frontend/.env
 ```
 
-### Environment Configuration
+### Configuration
 
-#### Backend Configuration (`.env`)
+#### Backend (`.env`)
+
 ```env
-# Target Contract Configuration
-CONTRACT_ADDRESS=0x05D032ac25d322df992303dCa074EE7392C117b9
-CONTRACT_CHAIN=lisk
-CONTRACT_NAME=usdt
+# Target Contract
+CONTRACT_ADDRESS=0xYourContractAddress
+CONTRACT_CHAIN=ethereum
+CONTRACT_NAME=YourProject
 
-# Chain Isolation (recommended)
-ANALYZE_CHAIN_ONLY=true
+# RPC Endpoints (with failover)
+ETHEREUM_RPC_URL1=https://ethereum-rpc.publicnode.com
+ETHEREUM_RPC_URL2=https://eth.llamarpc.com
+ETHEREUM_RPC_URL3=https://eth.nownodes.io/YOUR_API_KEY
 
-# RPC Endpoints
 LISK_RPC_URL1=https://lisk.drpc.org
-LISK_RPC_URL2=https://lisk.gateway.tenderly.co/your-key
+LISK_RPC_URL2=https://lisk.gateway.tenderly.co/YOUR_KEY
 
-# Server Configuration
-PORT=5000
+STARKNET_RPC_URL1=https://rpc.starknet.lava.build
+STARKNET_RPC_URL2=https://starknet-rpc.publicnode.com
 
 # AI Integration (optional)
 GEMINI_API_KEY=your-gemini-api-key
 
-# Database (file-based by default)
+# Server
+PORT=5000
 DATABASE_TYPE=file
 ```
 
-#### Frontend Configuration (`frontend/.env`)
-```env
-# API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:5000
+#### Frontend (`frontend/.env`)
 
-# Optional: Analytics
-NEXT_PUBLIC_VERCEL_ANALYTICS=false
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-### Running the Services
+### Running the Application
 
-#### Option 1: Full Stack Development
+#### Development Mode
+
 ```bash
-# Terminal 1: Start Backend API Server
+# Terminal 1: Start Backend
 npm run dev
 # Backend runs on http://localhost:5000
 
-# Terminal 2: Start Frontend Development Server
+# Terminal 2: Start Frontend
 cd frontend
 npm run dev
 # Frontend runs on http://localhost:3000
 ```
 
-#### Option 2: Production Mode
+#### Production Mode
+
 ```bash
-# Start Backend API Server
+# Backend
 npm start
 
-# Build and start Frontend
+# Frontend
 cd frontend
 npm run build
 npm start
 ```
 
-#### Option 3: Quick Analysis (CLI Mode)
-```bash
-# Run direct contract analysis
-npm run quick-start
+### First Steps
 
-# Or run specific analysis types
-npm run analyze
-npm run analyze:competitors
-npm run analyze:comparative
-```
+1. **Access the app** at `http://localhost:3000`
+2. **Sign up** for a free account
+3. **Onboard a contract** - Enter contract address and chain
+4. **View analytics** - Real-time dashboard with AI insights
+5. **Chat with AI** - Ask questions about your contract data
 
-### First Time Setup
+---
 
-1. **Access the Web Application**
-   ```
-   Frontend: http://localhost:3000
-   Backend API: http://localhost:5000
-   API Docs: http://localhost:5000/api-docs
-   ```
-
-2. **Create Account**
-   - Navigate to http://localhost:3000/signup
-   - Register with email and password
-   - Login at http://localhost:3000/login
-
-3. **Run Your First Analysis**
-   - Go to http://localhost:3000/analyzer
-   - Click "Use Default Config" for quick start
-   - Monitor real-time analysis progress
-   - View comprehensive results in dashboard
-
-### View Results
-
-#### Web Dashboard
-Access your analysis results at:
-- **Overview**: Summary metrics and AI insights
-- **Metrics**: DeFi ratios, TVL, user activity
-- **Users**: Behavior analysis and engagement scores
-- **Transactions**: Detailed transaction data with pagination
-- **Competitive**: Market positioning and competitor analysis
-
-#### CLI Reports
-Reports are automatically generated in:
-```
-reports/
-├── your-contract/
-│   └── lisk/
-│       ├── analysis_*.json    # Structured data
-│       ├── analysis_*.csv     # Spreadsheet format
-│       ├── analysis_*.md      # Executive report
-│       └── README.md          # Report index
-```
-
-## 🔧 Configuration Options
-
-### Chain Switching
-Simply change the target chain in `.env`:
-
-```env
-CONTRACT_CHAIN=lisk     # → Uses Lisk RPC providers only
-CONTRACT_CHAIN=starknet # → Uses Starknet RPC providers only  
-CONTRACT_CHAIN=ethereum # → Uses Ethereum RPC providers only
-```
-
-### Performance Tuning
-```env
-ANALYSIS_BLOCK_RANGE=1000      # Blocks to analyze
-MAX_CONCURRENT_REQUESTS=5      # Rate limiting
-FAILOVER_TIMEOUT=30000         # RPC timeout (ms)
-```
-
-### AI Features Configuration
-```env
-GEMINI_API_KEY=your-api-key    # Enable AI insights
-GEMINI_MODEL=gemini-2.5-flash-lite  # AI model selection
-AI_RATE_LIMIT=50               # AI requests per 15 minutes
-```
-
-### User Tiers and Rate Limiting
-```env
-# API Rate Limits
-RATE_LIMIT_REQUESTS=100        # Requests per 15 minutes
-RATE_LIMIT_ANALYSES=10         # Analyses per hour
-
-# User Tiers (monthly limits)
-FREE_TIER_LIMIT=10             # Free tier analyses
-PRO_TIER_LIMIT=100             # Pro tier analyses
-ENTERPRISE_TIER_LIMIT=unlimited # Enterprise tier
-```
-
-### Output Formats
-```env
-OUTPUT_FORMATS=json,csv,markdown  # Choose formats
-OUTPUT_DIR=./reports              # Output directory
-```
-
-## 📊 Working Features
-
-### ✅ **Web Application**
-- **User Authentication** - Registration, login, JWT tokens
-- **Real-time Dashboard** - Live analysis monitoring
-- **Interactive Analytics** - 5 comprehensive dashboard tabs
-- **Responsive Design** - Works on desktop and mobile
-- **Progress Tracking** - Real-time analysis status updates
-
-### ✅ **AI-Powered Insights**
-- **AI Interpretation** - SWOT analysis, risk assessment, recommendations
-- **Quick Insights** - Performance scoring and key metrics
-- **Real-time Alerts** - Security, performance, and anomaly detection
-- **Market Sentiment** - Competitive positioning analysis
-- **Optimization Suggestions** - Gas efficiency and performance tips
-
-### ✅ **Backend API**
-- **REST API** - Full-featured with OpenAPI documentation
-- **Authentication** - JWT-based with user tiers
-- **Rate Limiting** - 100 requests/15min, 10 analyses/hour
-- **File Storage** - No database dependencies
-- **Health Monitoring** - API health checks and status
-
-### ✅ **Multi-Chain Analysis**
-- **Lisk Mainnet** - Production-ready with failover
-- **Starknet** - Full transaction analysis
-- **Ethereum** - Standard EVM support
-- **Chain Isolation** - Optimized resource usage
-
-### ✅ **Data Analytics**
-- **Transaction Analysis** - Complete transaction details
-- **User Behavior** - Engagement, retention, lifecycle
-- **Financial Metrics** - TVL, gas costs, whale detection
-- **Competitive Analysis** - Multi-contract comparison
-- **Export Options** - JSON, CSV, Markdown reports
-
-### ✅ **Enterprise Features**
-- **Automatic Failover** - RPC provider redundancy
-- **Error Recovery** - Comprehensive error handling
-- **Performance Optimization** - 70% faster startup
-- **Scalable Architecture** - Modular and extensible
-
-## 🛠 Architecture
+## 🏗️ Architecture
 
 ### System Overview
+
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend API   │    │   AI Services   │
-│   (Next.js)     │◄──►│   (Express.js)  │◄──►│   (GeminiAI)    │
-│   Port: 3000    │    │   Port: 5000    │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   UI Components │    │   File Storage  │    │   RPC Clients   │
-│   - Dashboard   │    │   - Users       │    │   - Lisk        │
-│   - Analytics   │    │   - Contracts   │    │   - Starknet    │
-│   - Charts      │    │   - Analyses    │    │   - Ethereum    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-### Core Components
-
-#### **Frontend (React/Next.js)**
-- **Pages**: Landing, Auth, Analyzer, Dashboard, Profile
-- **Components**: Dashboard tabs, charts, forms, UI elements
-- **Hooks**: Authentication, API calls, real-time updates
-- **Styling**: Tailwind CSS with shadcn/ui components
-
-#### **Backend (Node.js/Express)**
-- **API Routes**: Auth, contracts, analysis, users
-- **Services**: Analytics engine, AI integration, RPC clients
-- **Middleware**: Authentication, rate limiting, error handling
-- **Storage**: File-based JSON storage system
-
-#### **Analysis Engine**
-- **SmartContractFetcher** - Multi-provider RPC management
-- **LiskRpcClient** - Specialized Lisk blockchain client  
-- **StarknetRpcClient** - Starknet-specific handling
-- **ChainNormalizer** - Cross-chain data standardization
-- **ReportGenerator** - Multi-format output generation
-
-#### **AI Integration**
-- **GeminiAI Service** - Advanced AI analysis and insights
-- **Rate Limiting** - User-specific AI request limits
-- **Fallback System** - Graceful degradation when AI unavailable
-- **Structured Prompts** - Optimized for consistent responses
-
-### Data Flow
-```
-User Input → Authentication → Contract Config → Analysis Start →
-RPC Data Collection → Chain Normalization → AI Processing →
-Results Storage → Dashboard Display → Report Generation
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend (Next.js 16)                     │
+│  Landing → Auth → Onboarding → Dashboard → Analytics → Chat │
+└─────────────────────────────────────────────────────────────┘
+                            ↕ REST API + WebSocket
+┌─────────────────────────────────────────────────────────────┐
+│                   Backend (Express.js)                       │
+│  Auth │ Contracts │ Analysis │ Subscription │ Chat │ Faucet │
+└─────────────────────────────────────────────────────────────┘
+                            ↕
+┌─────────────────────────────────────────────────────────────┐
+│                   Streaming Indexer                          │
+│  IndexerManager → ChunkManager → SmartContractFetcher       │
+│       ↓                ↓                    ↓                │
+│  FileStorage    HorizontalValidator   RPCClientPool         │
+└─────────────────────────────────────────────────────────────┘
+                            ↕
+┌─────────────────────────────────────────────────────────────┐
+│              Blockchain Networks + AI Services               │
+│  Ethereum │ Lisk │ Starknet │ Google Gemini │ Price Oracles │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## 📈 API Endpoints
+### Tech Stack
+
+#### Frontend
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **UI**: React 19 + Tailwind CSS
+- **Components**: shadcn/ui + Radix UI
+- **Charts**: Recharts
+- **Web3**: wagmi + RainbowKit + ethers.js
+- **State**: React Query
+
+#### Backend
+- **Runtime**: Node.js 18+
+- **Framework**: Express.js 5
+- **Language**: JavaScript (ES Modules)
+- **Storage**: File-based JSON (PostgreSQL ready)
+- **Auth**: JWT + bcrypt
+- **AI**: Google Gemini API
+- **WebSocket**: ws library
+
+#### Blockchain
+- **Chains**: Ethereum, Lisk, Starknet
+- **RPC**: Multi-provider failover system
+- **Indexing**: Real-time streaming with chunk processing
+- **Normalization**: Cross-chain data standardization
+
+---
+
+## 🎯 Core Features
+
+### 1. 🤖 AI-Powered Analytics
+
+**Google Gemini Integration** provides:
+- **SWOT Analysis** - Strengths, weaknesses, opportunities, threats
+- **Risk Assessment** - Security, performance, and market risks
+- **Optimization Suggestions** - Gas efficiency and performance improvements
+- **Market Sentiment** - Competitive positioning and growth predictions
+- **Real-time Alerts** - Anomaly detection and security warnings
+
+### 2. 💬 AI Chat Assistant
+
+**Natural Language Interface** for:
+- Querying contract data ("How many users joined last week?")
+- Understanding metrics ("Explain my retention rate")
+- Getting recommendations ("How can I improve user engagement?")
+- Comparing competitors ("How do I stack up against competitors?")
+- Exploring trends ("What's my growth trajectory?")
+
+### 3. 📊 Comprehensive Dashboards
+
+#### Overview Tab
+- Key metrics summary
+- AI-generated insights
+- Performance scoring
+- Quick actions
+
+#### Metrics Tab
+- DeFi ratios (TVL, liquidity, utilization)
+- Financial metrics (volume, fees, revenue)
+- User engagement scores
+- Growth indicators
+
+#### Users Tab
+- User behavior analysis
+- Cohort retention
+- Lifecycle stages
+- Whale detection
+- Engagement patterns
+
+#### Transactions Tab
+- Complete transaction history
+- Gas analysis
+- Value transfers
+- Success/failure rates
+- Pagination and filtering
+
+#### Competitive Tab
+- Multi-contract comparison
+- Market positioning
+- Benchmark analysis
+- Growth comparisons
+- Feature gaps
+
+### 4. ⚡ Real-Time Indexing
+
+**Streaming Indexer** features:
+- **Automatic Processing** - Starts on contract onboarding
+- **Chunk-Based** - Efficient memory usage
+- **Progress Tracking** - Real-time WebSocket updates
+- **Horizontal Validation** - Data integrity checks
+- **Failover Support** - Multiple RPC providers
+- **Resume Capability** - Continues from last checkpoint
+
+### 5. 🌐 Multi-Chain Support
+
+| Chain | Status | Features |
+|-------|--------|----------|
+| **Ethereum** | ✅ Production | Full event + transaction analysis |
+| **Lisk** | ✅ Production | DRPC + Tenderly failover |
+| **Starknet** | ✅ Production | Specialized transaction handling |
+
+**Chain Isolation**: Only initializes RPC providers for target chain
+- 70% faster startup
+- 60% lower memory usage
+
+### 6. 💳 Subscription System
+
+#### Tiers & Pricing
+
+| Tier | Monthly | Yearly | API Calls | Historical Data | Features |
+|------|---------|--------|-----------|-----------------|----------|
+| **Free** | $0 | $0 | 1,000 | 30 days | Basic analytics |
+| **Starter** | $29 | $290 | 10,000 | 90 days | AI insights |
+| **Pro** | $99 | $990 | 50,000 | 365 days | Advanced analytics |
+| **Enterprise** | $299 | $2,990 | 250,000 | 730 days | Full features |
+
+#### Payment Options
+- **Lisk**: LSK tokens or ETH
+- **Stellar**: XLM (Lumens) or USDC
+- **Smart Contract Verification**: Automatic subscription validation
+
+### 7. 🔐 Security & Authentication
+
+- **JWT-based auth** with secure token management
+- **Password hashing** with bcrypt
+- **Rate limiting** per user tier
+- **API key generation** for programmatic access
+- **Session management** with refresh tokens
+
+---
+
+## 📡 API Reference
 
 ### Authentication
-```
-POST /api/auth/register     - Register new user
-POST /api/auth/login        - Login user  
-GET  /api/auth/me          - Get current user
-POST /api/auth/refresh-api-key - Generate new API key
+
+```bash
+POST /api/auth/register     # Register new user
+POST /api/auth/login        # Login user
+GET  /api/auth/me          # Get current user
+POST /api/auth/refresh-api-key # Generate new API key
 ```
 
-### Contract Configuration
-```
-GET  /api/contracts        - List user configurations
-POST /api/contracts        - Create configuration
-GET  /api/contracts/:id    - Get specific configuration
-PUT  /api/contracts/:id    - Update configuration
-DELETE /api/contracts/:id  - Delete configuration
+### Contracts
+
+```bash
+GET    /api/contracts       # List user contracts
+POST   /api/contracts       # Add new contract
+GET    /api/contracts/:id   # Get contract details
+PUT    /api/contracts/:id   # Update contract
+DELETE /api/contracts/:id   # Delete contract
 ```
 
 ### Analysis
-```
-POST /api/analysis/start      - Start analysis
-GET  /api/analysis/:id/status - Monitor progress
-GET  /api/analysis/:id/results - Get final results
-GET  /api/analysis/history    - Analysis history
-GET  /api/analysis/stats      - Usage statistics
+
+```bash
+POST /api/analysis/start           # Start analysis
+GET  /api/analysis/:id/status      # Get progress
+GET  /api/analysis/:id/results     # Get results
+GET  /api/analysis/history         # Analysis history
+POST /api/analysis/:id/interpret   # AI interpretation
+GET  /api/analysis/:id/quick-insights # Quick AI insights
 ```
 
-### AI Features
-```
-POST /api/analysis/:id/interpret      - AI interpretation
-GET  /api/analysis/:id/quick-insights - Quick insights
-POST /api/analysis/:id/alerts         - Real-time alerts
-POST /api/analysis/:id/sentiment      - Market sentiment
-POST /api/analysis/:id/optimizations  - Optimization suggestions
-POST /api/analysis/:id/recommendations - Enhanced recommendations
+### Onboarding
+
+```bash
+POST /api/onboarding/start         # Start onboarding
+GET  /api/onboarding/:id/status    # Get progress
+GET  /api/onboarding/:id/results   # Get results
 ```
 
-### User Management
+### Chat
+
+```bash
+POST /api/chat/sessions            # Create chat session
+GET  /api/chat/sessions            # List sessions
+POST /api/chat/message             # Send message
+GET  /api/chat/sessions/:id/messages # Get messages
 ```
-GET /api/users/dashboard   - Dashboard data
-GET /api/users/profile     - User profile
-PUT /api/users/profile     - Update profile
-GET /api/users/usage       - Usage statistics
+
+### Subscription
+
+```bash
+GET  /api/subscription/status      # Get subscription status
+POST /api/subscription/verify      # Verify payment
+GET  /api/subscription/usage       # Get usage stats
 ```
 
 ### Documentation
-```
-GET /api-docs              - OpenAPI/Swagger documentation
-GET /health                - API health check
+
+```bash
+GET /api-docs                      # OpenAPI/Swagger docs
+GET /health                        # Health check
 ```
 
-## 📈 Supported Chains
+---
 
-| Chain | Status | RPC Providers | Features |
-|-------|--------|---------------|----------|
-| **Lisk** | ✅ Production | DRPC, Tenderly | Full event + transaction analysis |
-| **Starknet** | ✅ Production | Lava, PublicNode, Infura | Specialized transaction handling |
-| **Ethereum** | ✅ Production | PublicNode, NowNodes | Standard EVM analysis |
+## 📊 Data Analytics
+
+### Metrics Calculated
+
+#### User Metrics
+- **Unique Users** - Total and active users
+- **New Users** - Daily, weekly, monthly
+- **Retention Rate** - Cohort-based retention
+- **Churn Rate** - User attrition
+- **Engagement Score** - Activity-based scoring
+- **Lifecycle Stages** - New, active, at-risk, churned
+
+#### Transaction Metrics
+- **Total Transactions** - Success and failure counts
+- **Transaction Volume** - Value transferred
+- **Gas Costs** - Total and average gas
+- **Success Rate** - Transaction success percentage
+- **Average Value** - Per transaction value
+
+#### Financial Metrics
+- **Total Value Locked (TVL)** - For DeFi protocols
+- **Trading Volume** - For DEXs
+- **Fee Revenue** - Protocol fees collected
+- **Liquidity Depth** - Available liquidity
+
+#### Competitive Metrics
+- **Market Share** - Relative to competitors
+- **Growth Rate** - Compared to market
+- **Feature Parity** - Feature comparison
+- **User Acquisition** - Compared to competitors
+
+---
+
+## 🚀 Deployment
+
+### Environment Setup
+
+#### Production Backend
+
+```bash
+# Set production environment
+NODE_ENV=production
+
+# Configure production RPC endpoints
+ETHEREUM_RPC_URL1=https://your-production-rpc.com
+LISK_RPC_URL1=https://your-production-rpc.com
+
+# Set secure JWT secret
+JWT_SECRET=your-secure-random-secret
+
+# Configure CORS
+CORS_ORIGIN=https://your-frontend-domain.com
+```
+
+#### Production Frontend
+
+```bash
+# Build frontend
+cd frontend
+npm run build
+
+# Start production server
+npm start
+```
+
+### Deployment Platforms
+
+#### Recommended Platforms
+
+**Backend**:
+- Railway
+- Render
+- Heroku
+- AWS EC2
+- DigitalOcean
+
+**Frontend**:
+- Vercel (recommended for Next.js)
+- Netlify
+- AWS Amplify
+- Cloudflare Pages
+
+### Docker Support (Coming Soon)
+
+```dockerfile
+# Backend Dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --production
+COPY . .
+EXPOSE 5000
+CMD ["npm", "start"]
+```
+
+---
 
 ## 🧪 Testing
 
-### Run Test Suite
-```bash
-# Backend API tests
-npm test
-npm run test:api
+### Run Tests
 
-# Frontend component tests
+```bash
+# Backend tests
+npm test
+npm run test:unit
+npm run test:integration
+npm run test:coverage
+
+# Frontend tests
 cd frontend
 npm test
 npm run test:coverage
 ```
 
 ### Manual Testing
+
 ```bash
-# Test specific features
-node test-frontend-integration.js    # Frontend integration
-node test-enhanced-ai.js            # AI features
-node test-complete-auth-flow.js     # Authentication
-node test-api-enhanced.js           # API endpoints
-```
-
-### Health Checks
-```bash
-# Check API health
-curl http://localhost:5000/health
-
-# Check frontend
-curl http://localhost:3000/api/health
-```
-
-## 📊 Real-World Performance
-
-### Lisk Analysis Results
-```
-✅ Contract: 0x05D032ac25d322df992303dCa074EE7392C117b9
-📊 Data: 17 transactions, 11 unique users analyzed
-⚡ Speed: 1001 blocks analyzed in ~30 seconds
-🔗 RPC: DRPC primary, Tenderly failover working
-🤖 AI: GeminiAI insights with 100% success rate
-```
-
-### Chain Isolation Impact
-```
-Before: 7 providers across 3 chains
-After:  2 providers for target chain only
-Result: 70% faster startup, focused resources
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🎯 Roadmap
-
-### ✅ **Completed (Production Ready)**
-- ✅ **Multi-Chain Support** - Lisk, Starknet, Ethereum
-- ✅ **Full-Stack Web App** - React frontend with REST API
-- ✅ **AI Integration** - GeminiAI-powered insights and analysis
-- ✅ **User Authentication** - JWT-based auth system
-- ✅ **Real-time Dashboard** - Interactive analytics interface
-
-### 🚧 **In Progress**
-- [ ] **Additional Chains** - Polygon, Arbitrum, Optimism
-- [ ] **Real-time Streaming** - WebSocket integration for live updates
-- [ ] **Advanced Visualizations** - Enhanced charts and graphs
-
-### 🔮 **Future Enhancements**
-- [ ] **Mobile App** - React Native mobile application
-- [ ] **Advanced Analytics** - ML-powered predictions and forecasting
-- [ ] **Team Collaboration** - Multi-user workspaces and sharing
-- [ ] **Custom Alerts** - User-defined alert thresholds and notifications
-- [ ] **API Marketplace** - Third-party integrations and plugins
-
-## 📞 Support & Documentation
-
-### 📖 **Documentation**
-- **API Documentation**: http://localhost:5000/api-docs (when running)
-- **Frontend Components**: Built with shadcn/ui and Tailwind CSS
-- **Backend Architecture**: Express.js with file-based storage
-- **AI Integration**: GeminiAI service with rate limiting
-
-### 🐛 **Troubleshooting**
-
-#### Common Issues
-```bash
-# Port already in use
-lsof -ti:3000 | xargs kill -9  # Kill frontend process
-lsof -ti:5000 | xargs kill -9  # Kill backend process
-
-# Dependencies issues
-rm -rf node_modules package-lock.json
-npm install
-
-# Frontend build issues
-cd frontend
-rm -rf .next node_modules
-npm install
-npm run build
-```
-
-#### Environment Issues
-```bash
-# Check environment variables
-node debug-server-env.js
+# Test authentication flow
+node test-auth-flow.js
 
 # Test RPC connections
-node test-rpc-endpoints.js
+node test-rpc-connections.js
 
-# Verify AI integration
+# Test complete user journey
+node test-complete-user-journey.js
+
+# Test AI integration
 node test-enhanced-ai.js
 ```
 
-### 💬 **Community & Support**
-- 📧 Email: support@your-domain.com
-- 💬 Discord: [Join our community](https://discord.gg/your-invite)
-- 🐛 Issues: [GitHub Issues](https://github.com/your-repo/issues)
-- 📚 Wiki: [Project Wiki](https://github.com/your-repo/wiki)
+### Health Checks
+
+```bash
+# Backend health
+curl http://localhost:5000/health
+
+# Frontend health
+curl http://localhost:3000/api/health
+```
 
 ---
 
-## 🎉 Project Status: Production Ready
+## 📁 Project Structure
 
-### **Full-Stack Application Complete**
-- ✅ **Frontend**: Modern React/Next.js application with TypeScript
-- ✅ **Backend**: Express.js REST API with comprehensive endpoints
-- ✅ **Database**: File-based storage (no external dependencies)
-- ✅ **Authentication**: JWT-based user management system
-- ✅ **AI Integration**: GeminiAI-powered insights and analysis
+```
+MetaGauge/
+├── frontend/                    # Next.js frontend
+│   ├── app/                    # App router pages
+│   │   ├── page.tsx           # Landing page
+│   │   ├── login/             # Authentication
+│   │   ├── signup/
+│   │   ├── onboarding/        # Contract onboarding
+│   │   ├── dashboard/         # Main dashboard
+│   │   ├── chat/              # AI chat interface
+│   │   └── subscription/      # Subscription management
+│   ├── components/            # React components
+│   │   ├── analyzer/          # Dashboard tabs
+│   │   ├── auth/              # Auth components
+│   │   ├── chat/              # Chat components
+│   │   ├── subscription/      # Subscription components
+│   │   └── ui/                # shadcn/ui components
+│   ├── hooks/                 # Custom React hooks
+│   ├── lib/                   # Utilities and API client
+│   └── public/                # Static assets
+│
+├── src/                        # Backend source
+│   ├── api/                   # Express API
+│   │   ├── routes/           # API routes
+│   │   ├── middleware/       # Auth, logging, errors
+│   │   ├── models/           # Data models
+│   │   └── database/         # Storage layer
+│   ├── indexer/              # Streaming indexer
+│   │   ├── services/         # Indexer services
+│   │   ├── config/           # Chain configs
+│   │   └── models/           # Type definitions
+│   ├── services/             # Business logic
+│   │   ├── *RpcClient.js    # Chain-specific RPC clients
+│   │   ├── GeminiAIService.js # AI integration
+│   │   ├── SubscriptionService.js # Subscription logic
+│   │   └── ChatAIService.js  # Chat AI service
+│   └── config/               # Configuration
+│
+├── data/                      # File-based storage
+│   ├── users.json            # User data
+│   ├── contracts.json        # Contract configs
+│   ├── analyses.json         # Analysis results
+│   ├── chat_sessions.json    # Chat sessions
+│   └── chat_messages.json    # Chat messages
+│
+├── reports/                   # Generated reports
+│   └── [contract]/[chain]/   # Contract-specific reports
+│
+├── tests/                     # Test suites
+│   ├── unit/                 # Unit tests
+│   ├── integration/          # Integration tests
+│   └── helpers/              # Test utilities
+│
+├── .env.example              # Environment template
+├── package.json              # Backend dependencies
+└── README.md                 # This file
+```
 
-### **Enterprise Features**
-- ✅ **Multi-Chain Support**: Lisk, Starknet, Ethereum with failover
-- ✅ **Rate Limiting**: User tiers and API protection
-- ✅ **Error Handling**: Comprehensive error recovery and logging
-- ✅ **Performance**: 70% faster startup with chain isolation
-- ✅ **Scalability**: Modular architecture for easy extension
+---
 
-### **Real-World Tested**
-- ✅ **Live Data**: Successfully analyzed 17 transactions, 11 users
-- ✅ **AI Analysis**: 100% success rate with GeminiAI integration
-- ✅ **Multi-Format**: JSON, CSV, Markdown report generation
-- ✅ **Dashboard**: 5 comprehensive analytics tabs with real-time data
+## 🤝 Contributing
 
-**🚀 Ready for immediate deployment and production use!**
+We welcome contributions! Here's how to get started:
 
-*Built with enterprise-grade reliability, modern web technologies, and intelligent AI-powered blockchain analytics.*
+### Development Setup
+
+1. **Fork the repository**
+2. **Clone your fork**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/MetaGauge.git
+   cd MetaGauge
+   ```
+3. **Create a branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+4. **Make your changes**
+5. **Test your changes**
+   ```bash
+   npm test
+   ```
+6. **Commit and push**
+   ```bash
+   git commit -m 'Add amazing feature'
+   git push origin feature/amazing-feature
+   ```
+7. **Open a Pull Request**
+
+### Contribution Guidelines
+
+- Follow existing code style
+- Write tests for new features
+- Update documentation
+- Keep commits atomic and descriptive
+- Ensure all tests pass
+
+### Areas for Contribution
+
+- 🌐 Additional blockchain support (Polygon, Arbitrum, etc.)
+- 📊 New analytics metrics
+- 🎨 UI/UX improvements
+- 🐛 Bug fixes
+- 📝 Documentation improvements
+- 🧪 Test coverage
+- 🔧 Performance optimizations
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ Completed (v1.0)
+
+- ✅ Multi-chain support (Ethereum, Lisk, Starknet)
+- ✅ Full-stack web application
+- ✅ AI-powered analytics with Google Gemini
+- ✅ Real-time streaming indexer
+- ✅ Subscription system with multi-chain payments
+- ✅ AI chat assistant
+- ✅ Comprehensive dashboards
+- ✅ User authentication and authorization
+
+### 🚧 In Progress (v1.1)
+
+- [ ] PostgreSQL migration (file-based storage ready)
+- [ ] Mobile-responsive improvements
+- [ ] Advanced filtering and search
+- [ ] Export functionality (PDF, Excel)
+- [ ] Email notifications
+
+### 🔮 Future (v2.0+)
+
+- [ ] Additional chains (Polygon, Arbitrum, Optimism, Base)
+- [ ] Mobile app (React Native)
+- [ ] Advanced ML predictions
+- [ ] Team collaboration features
+- [ ] Custom alert thresholds
+- [ ] API marketplace
+- [ ] White-label solutions
+- [ ] On-chain governance analytics
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+### Technologies
+
+- [Next.js](https://nextjs.org/) - React framework
+- [Express.js](https://expressjs.com/) - Backend framework
+- [Google Gemini](https://ai.google.dev/) - AI integration
+- [ethers.js](https://docs.ethers.org/) - Ethereum library
+- [shadcn/ui](https://ui.shadcn.com/) - UI components
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [Recharts](https://recharts.org/) - Charts
+
+### Blockchain Networks
+
+- [Ethereum](https://ethereum.org/)
+- [Lisk](https://lisk.com/)
+- [Starknet](https://starknet.io/)
+- [Stellar](https://stellar.org/)
+
+---
+
+## 📞 Support & Contact
+
+### 📖 Documentation
+
+- **API Docs**: http://localhost:5000/api-docs (when running)
+- **GitHub Wiki**: [Project Wiki](https://github.com/soyaya/MetaGauge/wiki)
+
+### 🐛 Issues & Bugs
+
+Found a bug? [Open an issue](https://github.com/soyaya/MetaGauge/issues)
+
+### 💬 Community
+
+- **GitHub Discussions**: [Join the conversation](https://github.com/soyaya/MetaGauge/discussions)
+- **Discord**: Coming soon
+- **Twitter**: Coming soon
+
+### 📧 Contact
+
+- **Email**: support@metagauge.io
+- **Website**: https://metagauge.io (coming soon)
+
+---
+
+## 🌟 Star History
+
+If you find MetaGauge useful, please consider giving it a star ⭐
+
+[![Star History Chart](https://api.star-history.com/svg?repos=soyaya/MetaGauge&type=Date)](https://star-history.com/#soyaya/MetaGauge&Date)
+
+---
+
+## 📊 Project Stats
+
+- **Lines of Code**: 133,964+
+- **Files**: 636
+- **Backend Services**: 88
+- **Frontend Components**: 115+
+- **API Endpoints**: 50+
+- **Supported Chains**: 3
+- **Test Coverage**: Growing
+
+---
+
+<div align="center">
+
+**Built with ❤️ for the blockchain community**
+
+[Website](https://metagauge.io) • [Documentation](https://github.com/soyaya/MetaGauge/wiki) • [Issues](https://github.com/soyaya/MetaGauge/issues) • [Discussions](https://github.com/soyaya/MetaGauge/discussions)
+
+</div>
