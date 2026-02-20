@@ -1,0 +1,136 @@
+[
+  {
+    "id": "a04879fa-c5b3-4d52-b09a-9c0e83913ea3",
+    "userId": "66150fdd-aa3c-4b7e-8cd9-afc3ece7f352",
+    "configId": "faf69166-ccdb-4943-98e9-8d35cf93843d",
+    "analysisType": "single",
+    "status": "failed",
+    "progress": 30,
+    "results": null,
+    "metadata": {
+      "isDefaultContract": true,
+      "indexingStarted": "2026-02-13T12:37:16.922Z",
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "subscription": {
+        "tier": "Free",
+        "tierNumber": 0,
+        "historicalDays": 7,
+        "continuousSync": false
+      },
+      "blockRange": {
+        "start": null,
+        "end": 28175268,
+        "deployment": 28168268,
+        "total": null
+      }
+    },
+    "errorMessage": "contractConfig is not defined",
+    "logs": [
+      "Starting default contract indexing..."
+    ],
+    "completedAt": "2026-02-13T12:37:17.388Z",
+    "createdAt": "2026-02-13T12:37:16.926Z",
+    "updatedAt": "2026-02-15T12:50:46.637Z",
+    "lastUpdate": "2026-02-13T12:37:17.340Z",
+    "currentStep": "Initializing quick scan"
+  },
+  {
+    "id": "ec20d14d-6ea1-443c-af27-e84ec6d20231",
+    "userId": "66150fdd-aa3c-4b7e-8cd9-afc3ece7f352",
+    "configId": "faf69166-ccdb-4943-98e9-8d35cf93843d",
+    "analysisType": "single",
+    "status": "failed",
+    "progress": 0,
+    "results": null,
+    "metadata": {
+      "isDefaultContract": true,
+      "subscription": {
+        "tier": "Free",
+        "tierNumber": 0,
+        "historicalDays": 7,
+        "continuousSync": false
+      },
+      "blockRange": {
+        "start": 28168268,
+        "end": 28175268,
+        "deployment": 28168268,
+        "total": 7000
+      },
+      "wasStuck": true,
+      "resetAt": "2026-02-15T16:11:52.749Z"
+    },
+    "createdAt": "2026-02-15T13:02:03.133Z",
+    "updatedAt": "2026-02-15T16:11:52.846Z",
+    "errorMessage": "Analysis was stuck from previous session",
+    "completedAt": "2026-02-15T16:11:52.748Z"
+  },
+  {
+    "id": "2acb4349-2429-45fd-b5e8-088378951412",
+    "userId": "25c5a20a-9767-4c35-a81f-a7999ed2b4d4",
+    "contractAddress": "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
+    "chain": "lisk",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 0,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-16T15:29:48.119Z",
+      "wasStuck": true,
+      "resetAt": "2026-02-16T19:10:13.120Z"
+    },
+    "createdAt": "2026-02-16T15:29:48.130Z",
+    "updatedAt": "2026-02-16T19:10:13.126Z",
+    "errorMessage": "Analysis was stuck from previous session",
+    "completedAt": "2026-02-16T19:10:13.120Z"
+  },
+  {
+    "id": "74046f3c-d37b-4011-a2b8-a3767cf461b8",
+    "userId": "c453dcc5-8151-405f-a04e-eac155f70092",
+    "contractAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 0,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-17T14:55:51.297Z"
+    },
+    "createdAt": "2026-02-17T14:55:51.299Z",
+    "updatedAt": "2026-02-17T14:57:57.103Z",
+    "errorMessage": "server response 524 <none> (request={  }, response={  }, error=null, info={ \"requestUrl\": \"https://ethereum-rpc.publicnode.com\", \"responseBody\": \"error code: 524\", \"responseStatus\": \"524 <none>\" }, code=SERVER_ERROR, version=6.16.0)"
+  },
+  {
+    "id": "f03a6bb4-acbd-46d1-89d7-464b47883d9f",
+    "userId": "6246329d-8ad8-4c99-b41f-9a495ace544c",
+    "contractAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 0,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-17T16:03:10.445Z"
+    },
+    "createdAt": "2026-02-17T16:03:10.448Z",
+    "updatedAt": "2026-02-17T16:05:15.743Z",
+    "errorMessage": "server response 524 <none> (request={  }, response={  }, error=null, info={ \"requestUrl\": \"https://ethereum-rpc.publicnode.com\", \"responseBody\": \"error code: 524\", \"responseStatus\": \"524 <none>\" }, code=SERVER_ERROR, version=6.16.0)"
+  },
+  {
+    "id": "c096b714-5ba7-4ad9-9c73-baed59659ad0",
+    "userId": "fbbdccff-ab37-4928-99dc-bdb033f8c24c",
+    "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-17T16:06:15.624Z"
+    },
+    "createdAt": "2026-02-17T16:06:15.626Z",
+    "updatedAt": "2026-02-17T16:09:59.885Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "fetch failed"
+  }
+]

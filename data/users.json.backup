@@ -1,0 +1,841 @@
+[
+  {
+    "id": "66150fdd-aa3c-4b7e-8cd9-afc3ece7f352",
+    "email": "davidlovedavid1015@gmail.com",
+    "password": "$2a$06$EIz5QaGSacR3i238ovb5O.qJHYMFKmEu4JRvx9PYO.Sf68oFPQEcm",
+    "name": "David David",
+    "tier": "free",
+    "apiKey": "3db03c20ef6683eba97a4ddcebd36504fab88788aaf9c4b75cd932f81d9ac955",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-13T12:27:55.601Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
+        "chain": "lisk",
+        "abi": "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contractOwner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_diamondCutFacet\",\"type\":\"address\"}],\"stateMutability\":\"payable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"CalldataEmptyButInitNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetContainsNoCode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionAlreadyExists\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionDoesNotExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionIsImmutable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"IncorrectFacetCutAction\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitReverted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitZeroButCalldataNotEmpty\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoSelectorsInFace\",\"type\":\"error\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+        "name": "Defi",
+        "purpose": "USDT stablecoin on Lisk network - Tether USD for decentralized finance",
+        "category": "defi",
+        "startDate": "2026-02-13T12:37:16.926Z",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": "ec20d14d-6ea1-443c-af27-e84ec6d20231",
+        "lastUpdate": "2026-02-13T12:37:17.361Z",
+        "currentStep": "Initializing quick scan",
+        "error": "contractConfig is not defined",
+        "deploymentBlock": 28168268,
+        "subscriptionTier": "Free",
+        "continuousSync": false
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-13T12:27:55.602Z",
+    "updatedAt": "2026-02-15T16:06:50.468Z",
+    "lastLogin": "2026-02-15T12:31:33.297Z"
+  },
+  {
+    "id": "351b40d5-78f0-468f-bffa-88be70da8f82",
+    "email": "test-1770986532996@example.com",
+    "password": "$2a$06$Jr5Lv1vUOcqd8Xw75FQ0XOwiQr7vXnOo5HKOR1/MSeuzK1uvUiFwC",
+    "name": "Test User",
+    "tier": "free",
+    "apiKey": "1cff86ae43834fb3232edaa9f215f566cd6c6826dd033889bc892ff1dafc628d",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-13T12:42:13.163Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-13T12:42:13.164Z",
+    "updatedAt": "2026-02-13T12:42:13.164Z"
+  },
+  {
+    "id": "616ee296-f1bc-4957-9c73-43945f841b2d",
+    "email": "daviddavid1015@gmail.com",
+    "password": "$2a$06$XQYM8VrZJiGDEmPb0w2rtOIZ5Bz4WcjTIhsyP9lzzPhEsNDAc7LAG",
+    "name": "ghilo",
+    "tier": "pro",
+    "apiKey": "e2d2f1129e81e5d46bd87b88e95e9dd8c451ceeea777d9e41ab774667752b0a4",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-16T11:43:26.321Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24",
+        "chain": "lisk",
+        "abi": "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"remoteTokenAddr\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"allowance\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"needed\",\"type\":\"uint256\"}],\"name\":\"ERC20InsufficientAllowance\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"balance\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"needed\",\"type\":\"uint256\"}],\"name\":\"ERC20InsufficientBalance\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"name\":\"ERC20InvalidApprover\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"name\":\"ERC20InvalidReceiver\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"ERC20InvalidSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"ERC20InvalidSpender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"name\":\"ERC2612ExpiredSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"signer\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC2612InvalidSigner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"currentNonce\",\"type\":\"uint256\"}],\"name\":\"InvalidAccountNonce\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidShortString\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"str\",\"type\":\"string\"}],\"name\":\"StringTooLong\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldBridgeAddr\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newBridgeAddr\",\"type\":\"address\"}],\"name\":\"BridgeAddressChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Burn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"EIP712DomainChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Mint\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"BRIDGE\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DOMAIN_SEPARATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"REMOTE_TOKEN\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bridge\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"burn\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"eip712Domain\",\"outputs\":[{\"internalType\":\"bytes1\",\"name\":\"fields\",\"type\":\"bytes1\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"version\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"verifyingContract\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"},{\"internalType\":\"uint256[]\",\"name\":\"extensions\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bridgeAddr\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"nonces\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"permit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"remoteToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+        "name": "Defi",
+        "purpose": "asdjsajkdhdskljdjklajldjasjlasjdlasjljadlsjljsljdlajkdjaljlskjldjjasjdsldsjjslsdkjlsjkjasd",
+        "category": "defi",
+        "startDate": "1999-11-11",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null,
+        "subscriptionTier": "Pro"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-16T11:43:26.322Z",
+    "updatedAt": "2026-02-16T13:48:48.854Z",
+    "walletAddress": "0x0200e2958c35D1daD0A35E261a4Bff1BC6c90ea5",
+    "subscription": {
+      "tier": 2,
+      "tierName": "Pro",
+      "isActive": true,
+      "endTime": 1772468074,
+      "features": {
+        "apiCallsPerMonth": 50000,
+        "maxProjects": 100,
+        "maxAlerts": 50,
+        "exportAccess": true,
+        "comparisonTool": true,
+        "walletIntelligence": true,
+        "apiAccess": true,
+        "prioritySupport": false,
+        "customInsights": false
+      },
+      "limits": {
+        "historicalData": 31536000,
+        "teamMembers": 10,
+        "dataRefreshRate": 21600
+      },
+      "lastSynced": "2026-02-16T13:48:48.267Z"
+    }
+  },
+  {
+    "id": "25c5a20a-9767-4c35-a81f-a7999ed2b4d4",
+    "email": "soyaya1015@gmail.com",
+    "password": "$2a$06$JZVKSRRGxPW9jLg4ocI6ceK60eM9u0DF6J0RWdji93AO3VVV.4GEy",
+    "name": "David David",
+    "tier": "pro",
+    "apiKey": "ca69a455c7a40193273cc5013f671b19f8cbcc77db064c169c86ef9e2beaacdb",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-16T14:05:08.625Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
+        "chain": "lisk",
+        "abi": "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contractOwner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_diamondCutFacet\",\"type\":\"address\"}],\"stateMutability\":\"payable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"CalldataEmptyButInitNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetContainsNoCode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionAlreadyExists\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionDoesNotExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionIsImmutable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"IncorrectFacetCutAction\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitReverted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitZeroButCalldataNotEmpty\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoSelectorsInFace\",\"type\":\"error\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+        "name": "USDT",
+        "purpose": "asdhdjsgdkshslahllkasdjhkaljlj;a''la'ssa;'ka;sdk;';las;dakska;lllllllllllllllllllllllllllllllllllll",
+        "category": "defi",
+        "startDate": "1999-12-31",
+        "isIndexed": true,
+        "indexingProgress": 100,
+        "lastAnalysisId": "cde7e65e-5ce3-44f1-aeaf-b0d9b40e6131",
+        "subscriptionTier": "Pro"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-16T14:05:08.693Z",
+    "updatedAt": "2026-02-17T10:31:23.762Z",
+    "lastLogin": "2026-02-16T14:06:52.203Z",
+    "walletAddress": "0x0200e2958c35D1daD0A35E261a4Bff1BC6c90ea5",
+    "subscription": {
+      "tier": 2,
+      "tierName": "Pro",
+      "isActive": true,
+      "endTime": 1772468074,
+      "features": {
+        "apiCallsPerMonth": 50000,
+        "maxProjects": 100,
+        "maxAlerts": 50,
+        "exportAccess": true,
+        "comparisonTool": true,
+        "walletIntelligence": true,
+        "apiAccess": true,
+        "prioritySupport": false,
+        "customInsights": false
+      },
+      "limits": {
+        "historicalData": 31536000,
+        "teamMembers": 10,
+        "dataRefreshRate": 21600
+      },
+      "lastSynced": "2026-02-17T10:31:23.060Z"
+    }
+  },
+  {
+    "id": "cf1851b6-d88d-483b-a72a-3a6df204bdf8",
+    "email": "soyaya@gmail.com",
+    "password": "$2a$06$E63HT7yCI3R0x1yq6M2bXOWXP7A17u/gsccwYc3/3SxdZABvNXaDm",
+    "name": "don dam ",
+    "tier": "pro",
+    "apiKey": "637a5443513422f2b8897cae5c46a73c747afede7b4399f43b34c0b4ee0efc1d",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-17T12:04:15.386Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guy\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"guy\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Withdrawal\",\"type\":\"event\"}]",
+        "name": "Defi",
+        "purpose": "ajsdhjadasjkadsjkhdjkasjkasdhjkdhdksjsahdhsjkasdhjkhjskahhajkkjaskjkaskajkjkaskdkhkkasha",
+        "category": "defi",
+        "startDate": "1988-12-22",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null,
+        "subscriptionTier": "Pro"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-17T12:04:15.547Z",
+    "updatedAt": "2026-02-17T15:21:03.468Z",
+    "walletAddress": "0x0200e2958c35D1daD0A35E261a4Bff1BC6c90ea5",
+    "subscription": {
+      "tier": 2,
+      "tierName": "Pro",
+      "isActive": true,
+      "endTime": 1772468074,
+      "features": {
+        "apiCallsPerMonth": 50000,
+        "maxProjects": 100,
+        "maxAlerts": 50,
+        "exportAccess": true,
+        "comparisonTool": true,
+        "walletIntelligence": true,
+        "apiAccess": true,
+        "prioritySupport": false,
+        "customInsights": false
+      },
+      "limits": {
+        "historicalData": 31536000,
+        "teamMembers": 10,
+        "dataRefreshRate": 21600
+      },
+      "lastSynced": "2026-02-17T13:51:21.279Z"
+    }
+  },
+  {
+    "id": "7c91c59f-3300-4f5d-b194-40ff8eb42153",
+    "email": "test_1771335589474@example.com",
+    "password": "$2a$06$q.LbUWioRKHa1at8Feh.TO0wiSiiyGhik8fjL26IJ/jsooCgPx686",
+    "name": "Test User",
+    "tier": "free",
+    "apiKey": "e892842f7445496e142f946f52287459c942e31fd7a06886c2dd1aed9a7d1e3f",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-17T13:39:51.836Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "WETH",
+        "purpose": "Wrapped Ether - High volume DeFi token",
+        "category": "defi",
+        "startDate": "2026-02-17T13:39:52.232Z",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-17T13:39:51.838Z",
+    "updatedAt": "2026-02-17T13:39:52.761Z"
+  },
+  {
+    "id": "c453dcc5-8151-405f-a04e-eac155f70092",
+    "email": "test-1771340121997@example.com",
+    "password": "$2a$06$b0vNN123PQnkLES3OhLx8e2XMHuD6md9Y4dJ/zksBWVZvAZ0G90La",
+    "name": "Test User",
+    "tier": "free",
+    "apiKey": "bedf5b7d04026a61b7e2f7f1f5fe66e1989c6d414c6b3137f2e6ef7bee9cee33",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-17T14:55:30.181Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://www.circle.com/en/usdc",
+        "twitter": "https://twitter.com/circle",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "USD Coin",
+        "purpose": "Stablecoin for payments and transfers",
+        "category": "defi",
+        "startDate": "2018-09-26",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-17T14:55:30.289Z",
+    "updatedAt": "2026-02-17T14:55:35.451Z",
+    "lastLogin": "2026-02-17T14:55:33.288Z"
+  },
+  {
+    "id": "7c01d7e0-3e84-48b9-b216-56962bd9b10a",
+    "email": "test_1771343663101@example.com",
+    "password": "$2a$06$llLE3EG7ytRcsj8m7pOKj.5BGI/2Eb68VeXUUK9OkMBLcY9OCE93a",
+    "name": "E2E Test User",
+    "tier": "free",
+    "apiKey": "e467ca556da79a4217a962c35bf7b51f81bd169c68f4356a0bd30a9549695f37",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-17T15:54:42.660Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-17T15:54:42.893Z",
+    "updatedAt": "2026-02-17T15:54:42.893Z"
+  },
+  {
+    "id": "9de4977a-973d-46f7-8218-df5805e1a3ac",
+    "email": "test_1771343739392@example.com",
+    "password": "$2a$06$9hxqZRoSWjs5nq59UVmPTueQCcQ1zRgMKM2XWrPecxFd03NK6szxK",
+    "name": "E2E Test User",
+    "tier": "free",
+    "apiKey": "be4e5314e11b5505180a8c065cc1886e5ea0b80952faac73449fe635c29960a7",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-17T15:55:39.655Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "WETH",
+        "purpose": "Wrapped Ether - High volume DeFi token for testing",
+        "category": "defi",
+        "startDate": "2026-02-17T15:55:39.960Z",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-17T15:55:39.658Z",
+    "updatedAt": "2026-02-17T15:55:40.009Z"
+  },
+  {
+    "id": "6246329d-8ad8-4c99-b41f-9a495ace544c",
+    "email": "test-1771344173530@example.com",
+    "password": "$2a$06$gQ3pRe.x4MpAQjfGauwvQeK4L2QGj.t1dVTxjpLI5.N3RKsAJE1Tu",
+    "name": "Test User",
+    "tier": "free",
+    "apiKey": "9f293f54d138ee5d56bbed9e5daada382ac1112e8a0cc43defb0cb907aff97a5",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-17T16:03:03.526Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://www.circle.com/en/usdc",
+        "twitter": "https://twitter.com/circle",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "USD Coin",
+        "purpose": "Stablecoin for payments and transfers",
+        "category": "defi",
+        "startDate": "2018-09-26",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-17T16:03:03.528Z",
+    "updatedAt": "2026-02-17T16:03:07.809Z",
+    "lastLogin": "2026-02-17T16:03:05.587Z"
+  },
+  {
+    "id": "fbbdccff-ab37-4928-99dc-bdb033f8c24c",
+    "email": "test_1771344373145@example.com",
+    "password": "$2a$06$L2t9eyXmwjqZFe1nOVd.Ke9WFYfSn.ZIGc8BElzpAXE9t34ejMP0m",
+    "name": "E2E Test User",
+    "tier": "free",
+    "apiKey": "ccf1bf3ad0a44c64315eca04b1c43b7c35d99872b4e110993d88251136779eb7",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-17T16:06:13.383Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "WETH",
+        "purpose": "Wrapped Ether - High volume DeFi token for testing",
+        "category": "defi",
+        "startDate": "2026-02-17T16:06:13.422Z",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null,
+        "currentStep": "Error: fetch failed"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-17T16:06:13.385Z",
+    "updatedAt": "2026-02-17T16:09:59.890Z"
+  },
+  {
+    "id": "2555e33d-fb39-4636-9d76-a5c0b104fb4f",
+    "email": "realtest-1771441679552@example.com",
+    "password": "$2a$06$zGcLBhsHIVtTjAv9Rz.6P.hcGNfBkPb1p3WCQKqjcb7p4FkArojUS",
+    "name": "Real Test User",
+    "tier": "free",
+    "apiKey": "cd15ee0c1b14a70016f4edf3b9246852a5e2f4a4c679caa76671640289e19af2",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-18T19:09:32.615Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0x05D032ac25d322df992303dCa074EE7392C117b9",
+        "chain": "lisk",
+        "abi": null,
+        "name": "USDT",
+        "purpose": "Stablecoin for testing",
+        "category": "defi",
+        "startDate": "2024-01-01",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-18T19:09:32.868Z",
+    "updatedAt": "2026-02-18T19:09:43.819Z",
+    "lastLogin": "2026-02-18T19:09:40.231Z"
+  },
+  {
+    "id": "e76db8f9-b8d4-4759-920d-0a3aa71e4b5d",
+    "email": "ethtest-1771487956511@example.com",
+    "password": "$2a$06$mPDuNS7QffM8Wpk1s8QQEOXvf3lKpqFY1aKdIDH3sHe8839QwHKSu",
+    "name": "Ethereum Test User",
+    "tier": "free",
+    "apiKey": "a73b34dbc94f3dbd898e903b39b936c6819c983d7e7b702eeee274365dd11e41",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-19T07:59:17.280Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-19T07:59:17.297Z",
+    "updatedAt": "2026-02-19T07:59:17.297Z"
+  },
+  {
+    "id": "0c67c14c-d5ae-4e83-9739-bd7b146b39f9",
+    "email": "ethtest-1771487977960@example.com",
+    "password": "$2a$06$UbRI/96b6428HTo1zDrvXuOM8B/LfAMjbEE8NUKButqebvtRITtJi",
+    "name": "Ethereum Test User",
+    "tier": "free",
+    "apiKey": "e800d8b125ded4fe151ed6f34f3ae7d7924afa1000fa0df9df521ea5e75695ec",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-19T07:59:38.122Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "USD Coin (USDC)",
+        "purpose": "Stablecoin for testing data accuracy",
+        "category": "defi",
+        "startDate": "2018-09-26",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-19T07:59:38.136Z",
+    "updatedAt": "2026-02-19T07:59:40.253Z"
+  },
+  {
+    "id": "5ecfd4c7-7750-4001-a5a4-f4c1c47b97fe",
+    "email": "ethtest-1771488480580@example.com",
+    "password": "$2a$06$v6rhUXJXsAsgqwEfS2diUO9W6qm.dWg1RUehFAPdabmvIxZufDWiq",
+    "name": "Ethereum Test User",
+    "tier": "free",
+    "apiKey": "0098f461f1011dae480e5672df4fa23cc909986a04fc0dd81304069c95ae5468",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-19T08:08:00.749Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "USD Coin (USDC)",
+        "purpose": "Stablecoin for testing data accuracy",
+        "category": "defi",
+        "startDate": "2018-09-26",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-19T08:08:00.791Z",
+    "updatedAt": "2026-02-19T08:08:02.828Z"
+  },
+  {
+    "id": "80639222-aacd-4849-9d4b-2fcbfc9079cd",
+    "email": "ethtest-1771489023535@example.com",
+    "password": "$2a$06$zt9NqCuaSb0D6Hxh18hjYO7BdhmOVUQwUscd7RIzdY9UONR4DKZBK",
+    "name": "Ethereum Test User",
+    "tier": "free",
+    "apiKey": "7b73cea405943c666d60ab6a3b8ca60f2da3e8fa89de2dbf7ef1a5f37222be2a",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-02-19T08:17:05.611Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "USD Coin (USDC)",
+        "purpose": "Stablecoin for testing data accuracy",
+        "category": "defi",
+        "startDate": "2018-09-26",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-02-19T08:17:05.614Z",
+    "updatedAt": "2026-02-19T08:17:07.702Z"
+  }
+]

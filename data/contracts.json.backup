@@ -1,0 +1,581 @@
+[
+  {
+    "id": "faf69166-ccdb-4943-98e9-8d35cf93843d",
+    "userId": "66150fdd-aa3c-4b7e-8cd9-afc3ece7f352",
+    "name": "Defi",
+    "description": "Default contract for Defi - hdahkjhdfhdahsfhadhhafhadgshajsdgfgadsfajdgfjgasdjhgfjhasjhfggsajgfgagjasggdsajhdgasjgsjagjgasdjgdjgsdjasja",
+    "targetContract": {
+      "address": "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
+      "chain": "lisk",
+      "name": "Defi",
+      "abi": "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contractOwner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_diamondCutFacet\",\"type\":\"address\"}],\"stateMutability\":\"payable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"CalldataEmptyButInitNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetContainsNoCode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionAlreadyExists\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionDoesNotExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionIsImmutable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"IncorrectFacetCutAction\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitReverted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitZeroButCalldataNotEmpty\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoSelectorsInFace\",\"type\":\"error\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://eth.nownodes.io/YOUR_API_KEY"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye"
+      ],
+      "starknet": []
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-13T12:37:16.824Z",
+    "updatedAt": "2026-02-13T12:37:16.824Z"
+  },
+  {
+    "id": "059c1dc5-aa9c-4c6e-828d-732477c7dcab",
+    "userId": "616ee296-f1bc-4957-9c73-43945f841b2d",
+    "name": "Defi",
+    "description": "Default contract for Defi - asdjsajkdhdskljdjklajldjasjlasjdlasjljadlsjljsljdlajkdjaljlskjldjjasjdsldsjjslsdkjlsjkjasd",
+    "targetContract": {
+      "address": "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24",
+      "chain": "lisk",
+      "name": "Defi",
+      "abi": "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"remoteTokenAddr\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"allowance\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"needed\",\"type\":\"uint256\"}],\"name\":\"ERC20InsufficientAllowance\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"balance\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"needed\",\"type\":\"uint256\"}],\"name\":\"ERC20InsufficientBalance\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"name\":\"ERC20InvalidApprover\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"name\":\"ERC20InvalidReceiver\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"ERC20InvalidSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"ERC20InvalidSpender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"name\":\"ERC2612ExpiredSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"signer\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC2612InvalidSigner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"currentNonce\",\"type\":\"uint256\"}],\"name\":\"InvalidAccountNonce\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidShortString\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"str\",\"type\":\"string\"}],\"name\":\"StringTooLong\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldBridgeAddr\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newBridgeAddr\",\"type\":\"address\"}],\"name\":\"BridgeAddressChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Burn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"EIP712DomainChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Mint\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"BRIDGE\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DOMAIN_SEPARATOR\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"REMOTE_TOKEN\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"bridge\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"burn\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"eip712Domain\",\"outputs\":[{\"internalType\":\"bytes1\",\"name\":\"fields\",\"type\":\"bytes1\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"version\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"verifyingContract\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"},{\"internalType\":\"uint256[]\",\"name\":\"extensions\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bridgeAddr\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"nonces\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"permit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"remoteToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye"
+      ],
+      "starknet": []
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-16T11:46:23.785Z",
+    "updatedAt": "2026-02-16T11:46:23.785Z"
+  },
+  {
+    "id": "11278534-eb17-41d4-b654-9384e69b7e8e",
+    "userId": "25c5a20a-9767-4c35-a81f-a7999ed2b4d4",
+    "name": "USDT",
+    "description": "Default contract for USDT - asdhdjsgdkshslahllkasdjhkaljlj;a''la'ssa;'ka;sdk;';las;dakska;lllllllllllllllllllllllllllllllllllll",
+    "targetContract": {
+      "address": "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
+      "chain": "lisk",
+      "name": "USDT",
+      "abi": "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contractOwner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_diamondCutFacet\",\"type\":\"address\"}],\"stateMutability\":\"payable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"CalldataEmptyButInitNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsNotZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetAddressIsZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FacetContainsNoCode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionAlreadyExists\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionDoesNotExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FunctionIsImmutable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"IncorrectFacetCutAction\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitReverted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InitZeroButCalldataNotEmpty\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoSelectorsInFace\",\"type\":\"error\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye"
+      ],
+      "starknet": []
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-16T14:09:04.859Z",
+    "updatedAt": "2026-02-16T14:09:04.859Z"
+  },
+  {
+    "id": "b0666d5e-e4bf-47e1-8d92-d7c93091b81b",
+    "userId": "cf1851b6-d88d-483b-a72a-3a6df204bdf8",
+    "name": "Defi",
+    "description": "Default contract for Defi - ajsdhjadasjkadsjkhdjkasjkasdhjkdhdksjsahdhsjkasdhjkhjskahhajkkjaskjkaskajkjkaskdkhkkasha",
+    "targetContract": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chain": "ethereum",
+      "name": "Defi",
+      "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guy\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"guy\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Withdrawal\",\"type\":\"event\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-17T12:18:34.465Z",
+    "updatedAt": "2026-02-17T12:18:34.465Z"
+  },
+  {
+    "id": "b08c5054-f738-4130-9902-9a9914a6713a",
+    "userId": "7c91c59f-3300-4f5d-b194-40ff8eb42153",
+    "name": "WETH",
+    "description": "Default contract for WETH - Wrapped Ether - High volume DeFi token",
+    "targetContract": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chain": "ethereum",
+      "name": "WETH",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-17T13:39:52.875Z",
+    "updatedAt": "2026-02-17T13:39:52.875Z"
+  },
+  {
+    "id": "e9b645ed-119f-47e2-b12f-6d85bbe764fc",
+    "userId": "c453dcc5-8151-405f-a04e-eac155f70092",
+    "name": "USD Coin",
+    "description": "Default contract for USD Coin - Stablecoin for payments and transfers",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USD Coin",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-17T14:55:35.694Z",
+    "updatedAt": "2026-02-17T14:55:35.694Z"
+  },
+  {
+    "id": "c090ff75-89f4-4537-8ea5-ca23325cb2c0",
+    "userId": "9de4977a-973d-46f7-8218-df5805e1a3ac",
+    "name": "WETH",
+    "description": "Default contract for WETH - Wrapped Ether - High volume DeFi token for testing",
+    "targetContract": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chain": "ethereum",
+      "name": "WETH",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-17T15:55:40.457Z",
+    "updatedAt": "2026-02-17T15:55:40.457Z"
+  },
+  {
+    "id": "a8189495-5103-4a79-8383-691c42c52aa1",
+    "userId": "6246329d-8ad8-4c99-b41f-9a495ace544c",
+    "name": "USD Coin",
+    "description": "Default contract for USD Coin - Stablecoin for payments and transfers",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USD Coin",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-17T16:03:07.831Z",
+    "updatedAt": "2026-02-17T16:03:07.831Z"
+  },
+  {
+    "id": "a2835b5c-dc07-4239-bf38-051f7b3bddb9",
+    "userId": "fbbdccff-ab37-4928-99dc-bdb033f8c24c",
+    "name": "WETH",
+    "description": "Default contract for WETH - Wrapped Ether - High volume DeFi token for testing",
+    "targetContract": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chain": "ethereum",
+      "name": "WETH",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-17T16:06:13.447Z",
+    "updatedAt": "2026-02-17T16:06:13.447Z"
+  },
+  {
+    "id": "276db17c-5753-4381-bc0e-4e678a7709ff",
+    "userId": "2555e33d-fb39-4636-9d76-a5c0b104fb4f",
+    "name": "USDT",
+    "description": "Default contract for USDT - Stablecoin for testing",
+    "targetContract": {
+      "address": "0x05D032ac25d322df992303dCa074EE7392C117b9",
+      "chain": "lisk",
+      "name": "USDT",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-18T19:09:44.885Z",
+    "updatedAt": "2026-02-18T19:09:44.885Z"
+  },
+  {
+    "id": "97c84747-1c8c-4b59-8760-03a0524afb7b",
+    "userId": "0c67c14c-d5ae-4e83-9739-bd7b146b39f9",
+    "name": "USD Coin (USDC)",
+    "description": "Default contract for USD Coin (USDC) - Stablecoin for testing data accuracy",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USD Coin (USDC)",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-19T07:59:40.312Z",
+    "updatedAt": "2026-02-19T07:59:40.312Z"
+  },
+  {
+    "id": "681e973d-8f91-4380-9e84-51003f2909e8",
+    "userId": "5ecfd4c7-7750-4001-a5a4-f4c1c47b97fe",
+    "name": "USD Coin (USDC)",
+    "description": "Default contract for USD Coin (USDC) - Stablecoin for testing data accuracy",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USD Coin (USDC)",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-19T08:08:02.833Z",
+    "updatedAt": "2026-02-19T08:08:02.833Z"
+  }
+]

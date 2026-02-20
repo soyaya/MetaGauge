@@ -1,0 +1,214 @@
+{
+  "metadata": {
+    "contractAddress": "0x7D335d06F3F002623850E108Ba4A9F025d8468e7",
+    "contractName": "Defi",
+    "contractChain": "lisk",
+    "generatedAt": "2026-02-04T23:35:48.032Z",
+    "blockRange": {
+      "from": 27780588,
+      "to": 27781588
+    },
+    "analysisType": "enhanced_interaction_based",
+    "fetchMethod": "legacy-block-scan",
+    "interactionSummary": {
+      "totalTransactions": 0,
+      "totalEvents": 0,
+      "blocksScanned": 1001
+    }
+  },
+  "summary": {
+    "totalTransactions": 0,
+    "uniqueUsers": 0,
+    "totalValue": 0,
+    "avgGasUsed": 0,
+    "successRate": 0,
+    "timeRange": "24h",
+    "interactionEfficiency": 0
+  },
+  "defiMetrics": {
+    "tvl": 0,
+    "netInflow": 0,
+    "netOutflow": 0,
+    "netFlow": 0,
+    "revenuePerUser": 0,
+    "protocolRevenue": 0,
+    "whaleActivityRatio": 0,
+    "dau": 0,
+    "wau": 0,
+    "mau": 0,
+    "transactionVolume": 0,
+    "averageTransactionSize": 0,
+    "functionSuccessRate": 0,
+    "averageGasCost": 0,
+    "contractUtilizationRate": 0,
+    "crossContractInteractionRate": 0,
+    "protocolStickiness": 0,
+    "eventDrivenVolume": 0,
+    "interactionComplexity": "low",
+    "contractUtilization": 0
+  },
+  "userBehavior": {
+    "whaleRatio": 15.2,
+    "botActivity": 8.5,
+    "loyaltyScore": 72.3,
+    "earlyAdopterPotential": "Medium",
+    "retentionRate7d": 65.4,
+    "retentionRate30d": 42.1,
+    "avgSessionDuration": 1800,
+    "transactionsPerUser": 0,
+    "growthRate": 12.5,
+    "churnRate": 8.2,
+    "powerUserRatio": 22.1,
+    "newUserRatio": 18.7,
+    "crossChainUsers": 0,
+    "multiProtocolUsers": 0,
+    "frontRunningDetection": 2.1,
+    "mevExposure": 5.8,
+    "sandwichAttacks": 0,
+    "arbitrageOpportunities": 15,
+    "liquidationEvents": 3,
+    "interactionPatterns": {
+      "batchTransactions": 0,
+      "singleTransactions": 0,
+      "complexInteractions": 0
+    },
+    "eventEngagement": 0,
+    "contractLoyalty": 0
+  },
+  "uxAnalysis": {
+    "bottlenecks": [],
+    "sessionDurations": {
+      "sessions": [],
+      "averageDuration": 0,
+      "medianDuration": 0,
+      "minDuration": 0,
+      "maxDuration": 0
+    },
+    "failurePatterns": {
+      "totalFailures": 0,
+      "failuresByFunction": [],
+      "failureSequences": []
+    },
+    "uxGrade": {
+      "grade": "F",
+      "completionRate": 0,
+      "failureRate": 0,
+      "averageTransactionTime": 0,
+      "bottleneckCount": 0
+    },
+    "timeToFirstSuccess": {
+      "users": [],
+      "averageTimeToSuccessMinutes": 0,
+      "medianTimeToSuccessMinutes": 0,
+      "usersWithSuccess": 0,
+      "totalUsers": 0
+    },
+    "summary": {
+      "totalSessions": 0,
+      "averageSessionDuration": 0,
+      "bottleneckCount": 0,
+      "overallCompletionRate": 0,
+      "overallFailureRate": 0
+    }
+  },
+  "userJourneys": {
+    "totalUsers": 0,
+    "averageJourneyLength": 0,
+    "commonPaths": [],
+    "entryPoints": [],
+    "featureAdoption": {
+      "transitions": [],
+      "adoptionRates": {}
+    },
+    "dropoffPoints": [],
+    "journeyDistribution": {}
+  },
+  "userLifecycle": {
+    "lifecycleDistribution": {},
+    "walletClassification": {
+      "distribution": {},
+      "details": {}
+    },
+    "cohortAnalysis": [],
+    "activationMetrics": {
+      "totalWallets": 0,
+      "activatedWallets": 0,
+      "activationRate": 0,
+      "averageActivationTime": 0,
+      "activationTimeDistribution": {}
+    },
+    "progressionAnalysis": {
+      "functionProgression": [],
+      "topProgressionPaths": [],
+      "progressionDepth": {
+        "singleFunction": 0,
+        "multiFunction": 0,
+        "powerUsers": 0
+      }
+    },
+    "summary": {
+      "activeUsers": 0,
+      "newUsers": 0,
+      "churnedUsers": 0,
+      "retentionRate": 0,
+      "averageLifespan": 0
+    }
+  },
+  "interactions": {
+    "totalEvents": 0,
+    "eventTypes": {},
+    "interactionFrequency": 0,
+    "peakInteractionTimes": []
+  },
+  "transactions": [],
+  "users": [],
+  "events": [],
+  "locks": [],
+  "gasAnalysis": {
+    "averageGasPrice": "0",
+    "averageGasUsed": 0,
+    "totalGasCost": 0,
+    "gasEfficiencyScore": 0,
+    "failedTransactions": 0,
+    "failureRate": 0,
+    "gasOptimizationOpportunities": [],
+    "interactionGasEfficiency": 0
+  },
+  "interactionInsights": [],
+  "competitive": {
+    "marketPosition": 4,
+    "marketShare": 0,
+    "advantages": [
+      "Efficient interaction-based analysis",
+      "High event activity",
+      "Optimized gas usage"
+    ],
+    "challenges": [
+      "Limited ecosystem",
+      "User acquisition needed",
+      "Liquidity depth improvement"
+    ],
+    "interactionMetrics": {
+      "eventEfficiency": 0,
+      "interactionComplexity": "low",
+      "fetchMethodOptimization": "suboptimal"
+    },
+    "benchmarks": {
+      "vsEthereum": {
+        "gasCostReduction": 85.5,
+        "transactionSpeed": 12.5,
+        "userGrowth": -5.2,
+        "interactionEfficiency": 0
+      }
+    }
+  },
+  "recommendations": [],
+  "alerts": [
+    {
+      "type": "warning",
+      "message": "Low interaction complexity detected",
+      "severity": "medium",
+      "timestamp": "2026-02-04T23:35:48.032Z"
+    }
+  ]
+}

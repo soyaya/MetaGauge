@@ -1,0 +1,937 @@
+openapi: 3.0.0
+info:
+  title: Multi-Chain Smart Contract Analytics API
+  description: |
+    Comprehensive blockchain analytics platform that analyzes smart contracts across multiple chains 
+    with intelligent chain isolation and enterprise-grade reliability.
+    
+    ## Features
+    - **Multi-Chain Support**: Ethereum, Lisk, Starknet, Polygon, Base, Arbitrum, Optimism
+    - **OAuth Authentication**: Google and GitHub OAuth integration
+    - **Multiple Contract Configurations**: Save and manage multiple analysis configurations
+    - **Analysis History**: Track all your analyses with detailed results
+    - **Comprehensive Analytics**: 20+ DeFi metrics across user lifecycle, activity, financial, and performance categories
+    - **Multiple Output Formats**: JSON, CSV, and Markdown reports
+    
+    ## Authentication
+    This API supports two authentication methods:
+    1. **JWT Bearer Token**: Use the `/api/auth/login` endpoint to get a token
+    2. **API Key**: Use the `X-API-Key` header with your personal API key
+    
+    ## Rate Limits
+    - General endpoints: 100 requests per 15 minutes
+    - Analysis endpoints: 10 requests per hour
+    - Limits vary by user tier (Free, Pro, Enterprise)
+    
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@analytics-api.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+  - url: https://api.analytics-platform.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and OAuth operations
+  - name: Contracts
+    description: Contract configuration management
+  - name: Analysis
+    description: Contract analysis operations and results
+  - name: Users
+    description: User profile and account management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        name:
+          type: string
+          example: "John Doe"
+        avatar:
+          type: string
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+          example: "free"
+        oauthProvider:
+          type: string
+          enum: [google, github]
+          nullable: true
+          example: "google"
+        isActive:
+          type: boolean
+          example: true
+        lastLogin:
+          type: string
+          format: date-time
+          nullable: true
+        preferences:
+          type: object
+          properties:
+            notifications:
+              type: object
+              properties:
+                email:
+                  type: boolean
+                analysis:
+                  type: boolean
+            defaultChain:
+              type: string
+              example: "ethereum"
+        usage:
+          type: object
+          properties:
+            analysisCount:
+              type: integer
+              example: 5
+            monthlyAnalysisCount:
+              type: integer
+              example: 3
+            lastAnalysis:
+              type: string
+              format: date-time
+              nullable: true
+
+    Contract:
+      type: object
+      required:
+        - address
+        - chain
+        - name
+      properties:
+        address:
+          type: string
+          example: "0x1234567890123456789012345678901234567890"
+        chain:
+          type: string
+          enum: [ethereum, lisk, starknet, polygon, base, arbitrum, optimism]
+          example: "ethereum"
+        name:
+          type: string
+          example: "USDT Token"
+        abi:
+          type: string
+          nullable: true
+          example: "./abis/usdt.json"
+
+    ContractConfig:
+      type: object
+      required:
+        - name
+        - targetContract
+        - rpcConfig
+      properties:
+        id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        userId:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+          example: "USDT Analysis Config"
+        description:
+          type: string
+          example: "Analysis configuration for USDT token on Ethereum"
+        targetContract:
+          $ref: '#/components/schemas/Contract'
+        competitors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contract'
+        rpcConfig:
+          type: object
+          properties:
+            ethereum:
+              type: array
+              items:
+                type: string
+              example: ["https://eth.nownodes.io/api-key"]
+            lisk:
+              type: array
+              items:
+                type: string
+              example: ["https://lisk.drpc.org"]
+        analysisParams:
+          type: object
+          properties:
+            blockRange:
+              type: integer
+              minimum: 100
+              maximum: 10000
+              default: 1000
+            whaleThreshold:
+              type: number
+              default: 10
+            maxConcurrentRequests:
+              type: integer
+              minimum: 1
+              maximum: 20
+              default: 5
+            failoverTimeout:
+              type: integer
+              default: 30000
+            maxRetries:
+              type: integer
+              minimum: 1
+              maximum: 5
+              default: 2
+            outputFormats:
+              type: array
+              items:
+                type: string
+                enum: [json, csv, markdown]
+        tags:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+          default: true
+        lastAnalyzed:
+          type: string
+          format: date-time
+          nullable: true
+        analysisCount:
+          type: integer
+          default: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AnalysisResult:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        userId:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        configId:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        analysisType:
+          type: string
+          enum: [single, competitive, comparative]
+          example: "single"
+        status:
+          type: string
+          enum: [pending, running, completed, failed, cancelled]
+          example: "completed"
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 100
+        results:
+          type: object
+          properties:
+            target:
+              type: object
+              properties:
+                contract:
+                  $ref: '#/components/schemas/Contract'
+                transactions:
+                  type: integer
+                  example: 1250
+                metrics:
+                  type: object
+                  description: "Comprehensive DeFi metrics"
+                behavior:
+                  type: object
+                  description: "User behavior analysis"
+                reportPaths:
+                  type: object
+                  properties:
+                    json:
+                      type: string
+                    csv:
+                      type: string
+                    markdown:
+                      type: string
+            competitors:
+              type: array
+              items:
+                type: object
+                properties:
+                  contract:
+                    $ref: '#/components/schemas/Contract'
+                  transactions:
+                    type: integer
+                  metrics:
+                    type: object
+                  behavior:
+                    type: object
+                  error:
+                    type: string
+                    nullable: true
+            comparative:
+              type: object
+              properties:
+                summary:
+                  type: string
+                rankings:
+                  type: object
+                insights:
+                  type: array
+                  items:
+                    type: string
+        metadata:
+          type: object
+          properties:
+            blockRange:
+              type: integer
+            chainsAnalyzed:
+              type: array
+              items:
+                type: string
+            totalTransactions:
+              type: integer
+            executionTimeMs:
+              type: integer
+            rpcCallsCount:
+              type: integer
+            errorCount:
+              type: integer
+        errorMessage:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Validation Error"
+        message:
+          type: string
+          example: "Invalid input data"
+        details:
+          type: array
+          items:
+            type: string
+          nullable: true
+
+    PaginationResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 25
+        pages:
+          type: integer
+          example: 3
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the API is running and healthy
+      tags: [System]
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new user account with email and password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  minLength: 6
+                  example: "securepassword123"
+                name:
+                  type: string
+                  example: "John Doe"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  verificationToken:
+                    type: string
+                    example: "abc123def456"
+        '400':
+          description: Invalid input or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      description: Authenticate user with email and password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "securepassword123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/oauth/google:
+    post:
+      summary: Google OAuth login
+      description: Authenticate user with Google OAuth access token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accessToken
+              properties:
+                accessToken:
+                  type: string
+                  example: "ya29.a0AfH6SMC..."
+      responses:
+        '200':
+          description: OAuth login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "OAuth login successful"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/oauth/github:
+    post:
+      summary: GitHub OAuth login
+      description: Authenticate user with GitHub OAuth access token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accessToken
+              properties:
+                accessToken:
+                  type: string
+                  example: "gho_16C7e42F292c6912E7710c838347Ae178B4a"
+      responses:
+        '200':
+          description: OAuth login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "OAuth login successful"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/me:
+    get:
+      summary: Get current user profile
+      description: Retrieve the authenticated user's profile information
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/contracts:
+    get:
+      summary: Get user's contract configurations
+      description: Retrieve all contract configurations for the authenticated user
+      tags: [Contracts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search term for filtering configurations
+        - in: query
+          name: chain
+          schema:
+            type: string
+            enum: [ethereum, lisk, starknet, polygon, base, arbitrum, optimism]
+          description: Filter by blockchain network
+        - in: query
+          name: tags
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter by tags
+      responses:
+        '200':
+          description: Contract configurations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contracts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContractConfig'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationResponse'
+
+    post:
+      summary: Create new contract configuration
+      description: Create a new contract configuration for analysis
+      tags: [Contracts]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - targetContract
+                - rpcConfig
+              properties:
+                name:
+                  type: string
+                  example: "USDT Analysis"
+                description:
+                  type: string
+                  example: "Analysis configuration for USDT token"
+                targetContract:
+                  $ref: '#/components/schemas/Contract'
+                competitors:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Contract'
+                rpcConfig:
+                  type: object
+                  example:
+                    ethereum: ["https://eth.nownodes.io/api-key"]
+                    lisk: ["https://lisk.drpc.org"]
+                analysisParams:
+                  type: object
+                  properties:
+                    blockRange:
+                      type: integer
+                      default: 1000
+                    whaleThreshold:
+                      type: number
+                      default: 10
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: ["defi", "token"]
+      responses:
+        '201':
+          description: Contract configuration created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Contract configuration created successfully"
+                  config:
+                    $ref: '#/components/schemas/ContractConfig'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analysis/start:
+    post:
+      summary: Start contract analysis
+      description: Start analyzing a contract configuration
+      tags: [Analysis]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - configId
+              properties:
+                configId:
+                  type: string
+                  example: "507f1f77bcf86cd799439011"
+                analysisType:
+                  type: string
+                  enum: [single, competitive, comparative]
+                  default: single
+                  example: "single"
+      responses:
+        '202':
+          description: Analysis started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Analysis started successfully"
+                  analysisId:
+                    type: string
+                    example: "507f1f77bcf86cd799439011"
+                  status:
+                    type: string
+                    example: "pending"
+                  estimatedTime:
+                    type: string
+                    example: "30 seconds"
+        '400':
+          description: Invalid request or rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analysis/{id}/status:
+    get:
+      summary: Get analysis status
+      description: Check the status and progress of a running analysis
+      tags: [Analysis]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Analysis ID
+      responses:
+        '200':
+          description: Analysis status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, running, completed, failed, cancelled]
+                  progress:
+                    type: integer
+                    minimum: 0
+                    maximum: 100
+                  analysisType:
+                    type: string
+                  config:
+                    type: object
+                  createdAt:
+                    type: string
+                    format: date-time
+                  completedAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  errorMessage:
+                    type: string
+                    nullable: true
+                  logs:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Analysis not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analysis/{id}/results:
+    get:
+      summary: Get analysis results
+      description: Retrieve the complete results of a completed analysis
+      tags: [Analysis]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Analysis ID
+      responses:
+        '200':
+          description: Analysis results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '400':
+          description: Analysis not completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Analysis not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analysis/history:
+    get:
+      summary: Get user's analysis history
+      description: Retrieve the user's analysis history with pagination
+      tags: [Analysis]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, running, completed, failed, cancelled]
+        - in: query
+          name: analysisType
+          schema:
+            type: string
+            enum: [single, competitive, comparative]
+      responses:
+        '200':
+          description: Analysis history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  analyses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AnalysisResult'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationResponse'
+
+  /api/users/dashboard:
+    get:
+      summary: Get user dashboard data
+      description: Retrieve comprehensive dashboard data for the user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  stats:
+                    type: object
+                    properties:
+                      contractConfigs:
+                        type: integer
+                      totalAnalyses:
+                        type: integer
+                      completedAnalyses:
+                        type: integer
+                      monthlyAnalyses:
+                        type: integer
+                      avgExecutionTime:
+                        type: number
+                  recentAnalyses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AnalysisResult'
+                  usage:
+                    type: object
+                  limits:
+                    type: object

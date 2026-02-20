@@ -1,0 +1,29 @@
+✅ QUICK SYNC STUCK ISSUE - FIXED
+
+🐛 Problem:
+   Quick Sync stuck at 30% with "already in progress" message
+   Analysis ID: 54b6f2b6-523a-4ccf-9d8e-fe6155a8ca81
+
+✅ What Was Done:
+   1. Reset stuck analysis (marked as failed)
+   2. Added auto-fix on server startup
+   3. Added 3-minute timeout protection
+   4. Enhanced error logging
+
+🚀 How to Use:
+   
+   Development:
+   npm run dev
+   
+   If stuck again:
+   node fix-stuck-analyses.js
+   
+   Then try Quick Sync again
+
+📊 Changes:
+   - src/api/server.js (auto-fix on startup)
+   - src/api/routes/onboarding.js (timeout + logging)
+   - fix-stuck-analyses.js (manual fix script)
+
+✅ Status: Ready to test!
+   Click "Quick Sync" button - should complete in 30-60 seconds
