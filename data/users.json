@@ -872,9 +872,9 @@
         "category": "defi",
         "startDate": "1988-12-22",
         "isIndexed": false,
-        "indexingProgress": 20,
+        "indexingProgress": 0,
         "lastAnalysisId": null,
-        "currentStep": "Fetching contract transactions...",
+        "currentStep": "Error: fetch failed",
         "subscriptionTier": "Pro"
       }
     },
@@ -886,7 +886,7 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-20T12:37:08.232Z",
-    "updatedAt": "2026-02-22T18:46:37.570Z",
+    "updatedAt": "2026-02-22T18:48:49.005Z",
     "walletAddress": "0x0200e2958c35D1daD0A35E261a4Bff1BC6c90ea5",
     "subscription": {
       "tier": 2,

@@ -157,13 +157,13 @@
     "chain": "ethereum",
     "analysisType": "quick-index",
     "status": "running",
-    "progress": 10,
+    "progress": 20,
     "metadata": {
       "isDefaultContract": true,
       "startedAt": "2026-02-22T18:46:37.365Z"
     },
     "createdAt": "2026-02-22T18:46:37.367Z",
-    "updatedAt": "2026-02-22T18:46:37.549Z",
-    "currentStep": "Initializing blockchain connection..."
+    "updatedAt": "2026-02-22T18:46:37.577Z",
+    "currentStep": "Fetching contract transactions..."
   }
 ]

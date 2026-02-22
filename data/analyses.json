@@ -156,14 +156,15 @@
     "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "chain": "ethereum",
     "analysisType": "quick-index",
-    "status": "running",
+    "status": "failed",
     "progress": 20,
     "metadata": {
       "isDefaultContract": true,
       "startedAt": "2026-02-22T18:46:37.365Z"
     },
     "createdAt": "2026-02-22T18:46:37.367Z",
-    "updatedAt": "2026-02-22T18:46:37.577Z",
-    "currentStep": "Fetching contract transactions..."
+    "updatedAt": "2026-02-22T18:48:48.977Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "fetch failed"
   }
 ]
