@@ -12,6 +12,7 @@ import { performContinuousContractSync } from './continuous-sync-improved.js';
 import { initializeStreamingIndexer } from '../../indexer/index.js';
 import SubscriptionService from '../../services/SubscriptionService.js';
 import { triggerDefaultContractIndexing } from './trigger-indexing.js';
+import { MetricsNormalizer } from '../../services/MetricsNormalizer.js';
 
 // Get streaming indexer from server
 let streamingIndexer = null;
@@ -413,13 +414,25 @@ router.get('/default-contract', async (req, res) => {
       }
     }
 
+    // Normalize metrics to ensure valid values
+    const normalizedMetrics = latestAnalysis?.results?.target?.metrics && !latestAnalysis.results.target.metrics.error
+      ? MetricsNormalizer.normalizeDeFiMetrics(latestAnalysis.results.target.metrics)
+      : MetricsNormalizer.getDefaultDeFiMetrics();
+
+    // Normalize behavior data
+    const normalizedBehavior = latestAnalysis?.results?.target?.behavior
+      ? MetricsNormalizer.normalizeUserBehavior(latestAnalysis.results.target.behavior)
+      : MetricsNormalizer.getDefaultUserBehavior();
+
     res.json({
       contract: defaultContract,
-      metrics: latestAnalysis?.results?.target?.metrics && !latestAnalysis.results.target.metrics.error 
-        ? latestAnalysis.results.target.metrics 
-        : null,
+      metrics: normalizedMetrics,
       // Include full analysis results for detailed metrics display
-      fullResults: latestAnalysis?.results?.target || null,
+      fullResults: latestAnalysis?.results?.target ? {
+        ...latestAnalysis.results.target,
+        defiMetrics: normalizedMetrics,
+        userBehavior: normalizedBehavior
+      } : null,
       indexingStatus: {
         isIndexed: defaultContract.isIndexed,
         progress: defaultContract.indexingProgress
