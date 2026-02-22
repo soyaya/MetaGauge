@@ -5,9 +5,11 @@
 
 import express from 'express';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { UserStorage, ContractStorage, AnalysisStorage } from '../database/index.js';
 import { validate } from '../middleware/validate.js';
 import { userSchemas } from '../middleware/validation.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 
 const router = express.Router();
 
@@ -483,5 +485,74 @@ router.delete('/delete-account', async (req, res) => {
     });
   }
 });
+
+/**
+ * @swagger
+ * /api/users/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ */
+router.post('/change-password', asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current and new password required' });
+  }
+  
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters' });
+  }
+  
+  const user = await UserStorage.findById(req.user.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  
+  // Verify current password
+  const isValid = await bcrypt.compare(currentPassword, user.password);
+  if (!isValid) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+  
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await UserStorage.update(req.user.id, { password: hashedPassword });
+  
+  res.json({ message: 'Password changed successfully' });
+}));
+
+/**
+ * @swagger
+ * /api/users/delete-account:
+ *   delete:
+ *     summary: Delete user account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ */
+router.delete('/delete-account', asyncHandler(async (req, res) => {
+  await UserStorage.delete(req.user.id);
+  res.json({ message: 'Account deleted successfully' });
+}));
 
 export default router;
