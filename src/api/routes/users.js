@@ -198,6 +198,62 @@ router.get('/dashboard', async (req, res) => {
       });
 
     // Get analysis stats
+    const completedAnalyses = allAnalyses.filter(a => a.status === 'completed').length;
+    const failedAnalyses = allAnalyses.filter(a => a.status === 'failed').length;
+
+    // Get monitoring status
+    let monitoringStatus = null;
+    try {
+      const { default: ContinuousMonitoringService } = await import('../../services/ContinuousMonitoringService.js');
+      monitoringStatus = ContinuousMonitoringService.getMonitoringStatus(userId);
+    } catch (error) {
+      console.error('Error getting monitoring status:', error);
+    }
+
+    // Get API usage
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const apiCallsUsed = (user.usage?.month === currentMonth && user.usage?.year === currentYear)
+      ? user.usage.apiCalls || 0
+      : 0;
+
+    // Get tier limits
+    const { SUBSCRIPTION_TIERS } = await import('../../services/SubscriptionBlockRangeCalculator.js');
+    const tierConfig = Object.values(SUBSCRIPTION_TIERS).find(t => t.tier === (user.tier || 0)) || SUBSCRIPTION_TIERS.FREE;
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        tier: user.tier || 0,
+        tierName: tierConfig.name
+      },
+      stats: {
+        contracts: configsCount,
+        analyses: allAnalyses.length,
+        completedAnalyses,
+        failedAnalyses,
+        recentAnalyses
+      },
+      monitoring: monitoringStatus ? {
+        isActive: monitoringStatus.isActive,
+        contractsMonitored: monitoringStatus.contractsMonitored || 0,
+        lastUpdate: monitoringStatus.lastUpdate
+      } : null,
+      apiUsage: {
+        used: apiCallsUsed,
+        limit: tierConfig.apiCallsPerMonth,
+        percentUsed: ((apiCallsUsed / tierConfig.apiCallsPerMonth) * 100).toFixed(1)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get dashboard data',
+      message: error.message
+    });
+  }
+});
     const analysisStats = await AnalysisStorage.getStats(userId);
 
     // Get monthly usage
