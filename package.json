@@ -65,6 +65,7 @@
     "ethers": "^6.16.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
+    "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "lodash": "^4.17.21",
     "ml-matrix": "^6.12.1",

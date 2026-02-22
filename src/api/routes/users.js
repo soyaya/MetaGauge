@@ -6,6 +6,8 @@
 import express from 'express';
 import crypto from 'crypto';
 import { UserStorage, ContractStorage, AnalysisStorage } from '../database/index.js';
+import { validate } from '../middleware/validate.js';
+import { userSchemas } from '../middleware/validation.js';
 
 const router = express.Router();
 
@@ -65,7 +67,7 @@ router.get('/profile', async (req, res) => {
  *       200:
  *         description: Profile updated successfully
  */
-router.put('/profile', async (req, res) => {
+router.put('/profile', validate(userSchemas.updateProfile), async (req, res) => {
   try {
     const { name, preferences } = req.body;
     const updates = {};
@@ -121,7 +123,7 @@ router.put('/profile', async (req, res) => {
  *       200:
  *         description: Subscription synced
  */
-router.post('/sync-subscription', async (req, res) => {
+router.post('/sync-subscription', validate(userSchemas.syncSubscription), async (req, res) => {
   try {
     const { walletAddress } = req.body;
     
@@ -203,7 +205,7 @@ router.get('/wallet-address', async (req, res) => {
  *       200:
  *         description: Wallet address updated
  */
-router.post('/wallet-address', async (req, res) => {
+router.post('/wallet-address', validate(userSchemas.walletAddress), async (req, res) => {
   try {
     const { walletAddress } = req.body;
     
