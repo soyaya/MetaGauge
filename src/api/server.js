@@ -26,6 +26,7 @@ import { setStreamingIndexer } from './routes/onboarding.js';
 import subscriptionRoutes from './routes/subscription.js';
 import faucetRoutes from './routes/faucet.js';
 import { initializeIndexerRoutes } from './routes/indexer.js';
+import backupRoutes from './routes/backup.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -35,6 +36,9 @@ import { createTierRateLimiter, createAnalysisRateLimiter } from './middleware/r
 
 // Import database
 import { initializeDatabase, AnalysisStorage } from './database/index.js';
+
+// Import backup scheduler
+import BackupScheduler from '../services/BackupScheduler.js';
 
 // Import streaming indexer
 import { initializeStreamingIndexer } from '../indexer/index.js';
@@ -257,6 +261,7 @@ app.use('/api/alerts', authenticateToken, alertRoutes);
 // Monitoring routes
 import monitoringRoutes from './routes/monitoring.js';
 app.use('/api/monitoring', authenticateToken, monitoringRoutes);
+app.use('/api/backup', authenticateToken, backupRoutes);
 
 // Streaming indexer routes
 if (streamingIndexer) {
@@ -322,6 +327,9 @@ async function startServer() {
       console.error('⚠️  Failed to check stuck analyses:', error.message);
     }
 
+    // Start backup scheduler
+    BackupScheduler.start();
+
     // Start listening
     server.listen(PORT, () => {
       console.log(`🚀 Multi-Chain Analytics API Server running on port ${PORT}`);
@@ -347,6 +355,7 @@ process.on('SIGTERM', async () => {
   try {
     const { default: ContinuousMonitoringService } = await import('../services/ContinuousMonitoringService.js');
     await ContinuousMonitoringService.stopAllMonitors();
+    BackupScheduler.stop();
     console.log('✅ Stopped all monitoring services');
   } catch (error) {
     console.error('⚠️  Error stopping monitoring services:', error.message);
