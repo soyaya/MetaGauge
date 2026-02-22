@@ -23,6 +23,7 @@ import { UxTab } from "@/components/analyzer/ux-tab"
 
 // Import subscription components
 import { SubscriptionStatus } from "@/components/subscription/subscription-status"
+import { useSubscription } from "@/hooks/use-subscription"
 
 interface DefaultContractData {
   contract: {
