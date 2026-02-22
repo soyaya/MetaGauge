@@ -39,6 +39,8 @@ import { initializeDatabase, AnalysisStorage } from './database/index.js';
 
 // Import backup scheduler
 import BackupScheduler from '../services/BackupScheduler.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './docs/swagger.js';
 
 // Import streaming indexer
 import { initializeStreamingIndexer } from '../indexer/index.js';
@@ -269,8 +271,16 @@ if (streamingIndexer) {
   app.use('/api/indexer', authenticateToken, indexerRoutes);
 }
 
-// Serve OpenAPI documentation
-app.use('/api-docs', express.static(join(__dirname, 'docs')));
+// Serve Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'MetaGauge API Documentation'
+}));
+
+// Serve OpenAPI spec as JSON
+app.get('/api-docs.json', (req, res) => {
+  res.json(swaggerSpec);
+});
 
 // Error handling
 app.use(errorHandler);
