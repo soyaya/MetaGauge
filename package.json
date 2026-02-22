@@ -38,7 +38,11 @@
     "db:migrate": "node scripts/migrate-data.js",
     "db:verify-migration": "node scripts/verify-migration.js",
     "db:test-storage": "node scripts/test-postgres-storage.js",
-    "db:reset": "node scripts/reset-database.js"
+    "db:reset": "node scripts/reset-database.js",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\""
   },
   "keywords": [
     "blockchain",
@@ -76,8 +80,12 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
+    "eslint": "^9.39.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-node": "^11.1.0",
     "fast-check": "^4.5.3",
     "jest": "^30.2.0",
+    "prettier": "^3.8.1",
     "supertest": "^7.2.2"
   }
 }
