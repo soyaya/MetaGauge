@@ -1,8 +1,3 @@
-/**
- * Onboarding routes
- * Handles user onboarding process with default contract setup
- */
-
 import express from 'express';
 import { UserStorage, ContractStorage, AnalysisStorage } from '../database/index.js';
 import { SmartContractFetcher } from '../../services/SmartContractFetcher.js';
@@ -11,6 +6,10 @@ import { ProgressiveDataFetcher } from '../../services/ProgressiveDataFetcher.js
 import { performContinuousContractSync } from './continuous-sync-improved.js';
 import { initializeStreamingIndexer } from '../../indexer/index.js';
 import SubscriptionService from '../../services/SubscriptionService.js';
+import { triggerDefaultContractIndexing } from './trigger-indexing.js';
+import { validate } from '../middleware/validate.js';
+import { onboardingSchemas } from '../middleware/validation.js';
+criptionService.js';
 import { triggerDefaultContractIndexing } from './trigger-indexing.js';
 
 // Get streaming indexer from server

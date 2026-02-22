@@ -31,6 +31,7 @@ import { initializeIndexerRoutes } from './routes/indexer.js';
 import { authenticateToken } from './middleware/auth.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestLogger } from './middleware/logger.js';
+import { createTierRateLimiter, createAnalysisRateLimiter } from './middleware/rateLimiter.js';
 
 // Import database
 import { initializeDatabase, AnalysisStorage } from './database/index.js';
@@ -96,14 +97,24 @@ wss.on('connection', (ws, req) => {
 // Make WebSocket server available to routes
 app.set('wss', wss);
 
-// Middleware
-app.use(cors({
-  origin: [
+// CORS Configuration
+const getAllowedOrigins = () => {
+  // Production: Use CORS_ORIGINS from env
+  if (config.nodeEnv === 'production' && config.corsOrigins) {
+    return config.corsOrigins;
+  }
+  
+  // Development: Allow localhost and configured frontend
+  return [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    /^http:\/\/192\.168\.\d+\.\d+:3000$/, // Allow local network IPs
     config.frontendUrl
-  ].filter(Boolean),
+  ].filter(Boolean);
+};
+
+// Middleware
+app.use(cors({
+  origin: getAllowedOrigins(),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -113,24 +124,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.'
-  }
-});
+// Apply tier-based rate limiting to all routes
+const tierRateLimiter = createTierRateLimiter();
+app.use(tierRateLimiter);
 
-// const analysisLimiter = rateLimit({
-//   windowMs: 60 * 60 * 1000, // 1 hour
-//   max: 100, // limit each IP to 100 analysis requests per hour (increased for testing)
-//   message: {
-//     error: 'Analysis rate limit exceeded. Please try again later.'
-//   }
-// });
-
-// app.use(limiter); // Temporarily disabled for testing
+// Stricter rate limiting for expensive operations
+const analysisRateLimiter = createAnalysisRateLimiter();
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -243,17 +242,21 @@ app.get('/api/chat/suggested-questions', async (req, res) => {
 });
 
 app.use('/api/contracts', authenticateToken, contractRoutes);
-app.use('/api/analysis', authenticateToken, analysisRoutes); // analysisLimiter temporarily disabled for testing
-app.use('/api/analysis', authenticateToken, quickScanRoutes); // Quick scan route
+app.use('/api/analysis', authenticateToken, analysisRateLimiter, analysisRoutes);
+app.use('/api/analysis', authenticateToken, analysisRateLimiter, quickScanRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
-app.use('/api/onboarding', authenticateToken, onboardingRoutes);
+app.use('/api/onboarding', authenticateToken, analysisRateLimiter, onboardingRoutes);
 app.use('/api/subscription', subscriptionRoutes); // Some routes require auth, some don't
 app.use('/api/faucet', faucetRoutes); // Public faucet endpoints
 
 // Alert configuration routes
 import alertRoutes from './routes/alerts.js';
 app.use('/api/alerts', authenticateToken, alertRoutes);
+
+// Monitoring routes
+import monitoringRoutes from './routes/monitoring.js';
+app.use('/api/monitoring', authenticateToken, monitoringRoutes);
 
 // Streaming indexer routes
 if (streamingIndexer) {
@@ -340,6 +343,15 @@ startServer();
 process.on('SIGTERM', async () => {
   console.log('\n🛑 SIGTERM received, starting graceful shutdown...');
   
+  // Stop all monitoring services
+  try {
+    const { default: ContinuousMonitoringService } = await import('../services/ContinuousMonitoringService.js');
+    await ContinuousMonitoringService.stopAllMonitors();
+    console.log('✅ Stopped all monitoring services');
+  } catch (error) {
+    console.error('⚠️  Error stopping monitoring services:', error.message);
+  }
+  
   if (streamingIndexer) {
     await streamingIndexer.shutdown();
   }
@@ -352,6 +364,15 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   console.log('\n🛑 SIGINT received, starting graceful shutdown...');
+  
+  // Stop all monitoring services
+  try {
+    const { default: ContinuousMonitoringService } = await import('../services/ContinuousMonitoringService.js');
+    await ContinuousMonitoringService.stopAllMonitors();
+    console.log('✅ Stopped all monitoring services');
+  } catch (error) {
+    console.error('⚠️  Error stopping monitoring services:', error.message);
+  }
   
   if (streamingIndexer) {
     await streamingIndexer.shutdown();

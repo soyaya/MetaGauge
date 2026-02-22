@@ -50,8 +50,9 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-13T12:27:55.602Z",
-    "updatedAt": "2026-02-15T16:06:50.468Z",
-    "lastLogin": "2026-02-15T12:31:33.297Z"
+    "updatedAt": "2026-02-22T09:55:28.879Z",
+    "lastLogin": "2026-02-15T12:31:33.297Z",
+    "walletAddress": null
   },
   {
     "id": "351b40d5-78f0-468f-bffa-88be70da8f82",
@@ -98,7 +99,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-13T12:42:13.164Z",
-    "updatedAt": "2026-02-13T12:42:13.164Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "616ee296-f1bc-4957-9c73-43945f841b2d",
@@ -362,7 +364,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-17T13:39:51.838Z",
-    "updatedAt": "2026-02-17T13:39:52.761Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "c453dcc5-8151-405f-a04e-eac155f70092",
@@ -409,8 +412,9 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-17T14:55:30.289Z",
-    "updatedAt": "2026-02-17T14:55:35.451Z",
-    "lastLogin": "2026-02-17T14:55:33.288Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "lastLogin": "2026-02-17T14:55:33.288Z",
+    "walletAddress": null
   },
   {
     "id": "7c01d7e0-3e84-48b9-b216-56962bd9b10a",
@@ -457,7 +461,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-17T15:54:42.893Z",
-    "updatedAt": "2026-02-17T15:54:42.893Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "9de4977a-973d-46f7-8218-df5805e1a3ac",
@@ -504,7 +509,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-17T15:55:39.658Z",
-    "updatedAt": "2026-02-17T15:55:40.009Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "6246329d-8ad8-4c99-b41f-9a495ace544c",
@@ -551,8 +557,9 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-17T16:03:03.528Z",
-    "updatedAt": "2026-02-17T16:03:07.809Z",
-    "lastLogin": "2026-02-17T16:03:05.587Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "lastLogin": "2026-02-17T16:03:05.587Z",
+    "walletAddress": null
   },
   {
     "id": "fbbdccff-ab37-4928-99dc-bdb033f8c24c",
@@ -600,7 +607,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-17T16:06:13.385Z",
-    "updatedAt": "2026-02-17T16:09:59.890Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "2555e33d-fb39-4636-9d76-a5c0b104fb4f",
@@ -647,8 +655,9 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-18T19:09:32.868Z",
-    "updatedAt": "2026-02-18T19:09:43.819Z",
-    "lastLogin": "2026-02-18T19:09:40.231Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "lastLogin": "2026-02-18T19:09:40.231Z",
+    "walletAddress": null
   },
   {
     "id": "e76db8f9-b8d4-4759-920d-0a3aa71e4b5d",
@@ -695,7 +704,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-19T07:59:17.297Z",
-    "updatedAt": "2026-02-19T07:59:17.297Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "0c67c14c-d5ae-4e83-9739-bd7b146b39f9",
@@ -742,7 +752,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-19T07:59:38.136Z",
-    "updatedAt": "2026-02-19T07:59:40.253Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "5ecfd4c7-7750-4001-a5a4-f4c1c47b97fe",
@@ -789,7 +800,8 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-19T08:08:00.791Z",
-    "updatedAt": "2026-02-19T08:08:02.828Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "walletAddress": null
   },
   {
     "id": "80639222-aacd-4849-9d4b-2fcbfc9079cd",
@@ -836,8 +848,9 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-19T08:17:05.614Z",
-    "updatedAt": "2026-02-19T08:27:54.039Z",
-    "lastLogin": "2026-02-19T08:27:54.038Z"
+    "updatedAt": "2026-02-22T09:55:28.880Z",
+    "lastLogin": "2026-02-19T08:27:54.038Z",
+    "walletAddress": null
   },
   {
     "id": "8e45b0ef-535d-44d3-af26-09d7462179d1",

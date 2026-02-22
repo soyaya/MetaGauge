@@ -9,6 +9,8 @@ import crypto from 'crypto';
 import fetch from 'node-fetch';
 import { UserStorage } from '../database/index.js';
 import { generateToken, authenticateToken } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { authSchemas } from '../middleware/validation.js';
 
 const router = express.Router();
 
@@ -43,7 +45,7 @@ const router = express.Router();
  *       400:
  *         description: Invalid input or user already exists
  */
-router.post('/register', async (req, res) => {
+router.post('/register', validate(authSchemas.register), async (req, res) => {
   try {
     console.log('[AUTH] Registration request received:', { email: req.body.email, name: req.body.name });
     const { email, password, name } = req.body;
@@ -186,7 +188,7 @@ router.post('/register', async (req, res) => {
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', async (req, res) => {
+router.post('/login', validate(authSchemas.login), async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   
   try {
