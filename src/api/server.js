@@ -31,6 +31,7 @@ import { initializeIndexerRoutes } from './routes/indexer.js';
 import { authenticateToken } from './middleware/auth.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestLogger } from './middleware/logger.js';
+import { createTierRateLimiter, createAnalysisRateLimiter } from './middleware/rateLimiter.js';
 
 // Import database
 import { initializeDatabase, AnalysisStorage } from './database/index.js';
@@ -123,24 +124,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.'
-  }
-});
+// Apply tier-based rate limiting to all routes
+const tierRateLimiter = createTierRateLimiter();
+app.use(tierRateLimiter);
 
-// const analysisLimiter = rateLimit({
-//   windowMs: 60 * 60 * 1000, // 1 hour
-//   max: 100, // limit each IP to 100 analysis requests per hour (increased for testing)
-//   message: {
-//     error: 'Analysis rate limit exceeded. Please try again later.'
-//   }
-// });
-
-// app.use(limiter); // Temporarily disabled for testing
+// Stricter rate limiting for expensive operations
+const analysisRateLimiter = createAnalysisRateLimiter();
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -253,11 +242,11 @@ app.get('/api/chat/suggested-questions', async (req, res) => {
 });
 
 app.use('/api/contracts', authenticateToken, contractRoutes);
-app.use('/api/analysis', authenticateToken, analysisRoutes); // analysisLimiter temporarily disabled for testing
-app.use('/api/analysis', authenticateToken, quickScanRoutes); // Quick scan route
+app.use('/api/analysis', authenticateToken, analysisRateLimiter, analysisRoutes);
+app.use('/api/analysis', authenticateToken, analysisRateLimiter, quickScanRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
-app.use('/api/onboarding', authenticateToken, onboardingRoutes);
+app.use('/api/onboarding', authenticateToken, analysisRateLimiter, onboardingRoutes);
 app.use('/api/subscription', subscriptionRoutes); // Some routes require auth, some don't
 app.use('/api/faucet', faucetRoutes); // Public faucet endpoints
 
