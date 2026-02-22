@@ -874,7 +874,7 @@
         "isIndexed": false,
         "indexingProgress": 0,
         "lastAnalysisId": null,
-        "currentStep": "Error: RPC Error: Unauthorized: You must authenticate your request with an API key. Create an account on https://www.ankr.com/rpc/ and generate your personal API key for free.",
+        "currentStep": "Error: fetch failed",
         "subscriptionTier": "Pro"
       }
     },
@@ -886,7 +886,7 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-20T12:37:08.232Z",
-    "updatedAt": "2026-02-20T14:09:39.025Z",
+    "updatedAt": "2026-02-22T18:48:49.005Z",
     "walletAddress": "0x0200e2958c35D1daD0A35E261a4Bff1BC6c90ea5",
     "subscription": {
       "tier": 2,
@@ -909,7 +909,7 @@
         "teamMembers": 10,
         "dataRefreshRate": 21600
       },
-      "lastSynced": "2026-02-20T14:09:37.808Z"
+      "lastSynced": "2026-02-22T18:46:05.183Z"
     }
   }
 ]

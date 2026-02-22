@@ -9,7 +9,7 @@ import { SubscriptionManagement } from '@/components/subscription/subscription-m
 import { NetworkSwitcher } from '@/components/web3/network-switcher'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { api } from '@/lib/api'
 
@@ -22,7 +22,7 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login?redirect=subscription')
+      router.push('/login?redirect=/subscription')
       return
     }
 
@@ -94,11 +94,14 @@ export default function SubscriptionPage() {
           </div>
           
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
-              {subscription?.isActive && subscription?.tier > 0 
-                ? 'Manage Your Subscription' 
-                : 'Choose Your Subscription'}
-            </h1>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Sparkles className="h-6 w-6 text-primary" />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                {subscription?.isActive && subscription?.tier > 0 
+                  ? 'Manage Your Subscription' 
+                  : 'Choose Your Subscription'}
+              </h1>
+            </div>
             <p className="text-xl text-muted-foreground">
               {subscription?.isActive && subscription?.tier > 0
                 ? 'Upgrade, downgrade, or cancel your plan'

@@ -139,14 +139,31 @@
     "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "chain": "ethereum",
     "analysisType": "quick-index",
-    "status": "running",
+    "status": "failed",
     "progress": 20,
     "metadata": {
       "isDefaultContract": true,
       "startedAt": "2026-02-20T12:41:53.114Z"
     },
     "createdAt": "2026-02-20T12:41:53.243Z",
-    "updatedAt": "2026-02-20T12:41:53.648Z",
+    "updatedAt": "2026-02-20T12:42:02.735Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "RPC Error: Unauthorized: You must authenticate your request with an API key. Create an account on https://www.ankr.com/rpc/ and generate your personal API key for free."
+  },
+  {
+    "id": "1a428762-82c1-4669-8fab-7d3959b3c278",
+    "userId": "8e45b0ef-535d-44d3-af26-09d7462179d1",
+    "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "running",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-22T18:46:37.365Z"
+    },
+    "createdAt": "2026-02-22T18:46:37.367Z",
+    "updatedAt": "2026-02-22T18:46:37.577Z",
     "currentStep": "Fetching contract transactions..."
   }
 ]
