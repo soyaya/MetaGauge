@@ -96,14 +96,24 @@ wss.on('connection', (ws, req) => {
 // Make WebSocket server available to routes
 app.set('wss', wss);
 
-// Middleware
-app.use(cors({
-  origin: [
+// CORS Configuration
+const getAllowedOrigins = () => {
+  // Production: Use CORS_ORIGINS from env
+  if (config.nodeEnv === 'production' && config.corsOrigins) {
+    return config.corsOrigins;
+  }
+  
+  // Development: Allow localhost and configured frontend
+  return [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    /^http:\/\/192\.168\.\d+\.\d+:3000$/, // Allow local network IPs
     config.frontendUrl
-  ].filter(Boolean),
+  ].filter(Boolean);
+};
+
+// Middleware
+app.use(cors({
+  origin: getAllowedOrigins(),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -255,6 +265,10 @@ app.use('/api/faucet', faucetRoutes); // Public faucet endpoints
 import alertRoutes from './routes/alerts.js';
 app.use('/api/alerts', authenticateToken, alertRoutes);
 
+// Monitoring routes
+import monitoringRoutes from './routes/monitoring.js';
+app.use('/api/monitoring', authenticateToken, monitoringRoutes);
+
 // Streaming indexer routes
 if (streamingIndexer) {
   const indexerRoutes = initializeIndexerRoutes(streamingIndexer);
@@ -340,6 +354,15 @@ startServer();
 process.on('SIGTERM', async () => {
   console.log('\n🛑 SIGTERM received, starting graceful shutdown...');
   
+  // Stop all monitoring services
+  try {
+    const { default: ContinuousMonitoringService } = await import('../services/ContinuousMonitoringService.js');
+    await ContinuousMonitoringService.stopAllMonitors();
+    console.log('✅ Stopped all monitoring services');
+  } catch (error) {
+    console.error('⚠️  Error stopping monitoring services:', error.message);
+  }
+  
   if (streamingIndexer) {
     await streamingIndexer.shutdown();
   }
@@ -352,6 +375,15 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   console.log('\n🛑 SIGINT received, starting graceful shutdown...');
+  
+  // Stop all monitoring services
+  try {
+    const { default: ContinuousMonitoringService } = await import('../services/ContinuousMonitoringService.js');
+    await ContinuousMonitoringService.stopAllMonitors();
+    console.log('✅ Stopped all monitoring services');
+  } catch (error) {
+    console.error('⚠️  Error stopping monitoring services:', error.message);
+  }
   
   if (streamingIndexer) {
     await streamingIndexer.shutdown();
