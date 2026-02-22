@@ -6,7 +6,14 @@
 import jwt from 'jsonwebtoken';
 import { UserStorage } from '../database/fileStorage.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+// Validate JWT_SECRET at startup
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  console.error('❌ SECURITY ERROR: JWT_SECRET must be at least 32 characters long');
+  console.error('   Set JWT_SECRET in your .env file with a strong random string');
+  process.exit(1);
+}
+
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 /**

@@ -33,7 +33,7 @@ router.get('/profile', async (req, res) => {
 
     // Remove sensitive data
     const { password, ...userProfile } = user;
-    res.json({ user: userProfile });
+    res.json(userProfile);
   } catch (error) {
     res.status(500).json({
       error: 'Failed to get user profile',
