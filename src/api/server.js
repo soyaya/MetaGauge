@@ -27,6 +27,7 @@ import subscriptionRoutes from './routes/subscription.js';
 import faucetRoutes from './routes/faucet.js';
 import { initializeIndexerRoutes } from './routes/indexer.js';
 import backupRoutes from './routes/backup.js';
+import exportRoutes from './routes/export.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -264,6 +265,7 @@ app.use('/api/alerts', authenticateToken, alertRoutes);
 import monitoringRoutes from './routes/monitoring.js';
 app.use('/api/monitoring', authenticateToken, monitoringRoutes);
 app.use('/api/backup', authenticateToken, backupRoutes);
+app.use('/api/export', authenticateToken, exportRoutes);
 
 // Streaming indexer routes
 if (streamingIndexer) {
