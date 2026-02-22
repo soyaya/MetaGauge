@@ -26,6 +26,7 @@ import { setStreamingIndexer } from './routes/onboarding.js';
 import subscriptionRoutes from './routes/subscription.js';
 import faucetRoutes from './routes/faucet.js';
 import { initializeIndexerRoutes } from './routes/indexer.js';
+import analyzerRoutes from './routes/analyzer.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -55,10 +56,35 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 let streamingIndexer = null;
 let wsManager = null;
 
-// DISABLED: Streaming indexer initialization blocks the event loop
-// TODO: Fix streaming indexer to not block during initialization
-console.log('⚠️  Streaming indexer is DISABLED to prevent server hang');
-console.log('⚠️  Server will run without streaming indexer features');
+// Store indexer state in app.locals for middleware access
+app.locals.indexerInitialized = false;
+
+// Initialize indexer asynchronously after server starts
+async function initializeIndexerAsync() {
+  try {
+    console.log('🔄 Initializing streaming indexer in background...');
+    
+    // Initialize WebSocket manager first
+    wsManager = new WebSocketManager(wss);
+    
+    // Initialize streaming indexer (non-blocking)
+    const { indexerManager, components } = await initializeStreamingIndexer('./data');
+    streamingIndexer = indexerManager;
+    
+    // Set indexer for onboarding routes
+    setStreamingIndexer(streamingIndexer);
+    
+    // Initialize indexer routes
+    const indexerRouter = initializeIndexerRoutes(streamingIndexer);
+    app.use('/api/indexer', authenticateToken, indexerRouter);
+    
+    app.locals.indexerInitialized = true;
+    console.log('✅ Streaming indexer initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize streaming indexer:', error);
+    console.log('⚠️  Server will continue without streaming indexer features');
+  }
+}
 
 // WebSocket connection handler
 wss.on('connection', (ws, req) => {
@@ -139,7 +165,11 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     version: '1.0.0',
     storage: config.databaseType,
-    environment: config.nodeEnv
+    environment: config.nodeEnv,
+    indexer: {
+      initialized: app.locals.indexerInitialized || false,
+      status: app.locals.indexerInitialized ? 'ready' : 'initializing'
+    }
   });
 });
 
@@ -245,6 +275,7 @@ app.get('/api/chat/suggested-questions', async (req, res) => {
 app.use('/api/contracts', authenticateToken, contractRoutes);
 app.use('/api/analysis', authenticateToken, analysisRoutes); // analysisLimiter temporarily disabled for testing
 app.use('/api/analysis', authenticateToken, quickScanRoutes); // Quick scan route
+app.use('/api/analyzer', authenticateToken, analyzerRoutes); // Optimized analyzer route
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
 app.use('/api/onboarding', authenticateToken, onboardingRoutes);
@@ -326,6 +357,11 @@ async function startServer() {
       console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
       console.log(`🔌 WebSocket: ws://localhost:${PORT}/ws`);
       console.log(`💾 Using file-based storage in ./data directory`);
+      
+      // Initialize indexer asynchronously after server is ready
+      initializeIndexerAsync().catch(err => {
+        console.error('❌ Indexer initialization failed:', err);
+      });
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

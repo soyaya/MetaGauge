@@ -375,14 +375,23 @@ export class EnhancedAnalyticsEngine {
       };
     } catch (error) {
       console.error(`   ❌ Enhanced analysis error: ${error.message}`);
+      console.error(`   Stack: ${error.stack}`);
+      
+      // Import MetricsNormalizer for error case
+      const { MetricsNormalizer } = await import('./MetricsNormalizer.js');
       
       return {
         contract: contractAddress,
         chain,
-        metrics: { error: error.message },
-        behavior: null,
+        metrics: MetricsNormalizer.getDefaultDeFiMetrics(),
+        behavior: MetricsNormalizer.getDefaultUserBehavior(),
+        uxAnalysis: null,
+        userJourneys: null,
+        userLifecycle: null,
         transactions: 0,
         blockRange: null,
+        users: [],
+        error: error.message,
         fetchMethod: 'failed'
       };
     }
