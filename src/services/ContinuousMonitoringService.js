@@ -372,7 +372,7 @@ export class ContinuousMonitoringService extends EventEmitter {
         continuousSync: subInfo.tier > 0, // Tiers 1, 2, 3 support continuous sync
         tier: subInfo.tier,
         tierName: subInfo.tierName,
-        apiCallsPerMonth: this.getApiLimitForTier(subInfo.tier)
+        apiCallsPerMonth: await this.getApiLimitForTier(subInfo.tier)
       };
     } catch (error) {
       console.error('Error checking subscription:', error);

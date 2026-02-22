@@ -489,12 +489,22 @@ export async function performContinuousContractSync(analysisId, config, userId) 
   try {
     console.log(`🚀 Starting continuous sync loop for analysis ${analysisId} (interaction-based)`);
     
+    // Get user's subscription info for API limits
+    const user = await UserStorage.findById(userId);
+    const { SUBSCRIPTION_TIERS } = await import('../../services/SubscriptionBlockRangeCalculator.js');
+    const tierConfig = Object.values(SUBSCRIPTION_TIERS).find(t => t.tier === (user.tier || 0)) || SUBSCRIPTION_TIERS.FREE;
+    
+    console.log(`   User tier: ${tierConfig.name} (API limit: ${tierConfig.apiCallsPerMonth}/month)`);
+    
     while (await runSyncCycle()) {
-      // Check if we should stop (max 50 cycles for reasonable marathon sync duration)
-      if (syncCycle > 50) {
-        console.log(`🛑 Stopping continuous sync after 50 cycles for reasonable duration (approximately 25-30 minutes)`);
+      // Check API usage instead of hardcoded cycle limit
+      const currentUsage = user.usage?.apiCalls || 0;
+      const apiLimit = tierConfig.apiCallsPerMonth;
+      
+      if (currentUsage >= apiLimit) {
+        console.log(`🛑 Stopping continuous sync - API limit reached (${currentUsage}/${apiLimit})`);
         
-        // Mark as completed instead of continuing indefinitely
+        // Mark as completed
         await AnalysisStorage.update(analysisId, {
           status: 'completed',
           progress: 100,
@@ -502,11 +512,13 @@ export async function performContinuousContractSync(analysisId, config, userId) 
             ...currentAnalysis.metadata,
             continuous: false,
             completedAfterCycles: syncCycle - 1,
-            autoStoppedReason: 'Maximum cycles reached'
+            autoStoppedReason: 'API limit reached',
+            apiCallsUsed: currentUsage,
+            apiCallsLimit: apiLimit
           },
           logs: [
             ...(currentAnalysis.logs || []),
-            `Continuous sync completed after ${syncCycle - 1} cycles (auto-stopped)`
+            `Continuous sync stopped after ${syncCycle - 1} cycles - API limit reached (${currentUsage}/${apiLimit})`
           ],
           completedAt: new Date().toISOString()
         });
