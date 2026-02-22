@@ -156,14 +156,48 @@
     "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "chain": "ethereum",
     "analysisType": "quick-index",
-    "status": "running",
+    "status": "failed",
     "progress": 20,
     "metadata": {
       "isDefaultContract": true,
       "startedAt": "2026-02-22T18:46:37.365Z"
     },
     "createdAt": "2026-02-22T18:46:37.367Z",
-    "updatedAt": "2026-02-22T18:46:37.577Z",
+    "updatedAt": "2026-02-22T18:48:48.977Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "fetch failed"
+  },
+  {
+    "id": "14e89456-8737-48a8-b661-602f3e8d46d9",
+    "userId": "8e45b0ef-535d-44d3-af26-09d7462179d1",
+    "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-22T19:02:48.042Z"
+    },
+    "createdAt": "2026-02-22T19:02:48.143Z",
+    "updatedAt": "2026-02-22T19:02:57.239Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "RPC Error: Unauthorized: You must authenticate your request with an API key. Create an account on https://www.ankr.com/rpc/ and generate your personal API key for free."
+  },
+  {
+    "id": "7892e2fb-bd72-434d-a015-cbdb755eaa8f",
+    "userId": "8e45b0ef-535d-44d3-af26-09d7462179d1",
+    "contractAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "running",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-22T19:03:02.334Z"
+    },
+    "createdAt": "2026-02-22T19:03:02.352Z",
+    "updatedAt": "2026-02-22T19:03:02.503Z",
     "currentStep": "Fetching contract transactions..."
   }
 ]

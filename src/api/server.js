@@ -26,6 +26,7 @@ import { setStreamingIndexer } from './routes/onboarding.js';
 import subscriptionRoutes from './routes/subscription.js';
 import faucetRoutes from './routes/faucet.js';
 import { initializeIndexerRoutes } from './routes/indexer.js';
+import analyzerRoutes from './routes/analyzer.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -274,6 +275,7 @@ app.get('/api/chat/suggested-questions', async (req, res) => {
 app.use('/api/contracts', authenticateToken, contractRoutes);
 app.use('/api/analysis', authenticateToken, analysisRoutes); // analysisLimiter temporarily disabled for testing
 app.use('/api/analysis', authenticateToken, quickScanRoutes); // Quick scan route
+app.use('/api/analyzer', authenticateToken, analyzerRoutes); // Optimized analyzer route
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
 app.use('/api/onboarding', authenticateToken, onboardingRoutes);
