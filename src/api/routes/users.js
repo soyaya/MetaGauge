@@ -5,7 +5,11 @@
 
 import express from 'express';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { UserStorage, ContractStorage, AnalysisStorage } from '../database/index.js';
+import { validate } from '../middleware/validate.js';
+import { userSchemas } from '../middleware/validation.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 
 const router = express.Router();
 
@@ -33,7 +37,7 @@ router.get('/profile', async (req, res) => {
 
     // Remove sensitive data
     const { password, ...userProfile } = user;
-    res.json({ user: userProfile });
+    res.json(userProfile);
   } catch (error) {
     res.status(500).json({
       error: 'Failed to get user profile',
@@ -65,7 +69,7 @@ router.get('/profile', async (req, res) => {
  *       200:
  *         description: Profile updated successfully
  */
-router.put('/profile', async (req, res) => {
+router.put('/profile', validate(userSchemas.updateProfile), async (req, res) => {
   try {
     const { name, preferences } = req.body;
     const updates = {};
@@ -121,7 +125,7 @@ router.put('/profile', async (req, res) => {
  *       200:
  *         description: Subscription synced
  */
-router.post('/sync-subscription', async (req, res) => {
+router.post('/sync-subscription', validate(userSchemas.syncSubscription), async (req, res) => {
   try {
     const { walletAddress } = req.body;
     
@@ -154,6 +158,80 @@ router.post('/sync-subscription', async (req, res) => {
       error: 'Failed to sync subscription',
       message: error.message
     });
+  }
+});
+
+/**
+ * @swagger
+ * /api/users/wallet-address:
+ *   get:
+ *     summary: Get user's wallet address
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Wallet address retrieved
+ */
+router.get('/wallet-address', async (req, res) => {
+  try {
+    const user = await UserStorage.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ walletAddress: user.walletAddress || null });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get wallet address', message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/users/wallet-address:
+ *   post:
+ *     summary: Set user's wallet address
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               walletAddress:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Wallet address updated
+ */
+router.post('/wallet-address', validate(userSchemas.walletAddress), async (req, res) => {
+  try {
+    const { walletAddress } = req.body;
+    
+    if (!walletAddress) {
+      return res.status(400).json({ error: 'Wallet address required' });
+    }
+    
+    // Basic validation
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      return res.status(400).json({ error: 'Invalid wallet address format' });
+    }
+    
+    const updatedUser = await UserStorage.update(req.user.id, { walletAddress });
+    
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ 
+      message: 'Wallet address updated successfully',
+      walletAddress: updatedUser.walletAddress 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update wallet address', message: error.message });
   }
 });
 
@@ -407,5 +485,74 @@ router.delete('/delete-account', async (req, res) => {
     });
   }
 });
+
+/**
+ * @swagger
+ * /api/users/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ */
+router.post('/change-password', asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current and new password required' });
+  }
+  
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters' });
+  }
+  
+  const user = await UserStorage.findById(req.user.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  
+  // Verify current password
+  const isValid = await bcrypt.compare(currentPassword, user.password);
+  if (!isValid) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+  
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await UserStorage.update(req.user.id, { password: hashedPassword });
+  
+  res.json({ message: 'Password changed successfully' });
+}));
+
+/**
+ * @swagger
+ * /api/users/delete-account:
+ *   delete:
+ *     summary: Delete user account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ */
+router.delete('/delete-account', asyncHandler(async (req, res) => {
+  await UserStorage.delete(req.user.id);
+  res.json({ message: 'Account deleted successfully' });
+}));
 
 export default router;

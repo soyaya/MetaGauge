@@ -10,6 +10,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { ContractStorage } from '../database/index.js';
 import { requireTier } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { contractSchemas } from '../middleware/validation.js';
 
 dotenv.config();
 
@@ -215,7 +217,7 @@ router.get('/', async (req, res) => {
  *       400:
  *         description: Invalid input data or missing required fields
  */
-router.post('/', async (req, res) => {
+router.post('/', validate(contractSchemas.create), async (req, res) => {
   try {
     const {
       name,
@@ -429,7 +431,7 @@ router.get('/:id', async (req, res) => {
  *       404:
  *         description: Configuration not found
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', validate(contractSchemas.update), async (req, res) => {
   try {
     const config = await ContractConfig.findOne({
       _id: req.params.id,

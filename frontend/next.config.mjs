@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
@@ -6,14 +12,21 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Set output file tracing root to silence workspace warning
   outputFileTracingRoot: process.cwd(),
-  // Force webpack mode
   experimental: {},
-  // Silence Turbopack warning
   turbopack: {},
   
-  // Add headers to allow Web3 libraries to work (CSP fix)
+  // Production optimizations
+  swcMinify: true,
+  compress: true,
+  
+  // Modularize imports to reduce bundle size
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{member}}',
+    },
+  },
+  
   async headers() {
     return [
       {
@@ -75,4 +88,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withBundleAnalyzer(nextConfig);
