@@ -159,6 +159,80 @@ router.post('/sync-subscription', async (req, res) => {
 
 /**
  * @swagger
+ * /api/users/wallet-address:
+ *   get:
+ *     summary: Get user's wallet address
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Wallet address retrieved
+ */
+router.get('/wallet-address', async (req, res) => {
+  try {
+    const user = await UserStorage.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ walletAddress: user.walletAddress || null });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get wallet address', message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/users/wallet-address:
+ *   post:
+ *     summary: Set user's wallet address
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               walletAddress:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Wallet address updated
+ */
+router.post('/wallet-address', async (req, res) => {
+  try {
+    const { walletAddress } = req.body;
+    
+    if (!walletAddress) {
+      return res.status(400).json({ error: 'Wallet address required' });
+    }
+    
+    // Basic validation
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      return res.status(400).json({ error: 'Invalid wallet address format' });
+    }
+    
+    const updatedUser = await UserStorage.update(req.user.id, { walletAddress });
+    
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ 
+      message: 'Wallet address updated successfully',
+      walletAddress: updatedUser.walletAddress 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update wallet address', message: error.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/users/dashboard:
  *   get:
  *     summary: Get user dashboard data
