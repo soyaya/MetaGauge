@@ -675,5 +675,2109 @@
     "analysisCount": 0,
     "createdAt": "2026-02-20T12:41:46.553Z",
     "updatedAt": "2026-02-20T12:41:46.553Z"
+  },
+  {
+    "id": "fe166939-4c1d-4897-b808-98972ff85412",
+    "userId": "dba96c0a-90a7-452f-bc78-32d4a18bfc8d",
+    "name": "USDC Test Contract",
+    "description": "Testing with USDC contract",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T10:39:34.378Z",
+    "updatedAt": "2026-02-23T10:39:34.378Z"
+  },
+  {
+    "id": "9754ba13-2272-4f54-a364-74d90e9e81ac",
+    "userId": "15807ba5-002a-42e9-bb1a-f2674aeedbdd",
+    "name": "Updated USDC Test Contract",
+    "description": "Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:37:04.984Z",
+    "updatedAt": "2026-02-23T12:37:05.028Z"
+  },
+  {
+    "id": "34298687-8087-4961-88b4-dbf3433977b6",
+    "userId": "15807ba5-002a-42e9-bb1a-f2674aeedbdd",
+    "name": "Duplicated USDC Contract",
+    "description": "Copy of Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "duplicate"
+    ],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:37:05.039Z",
+    "updatedAt": "2026-02-23T12:37:05.039Z"
+  },
+  {
+    "id": "ec91307d-43c5-4a59-8897-414de1056f23",
+    "userId": "15807ba5-002a-42e9-bb1a-f2674aeedbdd",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:37:05.075Z",
+    "updatedAt": "2026-02-23T12:37:05.075Z"
+  },
+  {
+    "id": "af6af358-b1dc-4c2e-8184-461e861c54fe",
+    "userId": "e3aa23a9-f0c3-4a3f-acf1-b8a5be128a91",
+    "name": "Updated USDC Test Contract",
+    "description": "Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T12:47:42.137Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T12:46:08.235Z",
+    "updatedAt": "2026-02-23T12:47:42.138Z"
+  },
+  {
+    "id": "55e12d92-032e-4fd1-b9e0-089327533d90",
+    "userId": "e3aa23a9-f0c3-4a3f-acf1-b8a5be128a91",
+    "name": "Duplicated USDC Contract",
+    "description": "Copy of Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "duplicate"
+    ],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:46:08.283Z",
+    "updatedAt": "2026-02-23T12:46:08.283Z"
+  },
+  {
+    "id": "d74fd648-847e-4f9f-a1ae-adfc928622d9",
+    "userId": "e3aa23a9-f0c3-4a3f-acf1-b8a5be128a91",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:46:08.312Z",
+    "updatedAt": "2026-02-23T12:46:08.312Z"
+  },
+  {
+    "id": "fb209fd8-41d0-4e37-a37f-dbc05ad1084c",
+    "userId": "f1365689-e701-4774-ab8c-09b719ed7d09",
+    "name": "Updated USDC Test Contract",
+    "description": "Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T12:52:33.608Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T12:51:41.149Z",
+    "updatedAt": "2026-02-23T12:52:33.609Z"
+  },
+  {
+    "id": "ce8f00a3-2445-46bb-839e-97b80a6da205",
+    "userId": "f1365689-e701-4774-ab8c-09b719ed7d09",
+    "name": "Duplicated USDC Contract",
+    "description": "Copy of Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "duplicate"
+    ],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:51:41.205Z",
+    "updatedAt": "2026-02-23T12:51:41.205Z"
+  },
+  {
+    "id": "68d17043-fe83-47aa-b60e-fce6e12ec2b6",
+    "userId": "f1365689-e701-4774-ab8c-09b719ed7d09",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:51:41.245Z",
+    "updatedAt": "2026-02-23T12:51:41.245Z"
+  },
+  {
+    "id": "41e4d625-791e-44a4-baef-fe82318cbe38",
+    "userId": "5e574d2d-2585-4163-b9ff-65deaf5e96f4",
+    "name": "Updated USDC Test Contract",
+    "description": "Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T12:53:23.590Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T12:52:50.083Z",
+    "updatedAt": "2026-02-23T12:53:23.591Z"
+  },
+  {
+    "id": "90d3e1a9-4388-4ccd-b651-48c22635d9c3",
+    "userId": "5e574d2d-2585-4163-b9ff-65deaf5e96f4",
+    "name": "Duplicated USDC Contract",
+    "description": "Copy of Updated description",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "duplicate"
+    ],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:52:50.178Z",
+    "updatedAt": "2026-02-23T12:52:50.178Z"
+  },
+  {
+    "id": "788b4129-fd61-4d02-a35b-a6faf7e59403",
+    "userId": "5e574d2d-2585-4163-b9ff-65deaf5e96f4",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:52:50.215Z",
+    "updatedAt": "2026-02-23T12:52:50.215Z"
+  },
+  {
+    "id": "d04038cd-6ece-4683-aa4b-58257ea0715a",
+    "userId": "c0d1f6c8-1f21-4ebd-a1cf-4af8f0da78f3",
+    "name": "Uniswap V2 Router",
+    "description": "Testing with Uniswap V2 Router contract",
+    "targetContract": {
+      "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      "chain": "ethereum",
+      "name": "Uniswap V2 Router"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T12:59:44.316Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T12:59:40.856Z",
+    "updatedAt": "2026-02-23T12:59:44.317Z"
+  },
+  {
+    "id": "8cbac1ec-9803-4f11-a936-72e8bbb2b93e",
+    "userId": "c0d1f6c8-1f21-4ebd-a1cf-4af8f0da78f3",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T12:59:40.876Z",
+    "updatedAt": "2026-02-23T12:59:40.876Z"
+  },
+  {
+    "id": "b717accc-85f8-41e2-9b5c-73e522e2844c",
+    "userId": "e555eb80-0661-4957-aeab-fe4b1c080073",
+    "name": "Uniswap V2 Router",
+    "description": "Testing with Uniswap V2 Router contract",
+    "targetContract": {
+      "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      "chain": "ethereum",
+      "name": "Uniswap V2 Router"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T13:01:41.993Z",
+    "updatedAt": "2026-02-23T13:01:41.993Z"
+  },
+  {
+    "id": "4a14ea57-db57-4224-9c79-14ce4ea5c9cb",
+    "userId": "e555eb80-0661-4957-aeab-fe4b1c080073",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T13:01:42.010Z",
+    "updatedAt": "2026-02-23T13:01:42.010Z"
+  },
+  {
+    "id": "1c16ceb2-0078-4f37-812f-8b0ffe0d60fc",
+    "userId": "0ce6322c-3bcf-4939-8f44-78cea60609eb",
+    "name": "Uniswap V2 Router",
+    "description": "Testing with Uniswap V2 Router contract",
+    "targetContract": {
+      "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      "chain": "ethereum",
+      "name": "Uniswap V2 Router"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T13:02:52.050Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T13:02:49.757Z",
+    "updatedAt": "2026-02-23T13:02:52.053Z"
+  },
+  {
+    "id": "27aa492b-11dd-485b-bcfd-52ee9b189ddf",
+    "userId": "0ce6322c-3bcf-4939-8f44-78cea60609eb",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T13:02:49.782Z",
+    "updatedAt": "2026-02-23T13:02:49.782Z"
+  },
+  {
+    "id": "1fb49879-baee-436b-8d7c-2ef8d7aebdb9",
+    "userId": "08591508-ae04-4800-b856-f2b4e2fe9857",
+    "name": "USDC Contract",
+    "description": "USDC on Ethereum",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T13:34:22.858Z",
+    "analysisCount": 4,
+    "createdAt": "2026-02-23T13:05:09.023Z",
+    "updatedAt": "2026-02-23T13:34:22.862Z"
+  },
+  {
+    "id": "fa4c83dc-7d1f-4144-9dbf-d3a72caeaa84",
+    "userId": "08591508-ae04-4800-b856-f2b4e2fe9857",
+    "description": "Default contract for undefined - undefined",
+    "targetContract": {
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      null
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T13:05:09.053Z",
+    "updatedAt": "2026-02-23T13:05:09.053Z"
+  },
+  {
+    "id": "fe06f254-640a-45c1-bdc9-f6e1c7d58fe3",
+    "userId": "fbe02661-5a2d-48ae-bcb7-e0c28cf60707",
+    "name": "Uniswap Token",
+    "description": "ethereum test contract",
+    "targetContract": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "name": "Uniswap Token",
+      "chain": "ethereum"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T13:51:31.478Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T13:50:46.049Z",
+    "updatedAt": "2026-02-23T13:51:31.479Z"
+  },
+  {
+    "id": "3e8831cc-3359-430c-9327-3624efe8331d",
+    "userId": "6d4d39dc-fed3-4386-a398-0a5156c03b6e",
+    "name": "Wrapped Ether",
+    "description": "lisk test contract",
+    "targetContract": {
+      "address": "0x4200000000000000000000000000000000000006",
+      "name": "Wrapped Ether",
+      "chain": "lisk"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T13:52:54.382Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T13:51:36.552Z",
+    "updatedAt": "2026-02-23T13:52:54.383Z"
+  },
+  {
+    "id": "b7d336fa-66d6-4004-b8a6-fd1888e7a6ab",
+    "userId": "5ba8e2c3-4e75-49d0-ac08-2c20a9eca21c",
+    "name": "Ether",
+    "description": "starknet test contract",
+    "targetContract": {
+      "address": "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      "name": "Ether",
+      "chain": "starknet"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T13:54:58.189Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T13:52:56.446Z",
+    "updatedAt": "2026-02-23T13:54:58.191Z"
+  },
+  {
+    "id": "14d2cb8b-5933-42e1-9c0c-fa083cff81a8",
+    "userId": "952cb50a-f84b-462b-b937-7e02110e977a",
+    "name": "UNI Token",
+    "targetContract": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "chain": "ethereum",
+      "name": "UNI"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T13:56:39.516Z",
+    "updatedAt": "2026-02-23T13:56:39.516Z"
+  },
+  {
+    "id": "c4bd0010-c3a5-4eba-ae67-054dec35b7ea",
+    "userId": "2f85a38e-53e1-41a3-b087-9397e947dd42",
+    "name": "UNI Token",
+    "targetContract": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "chain": "ethereum",
+      "name": "UNI"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T13:59:54.306Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T13:59:19.631Z",
+    "updatedAt": "2026-02-23T13:59:54.308Z"
+  },
+  {
+    "id": "b2b47493-2e5f-41da-9854-c7d0139d7bfc",
+    "userId": "98e7e2e5-8414-489d-b7d9-08b52ca2ef3b",
+    "name": "UNI Token",
+    "targetContract": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "chain": "ethereum",
+      "name": "UNI"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T14:02:05.683Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T14:02:01.050Z",
+    "updatedAt": "2026-02-23T14:02:05.686Z"
+  },
+  {
+    "id": "4a128319-d5da-4a76-9fc6-42ebb9b25c8d",
+    "userId": "f965f1db-ab08-4e98-9a1d-387ab9d7090a",
+    "name": "Defi",
+    "description": "Default contract for Defi - sgsgfdhfhfjgkgkhkhkljhlkjlkjkghjghfddgdhdghdfghdhgdhghdhgdhdddhgdhdhddgghdhdhdhdhdhddhddddd",
+    "targetContract": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chain": "ethereum",
+      "name": "Defi",
+      "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guy\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"guy\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Withdrawal\",\"type\":\"event\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": false,
+    "isDefault": false,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T14:03:21.937Z",
+    "updatedAt": "2026-02-23T14:03:23.223Z"
+  },
+  {
+    "id": "240f0d33-3fc8-4798-a562-23028e2ed37a",
+    "userId": "f965f1db-ab08-4e98-9a1d-387ab9d7090a",
+    "name": "Defi",
+    "description": "Default contract for Defi - sgsgfdhfhfjgkgkhkhkljhlkjlkjkghjghfddgdhdghdfghdhgdhghdhgdhdddhgdhdhddgghdhdhdhdhdhddhddddd",
+    "targetContract": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chain": "ethereum",
+      "name": "Defi",
+      "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"guy\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dst\",\"type\":\"address\"},{\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"guy\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"dst\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Deposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"src\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"wad\",\"type\":\"uint256\"}],\"name\":\"Withdrawal\",\"type\":\"event\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-23T14:03:23.233Z",
+    "updatedAt": "2026-02-23T14:03:23.233Z"
+  },
+  {
+    "id": "82852427-2910-4a69-9466-5c7264196aba",
+    "userId": "8c7b0934-fab9-4c30-a043-6daa19100407",
+    "name": "UNI Token",
+    "targetContract": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "chain": "ethereum",
+      "name": "UNI"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T14:03:58.987Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T14:03:55.938Z",
+    "updatedAt": "2026-02-23T14:03:58.989Z"
+  },
+  {
+    "id": "00cefb10-c5cf-4c9e-ab85-c6890c816f98",
+    "userId": "3316bf8f-aa37-4303-8d62-6a87e44fd0f2",
+    "name": "UNI Token",
+    "targetContract": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "chain": "ethereum",
+      "name": "UNI"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T14:06:04.032Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T14:05:58.095Z",
+    "updatedAt": "2026-02-23T14:06:04.036Z"
+  },
+  {
+    "id": "61c73bab-7efe-4422-ba18-11cf1830587a",
+    "userId": "bb8b5875-d00f-4c9e-8868-75ad89d13ff0",
+    "name": "Uniswap Token",
+    "description": "ethereum test contract",
+    "targetContract": {
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "name": "Uniswap Token",
+      "chain": "ethereum"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T14:07:56.061Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T14:07:47.676Z",
+    "updatedAt": "2026-02-23T14:07:56.062Z"
+  },
+  {
+    "id": "8b275dbb-e81d-418f-82f0-0b1dbdd928f2",
+    "userId": "92c01fa5-c6ff-4c82-b2a5-ce6a3a7f667f",
+    "name": "Wrapped Ether",
+    "description": "lisk test contract",
+    "targetContract": {
+      "address": "0x4200000000000000000000000000000000000006",
+      "name": "Wrapped Ether",
+      "chain": "lisk"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T14:08:05.318Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T14:07:57.928Z",
+    "updatedAt": "2026-02-23T14:08:05.319Z"
+  },
+  {
+    "id": "35ba0471-16dc-4bca-bb72-e584e3508414",
+    "userId": "a22ca8b4-7b88-4f7d-9d2c-661c07565982",
+    "name": "Ether",
+    "description": "starknet test contract",
+    "targetContract": {
+      "address": "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      "name": "Ether",
+      "chain": "starknet"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "standard",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [],
+    "isActive": true,
+    "lastAnalyzed": "2026-02-23T14:08:11.878Z",
+    "analysisCount": 1,
+    "createdAt": "2026-02-23T14:08:08.143Z",
+    "updatedAt": "2026-02-23T14:08:11.879Z"
+  },
+  {
+    "address": "0x1234567890123456789012345678901234567890",
+    "chain": "ethereum",
+    "name": "Test ERC-20 Token",
+    "abi": [
+      {
+        "type": "function",
+        "name": "transfer",
+        "inputs": [
+          {
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "transferFrom",
+        "inputs": [
+          {
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "approve",
+        "inputs": [
+          {
+            "name": "spender",
+            "type": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "balanceOf",
+        "inputs": [
+          {
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "totalSupply",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view"
+      }
+    ],
+    "createdAt": "2026-02-23T14:56:31.873Z"
+  },
+  {
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "chain": "ethereum",
+    "name": "Wrapped Ether (WETH)",
+    "category": "DeFi",
+    "purpose": "ERC-20 wrapper for ETH",
+    "abi": [
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "name",
+        "outputs": [
+          {
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "guy",
+            "type": "address"
+          },
+          {
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "approve",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "totalSupply",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "src",
+            "type": "address"
+          },
+          {
+            "name": "dst",
+            "type": "address"
+          },
+          {
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "transferFrom",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "withdraw",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [
+          {
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "dst",
+            "type": "address"
+          },
+          {
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "transfer",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [],
+        "name": "deposit",
+        "outputs": [],
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "",
+            "type": "address"
+          },
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "allowance",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "fallback"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "name": "src",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "name": "guy",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "Approval",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "name": "src",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "name": "dst",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "Transfer",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "name": "dst",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "Deposit",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "name": "src",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "name": "wad",
+            "type": "uint256"
+          }
+        ],
+        "name": "Withdrawal",
+        "type": "event"
+      }
+    ],
+    "userId": "1c26e115-3317-4a5d-a5fa-ecb72ba7b75d",
+    "createdAt": "2026-02-23T15:13:25.390Z"
+  },
+  {
+    "id": "093f4dd3-e2bd-4abe-b233-afae1061bb44",
+    "userId": "9a95b78e-cf66-4ba7-b73d-042e2acce48c",
+    "name": "Wrapped Ether",
+    "description": "Default contract for Wrapped Ether - ERC20 wrapper for ETH",
+    "targetContract": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chain": "ethereum",
+      "name": "Wrapped Ether",
+      "abi": null
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-24T12:02:55.917Z",
+    "updatedAt": "2026-02-24T12:02:55.917Z"
+  },
+  {
+    "id": "8d71cb0c-214f-4075-bc3c-aa7dd8f5fe3d",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "name": "Defi",
+    "description": "Default contract for Defi - jzfkjdhfksjhfdkjsdhjkfskhjsdfkjsdfjhfdhfdhfdshjkdjhksdfkjfdjkdfjkfdjksdfjkfjsdfhfdhfddssdffdsdjdfjkfdjkfsdfdjhksdfsfjkfdjhk",
+    "targetContract": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "chain": "ethereum",
+      "name": "Defi",
+      "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_upgradedAddress\",\"type\":\"address\"}],\"name\":\"deprecate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_spender\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"deprecated\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_evilUser\",\"type\":\"address\"}],\"name\":\"addBlackList\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_from\",\"type\":\"address\"},{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"upgradedAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maximumFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"_totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_maker\",\"type\":\"address\"}],\"name\":\"getBlackListStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowed\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"who\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newBasisPoints\",\"type\":\"uint256\"},{\"name\":\"newMaxFee\",\"type\":\"uint256\"}],\"name\":\"setParams\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"issue\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"redeem\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"remaining\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"basisPointsRate\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"isBlackListed\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_clearedUser\",\"type\":\"address\"}],\"name\":\"removeBlackList\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"MAX_UINT\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_blackListedUser\",\"type\":\"address\"}],\"name\":\"destroyBlackFunds\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_initialSupply\",\"type\":\"uint256\"},{\"name\":\"_name\",\"type\":\"string\"},{\"name\":\"_symbol\",\"type\":\"string\"},{\"name\":\"_decimals\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Issue\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Redeem\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"newAddress\",\"type\":\"address\"}],\"name\":\"Deprecate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"feeBasisPoints\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"maxFee\",\"type\":\"uint256\"}],\"name\":\"Params\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_blackListedUser\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_balance\",\"type\":\"uint256\"}],\"name\":\"DestroyedBlackFunds\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"AddedBlackList\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"RemovedBlackList\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Pause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Unpause\",\"type\":\"event\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": false,
+    "isDefault": false,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-24T16:40:23.459Z",
+    "updatedAt": "2026-02-24T16:40:48.080Z"
+  },
+  {
+    "id": "7e744481-2003-469e-8746-a8f1e05620c3",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "name": "Defi",
+    "description": "Default contract for Defi - jzfkjdhfksjhfdkjsdhjkfskhjsdfkjsdfjhfdhfdhfdshjkdjhksdfkjfdjkdfjkfdjksdfjkfjsdfhfdhfddssdffdsdjdfjkfdjkfsdfdjhksdfsfjkfdjhk",
+    "targetContract": {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "chain": "ethereum",
+      "name": "Defi",
+      "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_upgradedAddress\",\"type\":\"address\"}],\"name\":\"deprecate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_spender\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"deprecated\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_evilUser\",\"type\":\"address\"}],\"name\":\"addBlackList\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_from\",\"type\":\"address\"},{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"upgradedAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maximumFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"_totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_maker\",\"type\":\"address\"}],\"name\":\"getBlackListStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowed\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"who\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newBasisPoints\",\"type\":\"uint256\"},{\"name\":\"newMaxFee\",\"type\":\"uint256\"}],\"name\":\"setParams\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"issue\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"redeem\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"remaining\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"basisPointsRate\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"isBlackListed\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_clearedUser\",\"type\":\"address\"}],\"name\":\"removeBlackList\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"MAX_UINT\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_blackListedUser\",\"type\":\"address\"}],\"name\":\"destroyBlackFunds\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_initialSupply\",\"type\":\"uint256\"},{\"name\":\"_name\",\"type\":\"string\"},{\"name\":\"_symbol\",\"type\":\"string\"},{\"name\":\"_decimals\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Issue\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Redeem\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"newAddress\",\"type\":\"address\"}],\"name\":\"Deprecate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"feeBasisPoints\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"maxFee\",\"type\":\"uint256\"}],\"name\":\"Params\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_blackListedUser\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_balance\",\"type\":\"uint256\"}],\"name\":\"DestroyedBlackFunds\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"AddedBlackList\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"RemovedBlackList\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Pause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Unpause\",\"type\":\"event\"}]"
+    },
+    "competitors": [],
+    "rpcConfig": {
+      "ethereum": [
+        "https://ethereum-rpc.publicnode.com",
+        "https://eth.llamarpc.com"
+      ],
+      "lisk": [
+        "https://lisk.drpc.org",
+        "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+        "https://rpc.lisk.com"
+      ],
+      "starknet": [
+        "https://starknet-rpc.publicnode.com",
+        "https://rpc.starknet.lava.build",
+        "https://free-rpc.nethermind.io/mainnet-juno"
+      ]
+    },
+    "analysisParams": {
+      "searchStrategy": "quick",
+      "smartSearch": true,
+      "whaleThreshold": 10,
+      "maxConcurrentRequests": 10,
+      "failoverTimeout": 30000,
+      "maxRetries": 2,
+      "outputFormats": [
+        "json",
+        "csv",
+        "markdown"
+      ]
+    },
+    "tags": [
+      "default",
+      "defi"
+    ],
+    "isActive": true,
+    "isDefault": true,
+    "lastAnalyzed": null,
+    "analysisCount": 0,
+    "createdAt": "2026-02-24T16:40:48.159Z",
+    "updatedAt": "2026-02-24T16:40:48.159Z"
   }
 ]

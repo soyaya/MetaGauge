@@ -87,5 +87,159 @@
     },
     "isStreaming": false,
     "createdAt": "2026-02-20T14:20:11.991Z"
+  },
+  {
+    "id": "9b0f2400-97b7-42d8-afe5-0bd7a4f85847",
+    "sessionId": "64ee444e-d2fc-4672-a6a6-e03e9c7a0595",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T12:46:23.001Z"
+  },
+  {
+    "id": "c0861565-8c5e-44cd-8d19-1c0c311e9aef",
+    "sessionId": "852e6880-d377-40fe-812a-1420fa7a9546",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T12:51:50.607Z"
+  },
+  {
+    "id": "a95c6bc9-a879-40b2-9d40-94917068d89d",
+    "sessionId": "c3bed6f7-aac9-4b48-b257-c39bebf90a13",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T12:52:52.452Z"
+  },
+  {
+    "id": "f9746377-d821-4eca-8034-56614ca11ecc",
+    "sessionId": "c3bed6f7-aac9-4b48-b257-c39bebf90a13",
+    "role": "user",
+    "content": "What are the key metrics for this contract?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T12:52:52.471Z"
+  },
+  {
+    "id": "8f324a95-be07-4b1d-9ba3-56d37c242b37",
+    "sessionId": "b7771722-eeea-4afa-b69b-0f3339538b13",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T12:59:44.538Z"
+  },
+  {
+    "id": "cb0bb055-3271-4e28-ba54-24d6ec70a799",
+    "sessionId": "b7771722-eeea-4afa-b69b-0f3339538b13",
+    "role": "user",
+    "content": "What is this contract?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T12:59:44.552Z"
+  },
+  {
+    "id": "4bac5bfe-d6ca-473a-8251-7fd284e3abab",
+    "sessionId": "892e3207-aa9b-405c-8567-2b0f5f4c15f2",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T13:01:45.133Z"
+  },
+  {
+    "id": "f1b81416-7d13-480f-a9bb-1bbbc16e37dc",
+    "sessionId": "892e3207-aa9b-405c-8567-2b0f5f4c15f2",
+    "role": "user",
+    "content": "What is this contract?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T13:01:45.155Z"
+  },
+  {
+    "id": "e53394a1-76d3-439f-96d1-7f39b28e963c",
+    "sessionId": "ed2661b2-e017-4c66-91dc-afabf75660fd",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T13:02:52.895Z"
+  },
+  {
+    "id": "76ffe4f8-bf08-4b24-99a1-041270d6d225",
+    "sessionId": "ed2661b2-e017-4c66-91dc-afabf75660fd",
+    "role": "user",
+    "content": "What is this contract?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T13:02:52.917Z"
+  },
+  {
+    "id": "75534807-83d2-4e81-8a09-979544d17b1d",
+    "sessionId": "4c8dd675-1fcc-47ab-a7ff-85e27693a217",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-23T13:05:11.140Z"
+  },
+  {
+    "id": "dec3af0b-32f8-49cd-a05b-0f69a8283ac2",
+    "sessionId": "773565e8-3736-4672-9593-d11224a96fdd",
+    "role": "assistant",
+    "content": "Hello! I'm your AI assistant for analyzing the contract 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 on ethereum. What would you like to know?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-24T12:03:18.490Z"
+  },
+  {
+    "id": "4d09189a-7a1b-4c60-9cda-ee96258aac01",
+    "sessionId": "773565e8-3736-4672-9593-d11224a96fdd",
+    "role": "user",
+    "content": "What are the key metrics for this contract?",
+    "components": [],
+    "metadata": {},
+    "isStreaming": false,
+    "createdAt": "2026-02-24T12:03:19.102Z"
+  },
+  {
+    "id": "fe520167-a853-4d40-a09d-ec72743064fd",
+    "sessionId": "773565e8-3736-4672-9593-d11224a96fdd",
+    "role": "assistant",
+    "content": "I encountered an error processing your message: exception TypeError: fetch failed sending request. Please try again or rephrase your question.",
+    "components": [
+      {
+        "type": "alert",
+        "data": {
+          "severity": "error",
+          "title": "Processing Error",
+          "message": "There was an issue processing your request. Please try again.",
+          "actionable": true
+        }
+      }
+    ],
+    "metadata": {
+      "fallback": true,
+      "reason": "processing_error",
+      "processingTime": 1771934610807
+    },
+    "isStreaming": false,
+    "createdAt": "2026-02-24T12:03:30.979Z"
   }
 ]
