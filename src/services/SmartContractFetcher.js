@@ -209,7 +209,8 @@ export class SmartContractFetcher extends EventEmitter {
         
         console.log(`✅ Initialized ${config.name} provider for ${chain}`);
       } catch (error) {
-        console.error(`❌ Failed to initialize ${config.name} provider for ${chain}:`, error.message);
+        // Log initialization errors as info instead of error
+        console.info(`ℹ️ Could not initialize ${config.name} provider for ${chain}: ${error.message}`);
       }
     }
     
@@ -258,7 +259,7 @@ export class SmartContractFetcher extends EventEmitter {
           };
           
           if (!isHealthy) {
-            console.warn(`⚠️  Provider ${provider.name} for ${chain} is unhealthy`);
+            console.info(`ℹ️ Provider ${provider.name} for ${chain} is temporarily unavailable`);
             this.emit('providerUnhealthy', { chain, provider: provider.name });
           }
         } catch (error) {
@@ -266,7 +267,7 @@ export class SmartContractFetcher extends EventEmitter {
           provider.lastError = error.message;
           this.providerHealth[chain][provider.name].errorCount++;
           
-          console.error(`❌ Health check failed for ${provider.name} (${chain}):`, error.message);
+          console.info(`ℹ️ Health check issue for ${provider.name} (${chain}): ${error.message}`);
         }
       }
     }

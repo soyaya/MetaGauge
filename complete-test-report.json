@@ -1,0 +1,239 @@
+{
+  "timestamp": "2026-02-23T12:52:52.713Z",
+  "duration": "2.92s",
+  "totalTests": 27,
+  "successfulTests": 25,
+  "totalIssues": 2,
+  "issues": [
+    {
+      "category": "Contracts",
+      "severity": "MEDIUM",
+      "message": "Contract data incomplete",
+      "details": {
+        "config": {
+          "id": "41e4d625-791e-44a4-baef-fe82318cbe38",
+          "userId": "5e574d2d-2585-4163-b9ff-65deaf5e96f4",
+          "name": "USDC Test Contract",
+          "description": "Testing with USDC contract",
+          "targetContract": {
+            "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+            "chain": "ethereum",
+            "name": "USDC"
+          },
+          "competitors": [],
+          "rpcConfig": {
+            "ethereum": [],
+            "lisk": [
+              "https://lisk.drpc.org",
+              "https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye",
+              "https://rpc.lisk.com"
+            ],
+            "starknet": [
+              "https://starknet-rpc.publicnode.com",
+              "https://rpc.starknet.lava.build",
+              "https://free-rpc.nethermind.io/mainnet-juno"
+            ]
+          },
+          "analysisParams": {
+            "searchStrategy": "standard",
+            "smartSearch": true,
+            "whaleThreshold": 10,
+            "maxConcurrentRequests": 10,
+            "failoverTimeout": 30000,
+            "maxRetries": 2,
+            "outputFormats": [
+              "json",
+              "csv",
+              "markdown"
+            ]
+          },
+          "tags": [],
+          "isActive": true,
+          "lastAnalyzed": null,
+          "analysisCount": 0,
+          "createdAt": "2026-02-23T12:52:50.083Z",
+          "updatedAt": "2026-02-23T12:52:50.083Z"
+        }
+      },
+      "timestamp": "2026-02-23T12:52:50.136Z"
+    },
+    {
+      "category": "Chat",
+      "severity": "HIGH",
+      "message": "Failed to send chat message",
+      "details": {
+        "error": "Failed to process message",
+        "message": "Cannot read properties of undefined (reading 'trim')"
+      },
+      "timestamp": "2026-02-23T12:52:52.486Z"
+    }
+  ],
+  "successes": [
+    {
+      "category": "Authentication",
+      "message": "User registered: test_complete_1771851169784@metagauge.io",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:49.978Z"
+    },
+    {
+      "category": "Authentication",
+      "message": "User login successful",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.025Z"
+    },
+    {
+      "category": "Authentication",
+      "message": "Current user retrieved: test_complete_1771851169784@metagauge.io",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.043Z"
+    },
+    {
+      "category": "Authentication",
+      "message": "API key refreshed successfully",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.065Z"
+    },
+    {
+      "category": "Contracts",
+      "message": "Contract created: 41e4d625-791e-44a4-baef-fe82318cbe38",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.091Z"
+    },
+    {
+      "category": "Contracts",
+      "message": "Found 1 contract(s) - Paginated format",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.109Z"
+    },
+    {
+      "category": "Contracts",
+      "message": "Contract updated successfully",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.164Z"
+    },
+    {
+      "category": "Contracts",
+      "message": "Contract duplicated successfully",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.187Z"
+    },
+    {
+      "category": "Onboarding",
+      "message": "Onboarding status retrieved",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.201Z"
+    },
+    {
+      "category": "Onboarding",
+      "message": "Onboarding completed",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.231Z"
+    },
+    {
+      "category": "Onboarding",
+      "message": "Default contract retrieved",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.359Z"
+    },
+    {
+      "category": "Analysis",
+      "message": "Analysis started: 51a3df69-dfcf-4cab-981b-81a6757e3c7b",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:50.392Z"
+    },
+    {
+      "category": "Analysis",
+      "message": "Analysis status: running",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.409Z"
+    },
+    {
+      "category": "Analysis",
+      "message": "Analysis history retrieved: 2 items",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.427Z"
+    },
+    {
+      "category": "Chat",
+      "message": "Chat session created: c3bed6f7-aac9-4b48-b257-c39bebf90a13",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.465Z"
+    },
+    {
+      "category": "Chat",
+      "message": "Chat messages retrieved: 2 messages",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.496Z"
+    },
+    {
+      "category": "Chat",
+      "message": "Chat sessions listed: 1 sessions",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.506Z"
+    },
+    {
+      "category": "Subscription",
+      "message": "Subscription plans retrieved: 0 plans",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.512Z"
+    },
+    {
+      "category": "Subscription",
+      "message": "Subscription stats retrieved",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.523Z"
+    },
+    {
+      "category": "User Profile",
+      "message": "User profile retrieved",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.574Z"
+    },
+    {
+      "category": "User Profile",
+      "message": "User profile updated",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.652Z"
+    },
+    {
+      "category": "User Profile",
+      "message": "Usage stats retrieved",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.663Z"
+    },
+    {
+      "category": "Error Handling",
+      "message": "Invalid contract ID correctly rejected",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.691Z"
+    },
+    {
+      "category": "Error Handling",
+      "message": "Unauthorized access correctly blocked",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.702Z"
+    },
+    {
+      "category": "Error Handling",
+      "message": "Invalid data correctly rejected",
+      "data": {},
+      "timestamp": "2026-02-23T12:52:52.712Z"
+    }
+  ],
+  "testUser": "test_complete_1771851169784@metagauge.io",
+  "testContract": {
+    "name": "USDC Test Contract",
+    "description": "Testing with USDC contract",
+    "targetContract": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "chain": "ethereum",
+      "name": "USDC"
+    }
+  },
+  "ids": {
+    "userId": "5e574d2d-2585-4163-b9ff-65deaf5e96f4",
+    "contractId": "41e4d625-791e-44a4-baef-fe82318cbe38",
+    "analysisId": "51a3df69-dfcf-4cab-981b-81a6757e3c7b",
+    "chatSessionId": "c3bed6f7-aac9-4b48-b257-c39bebf90a13"
+  }
+}

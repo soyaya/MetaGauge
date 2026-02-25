@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "contractAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "contractName": "USDC",
+    "contractChain": "ethereum",
+    "generatedAt": "2026-02-23T12:52:30.439Z",
+    "blockRange": {
+      "searchStrategy": "standard",
+      "blocksSearched": 200000
+    },
+    "analysisType": "full_comparative",
+    "searchSummary": {
+      "strategy": "standard",
+      "totalTransactionsFound": 0,
+      "uniqueUsers": 0,
+      "rangesSearched": 2,
+      "blocksSearched": 200000,
+      "searchTime": "44.34 seconds",
+      "currentBlock": 24519706,
+      "activityLevel": "MINIMAL",
+      "searchMethods": [
+        "smart_range_selection",
+        "activity_based_stopping",
+        "priority_optimization"
+      ]
+    }
+  },
+  "summary": {
+    "totalTransactions": 0,
+    "uniqueUsers": 0,
+    "totalValue": 0,
+    "avgGasUsed": 0,
+    "successRate": 0,
+    "timeRange": "24h"
+  },
+  "defiMetrics": {
+    "tvl": 0,
+    "dau": 0,
+    "mau": 0,
+    "transactionVolume24h": 0,
+    "gasEfficiency": "Low",
+    "revenuePerUser": 0,
+    "liquidityUtilization": 75.2,
+    "yieldGenerated": 0,
+    "protocolFees": 0,
+    "stakingRewards": 0,
+    "borrowingRate": 5.2,
+    "lendingRate": 3.8,
+    "impermanentLoss": 0.15,
+    "slippageTolerance": 0.5,
+    "volumeToTvlRatio": 0.05,
+    "feeToVolumeRatio": 0.001,
+    "activePoolsCount": 12,
+    "crossChainVolume": 0,
+    "bridgeUtilization": 15.5,
+    "governanceParticipation": 25.8
+  },
+  "userBehavior": {
+    "whaleRatio": 15.2,
+    "botActivity": 8.5,
+    "loyaltyScore": 72.3,
+    "earlyAdopterPotential": "Medium",
+    "retentionRate7d": 65.4,
+    "retentionRate30d": 42.1,
+    "averageSessionDuration": 1800,
+    "transactionsPerUser": 0,
+    "userGrowthRate": 12.5,
+    "churRate": 8.2,
+    "powerUserRatio": 22.1,
+    "newUserRatio": 18.7,
+    "crossChainUsers": 0,
+    "multiProtocolUsers": 0,
+    "gasOptimizationScore": 0,
+    "frontRunningDetection": 2.1,
+    "mevExposure": 5.8,
+    "sandwichAttacks": 0,
+    "arbitrageOpportunities": 15,
+    "liquidationEvents": 3
+  },
+  "transactions": [],
+  "users": [],
+  "events": [],
+  "locks": [],
+  "gasAnalysis": {
+    "averageGasPrice": "0",
+    "averageGasUsed": 0,
+    "totalGasCost": 0,
+    "totalGasCostUSD": 0,
+    "averageGasCostUSD": 0,
+    "gasEfficiencyScore": 0,
+    "failedTransactions": 0,
+    "failureRate": 0,
+    "gasOptimizationOpportunities": []
+  },
+  "competitive": {
+    "marketPosition": 5,
+    "marketShare": 0,
+    "advantages": [
+      "Low transaction fees",
+      "Fast confirmation times",
+      "Active development team"
+    ],
+    "challenges": [
+      "Limited ecosystem",
+      "User acquisition needed",
+      "Liquidity depth improvement"
+    ],
+    "benchmarks": {
+      "vsEthereum": {
+        "gasCostReduction": 85.5,
+        "transactionSpeed": 12.5,
+        "userGrowth": -5.2
+      },
+      "vsCompetitors": [
+        {
+          "name": "Similar Protocol",
+          "chain": "ethereum",
+          "marketShare": 0.78,
+          "userOverlap": 44.71
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    "Monitor competitive landscape regularly",
+    "Implement user feedback collection system"
+  ],
+  "alerts": []
+}

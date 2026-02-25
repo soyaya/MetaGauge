@@ -127,7 +127,17 @@ export default function OnboardingPage() {
 
       const response = await api.onboarding.complete(onboardingData);
       
-      // Redirect immediately - indexing happens in background
+      // Trigger indexing immediately after onboarding
+      try {
+        console.log('🚀 Triggering indexing after onboarding...');
+        await api.post('/api/onboarding/trigger-indexing');
+        console.log('✅ Indexing triggered successfully');
+      } catch (indexError) {
+        console.error('⚠️ Failed to trigger indexing:', indexError);
+        // Don't block redirect - user can trigger manually from dashboard
+      }
+      
+      // Redirect to dashboard
       router.push('/dashboard');
 
     } catch (error: any) {

@@ -27,6 +27,7 @@ import subscriptionRoutes from './routes/subscription.js';
 import faucetRoutes from './routes/faucet.js';
 import { initializeIndexerRoutes } from './routes/indexer.js';
 import analyzerRoutes from './routes/analyzer.js';
+import functionsRoutes from './routes/functions.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -276,6 +277,7 @@ app.use('/api/contracts', authenticateToken, contractRoutes);
 app.use('/api/analysis', authenticateToken, analysisRoutes); // analysisLimiter temporarily disabled for testing
 app.use('/api/analysis', authenticateToken, quickScanRoutes); // Quick scan route
 app.use('/api/analyzer', authenticateToken, analyzerRoutes); // Optimized analyzer route
+app.use('/api/functions', authenticateToken, functionsRoutes); // Function signature analytics
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
 app.use('/api/onboarding', authenticateToken, onboardingRoutes);

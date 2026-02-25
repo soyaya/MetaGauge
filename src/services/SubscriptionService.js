@@ -4,6 +4,7 @@
  */
 
 import { ethers } from 'ethers';
+import { createRobustProvider } from './RobustProvider.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -71,22 +72,30 @@ class SubscriptionService {
     if (this.initialized) return;
     
     try {
-      // Initialize provider with shorter timeout
-      this.provider = new ethers.JsonRpcProvider(LISK_SEPOLIA_RPC, undefined, {
+      // Initialize provider with RobustProvider to prevent filter errors
+      const baseProvider = new ethers.JsonRpcProvider(LISK_SEPOLIA_RPC, undefined, {
         staticNetwork: true,
         timeout: 5000 // 5 second timeout
+      });
+      
+      // Wrap with RobustProvider to handle filter errors gracefully
+      this.provider = createRobustProvider(baseProvider, {
+        disableFilters: true,
+        usePolling: true,
+        pollingInterval: 5000,
+        maxBlockRange: 2000
       });
       
       this.subscriptionContract = new ethers.Contract(
         CONTRACTS.SUBSCRIPTION,
         SUBSCRIPTION_ABI,
-        this.provider
+        this.provider.provider // Use underlying provider for contract
       );
       
       // Setup event listeners with error handling
       this.setupEventListeners();
       this.initialized = true;
-      console.log('[SubscriptionService] Initialized successfully');
+      console.log('[SubscriptionService] Initialized successfully with RobustProvider');
     } catch (error) {
       console.warn('[SubscriptionService] Initialization failed:', error.message);
       // Don't throw - allow app to continue without subscription features
@@ -144,76 +153,91 @@ class SubscriptionService {
   setupEventListeners() {
     if (!this.subscriptionContract) return;
     
-    console.log('🔗 Setting up subscription event listeners...');
+    console.log('🔗 Setting up subscription event listeners with robust polling...');
 
-    // Listen for new subscriptions
-    this.subscriptionContract.on('SubscriptionCreated', (user, tier, role, billingCycle, startTime, endTime, event) => {
-      console.log('📝 New subscription created:', {
-        user,
-        tier: SUBSCRIPTION_TIERS[tier],
-        role: USER_ROLES[role],
-        billingCycle: BILLING_CYCLES[billingCycle],
-        startTime: new Date(Number(startTime) * 1000),
-        endTime: new Date(Number(endTime) * 1000),
-        transactionHash: event.transactionHash
-      });
+    // Use RobustProvider's event listener to avoid filter errors
+    const eventFilter = {
+      address: CONTRACTS.SUBSCRIPTION,
+      topics: [] // Listen to all events from this contract
+    };
 
-      // Here you would typically save to database
-      this.handleSubscriptionCreated({
-        walletAddress: user,
-        tier: Number(tier),
-        role: Number(role),
-        billingCycle: Number(billingCycle),
-        startTime: Number(startTime),
-        endTime: Number(endTime),
-        transactionHash: event.transactionHash
-      });
-    });
+    // Listen for new subscriptions using robust event listener
+    try {
+      this.provider.createRobustEventListener(eventFilter, (log) => {
+        // Parse the log to determine event type
+        try {
+          const parsedLog = this.subscriptionContract.interface.parseLog(log);
+          
+          if (parsedLog.name === 'SubscriptionCreated') {
+            const [user, tier, role, billingCycle, startTime, endTime] = parsedLog.args;
+            console.log('📝 New subscription created:', {
+              user,
+              tier: SUBSCRIPTION_TIERS[tier],
+              role: USER_ROLES[role],
+              billingCycle: BILLING_CYCLES[billingCycle],
+              startTime: new Date(Number(startTime) * 1000),
+              endTime: new Date(Number(endTime) * 1000),
+              transactionHash: log.transactionHash
+            });
 
-    // Listen for subscription cancellations
-    this.subscriptionContract.on('SubscriptionCancelled', (user, event) => {
-      console.log('❌ Subscription cancelled:', {
-        user,
-        transactionHash: event.transactionHash
-      });
+            this.handleSubscriptionCreated({
+              walletAddress: user,
+              tier: Number(tier),
+              role: Number(role),
+              billingCycle: Number(billingCycle),
+              startTime: Number(startTime),
+              endTime: Number(endTime),
+              transactionHash: log.transactionHash
+            });
+          } else if (parsedLog.name === 'SubscriptionCancelled') {
+            const [user] = parsedLog.args;
+            console.log('❌ Subscription cancelled:', {
+              user,
+              transactionHash: log.transactionHash
+            });
 
-      this.handleSubscriptionCancelled({
-        walletAddress: user,
-        transactionHash: event.transactionHash
-      });
-    });
+            this.handleSubscriptionCancelled({
+              walletAddress: user,
+              transactionHash: log.transactionHash
+            });
+          } else if (parsedLog.name === 'SubscriptionRenewed') {
+            const [user, newEndTime] = parsedLog.args;
+            console.log('🔄 Subscription renewed:', {
+              user,
+              newEndTime: new Date(Number(newEndTime) * 1000),
+              transactionHash: log.transactionHash
+            });
 
-    // Listen for subscription renewals
-    this.subscriptionContract.on('SubscriptionRenewed', (user, newEndTime, event) => {
-      console.log('🔄 Subscription renewed:', {
-        user,
-        newEndTime: new Date(Number(newEndTime) * 1000),
-        transactionHash: event.transactionHash
-      });
+            this.handleSubscriptionRenewed({
+              walletAddress: user,
+              newEndTime: Number(newEndTime),
+              transactionHash: log.transactionHash
+            });
+          } else if (parsedLog.name === 'SubscriptionChanged') {
+            const [user, newTier, newCycle] = parsedLog.args;
+            console.log('🔄 Subscription changed:', {
+              user,
+              newTier: SUBSCRIPTION_TIERS[newTier],
+              newCycle: BILLING_CYCLES[newCycle],
+              transactionHash: log.transactionHash
+            });
 
-      this.handleSubscriptionRenewed({
-        walletAddress: user,
-        newEndTime: Number(newEndTime),
-        transactionHash: event.transactionHash
+            this.handleSubscriptionChanged({
+              walletAddress: user,
+              newTier: Number(newTier),
+              newCycle: Number(newCycle),
+              transactionHash: log.transactionHash
+            });
+          }
+        } catch (parseError) {
+          console.warn('Failed to parse event log:', parseError.message);
+        }
       });
-    });
-
-    // Listen for subscription changes
-    this.subscriptionContract.on('SubscriptionChanged', (user, newTier, newCycle, event) => {
-      console.log('🔄 Subscription changed:', {
-        user,
-        newTier: SUBSCRIPTION_TIERS[newTier],
-        newCycle: BILLING_CYCLES[newCycle],
-        transactionHash: event.transactionHash
-      });
-
-      this.handleSubscriptionChanged({
-        walletAddress: user,
-        newTier: Number(newTier),
-        newCycle: Number(newCycle),
-        transactionHash: event.transactionHash
-      });
-    });
+      
+      console.log('✅ Event listeners configured with block-based polling (no filters)');
+    } catch (error) {
+      console.error('Failed to setup event listeners:', error.message);
+    }
   }
 
   /**
@@ -334,6 +358,100 @@ class SubscriptionService {
    */
   async getAllPlans() {
     try {
+      // If blockchain not available, return hardcoded plans
+      if (!this.subscriptionContract) {
+        return {
+          0: {
+            tier: 0,
+            name: 'Free',
+            monthlyPrice: '0',
+            yearlyPrice: '0',
+            features: {
+              apiCallsPerMonth: 1000,
+              maxProjects: 1,
+              maxAlerts: 3,
+              exportAccess: false,
+              comparisonTool: false,
+              walletIntelligence: false,
+              apiAccess: false,
+              prioritySupport: false,
+              customInsights: false
+            },
+            limits: {
+              historicalData: 30,
+              teamMembers: 1,
+              dataRefreshRate: 3600
+            }
+          },
+          1: {
+            tier: 1,
+            name: 'Starter',
+            monthlyPrice: '29',
+            yearlyPrice: '290',
+            features: {
+              apiCallsPerMonth: 10000,
+              maxProjects: 3,
+              maxAlerts: 10,
+              exportAccess: true,
+              comparisonTool: true,
+              walletIntelligence: false,
+              apiAccess: false,
+              prioritySupport: false,
+              customInsights: false
+            },
+            limits: {
+              historicalData: 90,
+              teamMembers: 2,
+              dataRefreshRate: 1800
+            }
+          },
+          2: {
+            tier: 2,
+            name: 'Pro',
+            monthlyPrice: '99',
+            yearlyPrice: '990',
+            features: {
+              apiCallsPerMonth: 50000,
+              maxProjects: 10,
+              maxAlerts: 50,
+              exportAccess: true,
+              comparisonTool: true,
+              walletIntelligence: true,
+              apiAccess: true,
+              prioritySupport: true,
+              customInsights: false
+            },
+            limits: {
+              historicalData: 365,
+              teamMembers: 5,
+              dataRefreshRate: 900
+            }
+          },
+          3: {
+            tier: 3,
+            name: 'Enterprise',
+            monthlyPrice: '299',
+            yearlyPrice: '2990',
+            features: {
+              apiCallsPerMonth: 250000,
+              maxProjects: 50,
+              maxAlerts: 200,
+              exportAccess: true,
+              comparisonTool: true,
+              walletIntelligence: true,
+              apiAccess: true,
+              prioritySupport: true,
+              customInsights: true
+            },
+            limits: {
+              historicalData: 730,
+              teamMembers: 20,
+              dataRefreshRate: 300
+            }
+          }
+        };
+      }
+
       const plans = {};
       
       for (let tier = 0; tier <= 3; tier++) {
@@ -356,6 +474,16 @@ class SubscriptionService {
    */
   async getSubscriptionStats() {
     try {
+      // If blockchain not available, return mock stats
+      if (!this.subscriptionContract) {
+        return {
+          totalSubscribers: 0,
+          totalRevenue: '0',
+          timestamp: new Date().toISOString(),
+          note: 'Blockchain integration not configured'
+        };
+      }
+
       const totalSubscribers = await this.subscriptionContract.totalSubscribers();
       const totalRevenue = await this.subscriptionContract.totalRevenue();
       
@@ -366,7 +494,13 @@ class SubscriptionService {
       };
     } catch (error) {
       console.error('Error getting subscription stats:', error);
-      throw error;
+      // Return graceful fallback instead of throwing
+      return {
+        totalSubscribers: 0,
+        totalRevenue: '0',
+        timestamp: new Date().toISOString(),
+        error: error.message
+      };
     }
   }
 

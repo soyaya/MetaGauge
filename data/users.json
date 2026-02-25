@@ -141,7 +141,7 @@
       "defaultChain": "ethereum"
     },
     "createdAt": "2026-02-24T14:00:33.256Z",
-    "updatedAt": "2026-02-24T18:03:03.585Z",
+    "updatedAt": "2026-02-25T12:56:19.492Z",
     "walletAddress": "0x0200e2958c35D1daD0A35E261a4Bff1BC6c90ea5",
     "subscription": {
       "tier": 2,
@@ -164,7 +164,7 @@
         "teamMembers": 10,
         "dataRefreshRate": 21600
       },
-      "lastSynced": "2026-02-24T16:41:16.282Z"
+      "lastSynced": "2026-02-25T12:56:15.924Z"
     }
   }
 ]

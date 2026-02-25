@@ -12,14 +12,21 @@ export class RobustProvider {
     this.provider = provider;
     this.filterManager = new FilterManager(provider, options);
     this.config = {
-      usePolling: options.usePolling || false,
+      usePolling: options.usePolling !== false, // Default to true
       pollingInterval: options.pollingInterval || 4000,
       maxBlockRange: options.maxBlockRange || 2000,
+      disableFilters: options.disableFilters !== false, // Default to true (disable filters)
       ...options
     };
     
     this.eventListeners = new Map();
     this.isDestroyed = false;
+    
+    // Disable filter-based polling in the underlying provider if it's an ethers provider
+    if (this.provider._pollingInterval !== undefined && this.config.disableFilters) {
+      // Disable ethers.js internal filter polling
+      this.provider.polling = false;
+    }
     
     // Wrap provider methods
     this._wrapProviderMethods();
@@ -264,22 +271,41 @@ export class RobustProvider {
   }
 
   send(method, params) {
-    // Intercept filter-related methods
+    // Intercept and suppress ALL filter-related methods to prevent errors
     if (method === 'eth_getFilterChanges') {
-      console.warn('eth_getFilterChanges intercepted - using robust alternative');
+      console.debug('eth_getFilterChanges intercepted - returning empty array (filters disabled)');
       return Promise.resolve([]);
     }
     
     if (method === 'eth_newFilter' || method === 'eth_newBlockFilter' || method === 'eth_newPendingTransactionFilter') {
-      console.warn(`${method} intercepted - using robust alternative`);
+      console.debug(`${method} intercepted - returning dummy filter ID (filters disabled)`);
       return Promise.resolve('0x0'); // Return dummy filter ID
+    }
+    
+    if (method === 'eth_uninstallFilter') {
+      console.debug('eth_uninstallFilter intercepted - returning true (filters disabled)');
+      return Promise.resolve(true);
     }
     
     if (method === 'eth_getLogs') {
       return this.getLogs(params[0]);
     }
     
-    return this.provider.send(method, params);
+    // Wrap all other calls to catch and suppress filter errors
+    return this.provider.send(method, params).catch(error => {
+      // Suppress filter-related errors
+      if (error.message && error.message.includes('filter not found')) {
+        console.warn(`Filter error suppressed in ${method}: ${error.message}`);
+        
+        // Return appropriate default values
+        if (method.includes('Filter')) {
+          return method === 'eth_getFilterChanges' ? [] : true;
+        }
+      }
+      
+      // Re-throw non-filter errors
+      throw error;
+    });
   }
 
   /**
@@ -321,10 +347,43 @@ export function createRobustProvider(providerOrUrl, options = {}) {
   let provider;
   
   if (typeof providerOrUrl === 'string') {
-    provider = new ethers.JsonRpcProvider(providerOrUrl);
+    // Create provider with polling disabled to prevent filter usage
+    provider = new ethers.JsonRpcProvider(providerOrUrl, undefined, {
+      polling: false, // Disable automatic polling
+      staticNetwork: true // Use static network to avoid unnecessary calls
+    });
   } else {
     provider = providerOrUrl;
+    
+    // Disable polling on existing provider if possible
+    if (provider.polling !== undefined) {
+      provider.polling = false;
+    }
   }
   
-  return new RobustProvider(provider, options);
+  // Wrap the provider's send method to catch any filter errors that slip through
+  const originalSend = provider.send.bind(provider);
+  provider.send = async (method, params) => {
+    try {
+      return await originalSend(method, params);
+    } catch (error) {
+      // Catch and suppress filter errors at the lowest level
+      if (error.message && error.message.includes('filter not found')) {
+        console.warn(`Filter error caught and suppressed in provider.send(${method}): ${error.message}`);
+        
+        // Return safe defaults
+        if (method === 'eth_getFilterChanges') return [];
+        if (method === 'eth_uninstallFilter') return true;
+        if (method.includes('newFilter')) return '0x0';
+      }
+      
+      throw error;
+    }
+  };
+  
+  return new RobustProvider(provider, {
+    disableFilters: true, // Always disable filters by default
+    usePolling: true, // Use block-based polling instead
+    ...options
+  });
 }

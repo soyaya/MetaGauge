@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import { RpcCache } from './RpcCache.js';
 import { RpcRequestQueue } from './RpcRequestQueue.js';
 import { RpcErrorTracker } from './RpcErrorTracker.js';
+import { RpcRetryHelper } from './RpcRetryHelper.js';
 
 export class StarknetRpcClient {
   constructor(rpcUrls, config = {}) {
@@ -48,7 +49,15 @@ export class StarknetRpcClient {
         id: this.requestId++
       };
 
+      let delay = 500; // Initial delay in ms
+
       for (let attempt = 0; attempt <= this.config.retries; attempt++) {
+        // Add exponential backoff delay before retry (skip first attempt)
+        if (attempt > 0) {
+          await RpcRetryHelper.sleep(delay);
+          delay = Math.min(delay * 2, 5000); // Max 5 seconds
+        }
+
         for (let rpcIndex = 0; rpcIndex < this.rpcUrls.length; rpcIndex++) {
           const rpcUrl = this.rpcUrls[(this.currentRpcIndex + rpcIndex) % this.rpcUrls.length];
           
@@ -79,6 +88,11 @@ export class StarknetRpcClient {
             this.cache.set(method, params, data.result);
             return data.result;
           } catch (error) {
+            // Log network errors as info instead of error
+            if (RpcRetryHelper.isRetryableError(error)) {
+              console.info(`ℹ️ RPC connection issue (attempt ${attempt + 1}/${this.config.retries + 1}): ${error.message}`);
+            }
+            
             this.errorTracker.track(error, { rpcUrl, method, params, attempt });
             
             if (rpcIndex === this.rpcUrls.length - 1 && attempt === this.config.retries) {

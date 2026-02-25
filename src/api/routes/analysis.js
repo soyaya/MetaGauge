@@ -5,7 +5,7 @@
 
 import express from 'express';
 import { ContractStorage, AnalysisStorage, UserStorage } from '../database/index.js';
-import { AnalyticsEngine } from '../../index.js';
+import { EnhancedAnalyticsEngine as AnalyticsEngine } from '../../services/EnhancedAnalyticsEngine.js';
 import { requireTier } from '../middleware/auth.js';
 import GeminiAIService from '../../services/GeminiAIService.js';
 
@@ -44,13 +44,16 @@ const router = express.Router();
  */
 router.post('/start', async (req, res) => {
   try {
-    const { configId, analysisType = 'single' } = req.body;
+    const { configId, configurationId, contractId, analysisType = 'single' } = req.body;
     const userId = req.user.id;
 
-    if (!configId) {
+    // Support multiple parameter names
+    const actualConfigId = configId || configurationId || contractId;
+
+    if (!actualConfigId) {
       return res.status(400).json({
         error: 'Missing configuration ID',
-        message: 'Configuration ID is required'
+        message: 'Configuration ID is required (use configId, configurationId, or contractId)'
       });
     }
 
@@ -90,7 +93,7 @@ router.post('/start', async (req, res) => {
     }
 
     // Get configuration
-    const config = await ContractStorage.findById(configId);
+    const config = await ContractStorage.findById(actualConfigId);
     if (!config || config.userId !== userId || !config.isActive) {
       return res.status(404).json({
         error: 'Configuration not found',
@@ -872,8 +875,20 @@ router.post('/:id/cancel', async (req, res) => {
  */
 async function performAnalysis(analysisId, config, user, analysisType) {
   const startTime = Date.now();
+  
+  // Log to file
+  const fs = await import('fs');
+  const logFile = 'analysis-debug.log';
+  const log = (msg) => {
+    const logMsg = `[${new Date().toISOString()}] ${msg}\n`;
+    fs.appendFileSync(logFile, logMsg);
+    console.log(msg);
+  };
+
+  log(`🔬 performAnalysis called: ${analysisId}, type: ${analysisType}`);
 
   try {
+    log('Step 1: Updating status to running');
     // Update status to running
     await AnalysisStorage.update(analysisId, {
       status: 'running',
@@ -884,13 +899,15 @@ async function performAnalysis(analysisId, config, user, analysisType) {
       }]
     });
 
+    log('Step 2: Initializing analytics engine');
     // Initialize analytics engine with config
     const engine = new AnalyticsEngine({
       maxRequestsPerSecond: config.analysisParams?.maxConcurrentRequests || 5,
-      failoverTimeout: config.analysisParams?.failoverTimeout || 30000,
+      failoverTimeout: config.analysisParams?.failoverTimeout || 5 * 60 * 1000,
       maxRetries: config.analysisParams?.maxRetries || 2
     });
 
+    log('Step 3: Updating progress to 10%');
     // Update progress
     await AnalysisStorage.update(analysisId, {
       progress: 10,
@@ -901,9 +918,11 @@ async function performAnalysis(analysisId, config, user, analysisType) {
       }]
     });
 
+    log('Step 4: Starting analysis');
     let results = {};
 
     if (analysisType === 'single') {
+      log('Step 5: Single analysis mode');
       // Analyze target contract only
       await AnalysisStorage.update(analysisId, {
         progress: 30,
@@ -914,6 +933,7 @@ async function performAnalysis(analysisId, config, user, analysisType) {
         }]
       });
       
+      log(`Step 6: Calling analyzeContract for ${config.targetContract.address} on ${config.targetContract.chain}`);
       const targetResult = await engine.analyzeContract(
         config.targetContract.address,
         config.targetContract.chain,
@@ -921,6 +941,7 @@ async function performAnalysis(analysisId, config, user, analysisType) {
         null // Smart search enabled
       );
 
+      log(`Step 7: Analysis complete, transactions: ${targetResult.transactions}`);
       // Use the comprehensive fullReport structure
       results.target = {
         contract: config.targetContract,

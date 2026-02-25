@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { ChatSessionStorage, ChatMessageStorage } from '../database/index.js';
+import { ChatSessionStorage, ChatMessageStorage, ContractStorage } from '../database/index.js';
 import ChatAIService from '../../services/ChatAIService.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -87,28 +87,42 @@ router.get('/sessions', async (req, res) => {
  */
 router.post('/sessions', async (req, res) => {
   try {
-    const { contractAddress, contractChain, contractName } = req.body;
+    const { contractAddress, contractChain, contractName, contractId } = req.body;
     const userId = req.user.id;
 
-    if (!contractAddress || !contractChain) {
+    let address = contractAddress;
+    let chain = contractChain;
+    let name = contractName;
+
+    // If contractId provided, look up the contract
+    if (contractId && !address) {
+      const contract = await ContractStorage.findById(contractId);
+      if (contract) {
+        address = contract.targetContract.address;
+        chain = contract.targetContract.chain;
+        name = contract.targetContract.name || contract.name;
+      }
+    }
+
+    if (!address || !chain) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'contractAddress and contractChain are required'
+        message: 'Either contractId OR (contractAddress + contractChain) are required'
       });
     }
 
     // Check if session already exists for this contract
-    let session = await ChatSessionStorage.findByContract(userId, contractAddress, contractChain);
+    let session = await ChatSessionStorage.findByContract(userId, address, chain);
 
     if (!session) {
       // Create new session
-      console.log('Creating new session for:', { userId, contractAddress, contractChain });
+      console.log('Creating new session for:', { userId, address, chain });
       session = await ChatSessionStorage.create({
         userId,
-        contractAddress: contractAddress.toLowerCase(),
-        contractChain,
-        contractName: contractName || 'Unknown Contract',
-        title: `Chat: ${contractName || contractAddress.slice(0, 8)}...`
+        contractAddress: address.toLowerCase(),
+        contractChain: chain,
+        contractName: name || 'Unknown Contract',
+        title: `Chat: ${name || address.slice(0, 8)}...`
       });
       console.log('Session created:', session);
 
@@ -118,7 +132,7 @@ router.post('/sessions', async (req, res) => {
         await ChatMessageStorage.create({
           sessionId: session.id,
           role: 'assistant',
-          content: `Hello! I'm your AI assistant for analyzing the contract ${contractAddress} on ${contractChain}. What would you like to know?`,
+          content: `Hello! I'm your AI assistant for analyzing the contract ${address} on ${chain}. What would you like to know?`,
           components: []
         });
         console.log('Welcome message created');
@@ -141,6 +155,8 @@ router.post('/sessions', async (req, res) => {
     }
 
     res.json({
+      sessionId: session.id,
+      id: session.id,
       session: session,
       contractContext,
       suggestedQuestions,
@@ -312,13 +328,16 @@ router.get('/sessions/:sessionId/messages', async (req, res) => {
 router.post('/sessions/:sessionId/messages', async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { content } = req.body;
+    const { content, message } = req.body;
     const userId = req.user.id;
 
-    if (!content || content.trim().length === 0) {
+    // Support both 'content' and 'message' parameter names
+    const messageContent = content || message;
+
+    if (!messageContent || typeof messageContent !== 'string' || messageContent.trim().length === 0) {
       return res.status(400).json({
         error: 'Message content required',
-        message: 'Message content cannot be empty'
+        message: 'Message content cannot be empty (use content or message field)'
       });
     }
 
@@ -335,7 +354,7 @@ router.post('/sessions/:sessionId/messages', async (req, res) => {
     const userMessage = await ChatMessageStorage.create({
       sessionId,
       role: 'user',
-      content: content.trim(),
+      content: messageContent.trim(),
       components: []
     });
 

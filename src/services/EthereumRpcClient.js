@@ -8,6 +8,7 @@ import { createRobustProvider } from './RobustProvider.js';
 import { RpcCache } from './RpcCache.js';
 import { RpcRequestQueue } from './RpcRequestQueue.js';
 import { RpcErrorTracker } from './RpcErrorTracker.js';
+import { RpcRetryHelper } from './RpcRetryHelper.js';
 
 export class EthereumRpcClient {
   constructor(rpcUrls, options = {}) {
@@ -26,10 +27,12 @@ export class EthereumRpcClient {
     this.blockTimestampCache = new Map();
     
     // Create robust provider to handle filter errors (use first URL)
+    // IMPORTANT: Disable filter-based polling to prevent "filter not found" errors
     this.robustProvider = createRobustProvider(this.rpcUrls[0], {
       maxBlockRange: options.maxBlockRange || 2000,
       pollingInterval: options.pollingInterval || 4000,
-      usePolling: true
+      usePolling: true,
+      disableFilters: true // Explicitly disable filter-based polling
     });
   }
 
@@ -65,7 +68,15 @@ export class EthereumRpcClient {
         id: this.requestId++
       };
 
+      let delay = 500; // Initial delay in ms
+
       for (let attempt = 0; attempt <= this.config.retries; attempt++) {
+        // Add exponential backoff delay before retry (skip first attempt)
+        if (attempt > 0) {
+          await RpcRetryHelper.sleep(delay);
+          delay = Math.min(delay * 2, 5000); // Max 5 seconds
+        }
+
         for (let rpcIndex = 0; rpcIndex < this.rpcUrls.length; rpcIndex++) {
           const rpcUrl = this.rpcUrls[(this.currentRpcIndex + rpcIndex) % this.rpcUrls.length];
           
@@ -89,15 +100,19 @@ export class EthereumRpcClient {
             const data = await response.json();
             
             if (data.error) {
-              // Handle specific filter errors
-              if (data.error.code === -32602 && data.error.message.includes('filter not found')) {
-                if (method === 'eth_getFilterChanges') {
+              // Handle specific filter errors - suppress and return empty results
+              if (data.error.message && data.error.message.includes('filter not found')) {
+                console.warn(`Filter error suppressed for ${method}: ${data.error.message}`);
+                if (method === 'eth_getFilterChanges' || method === 'eth_uninstallFilter') {
                   return [];
+                }
+                if (method === 'eth_newFilter' || method === 'eth_newBlockFilter' || method === 'eth_newPendingTransactionFilter') {
+                  return '0x0'; // Return dummy filter ID
+                }
               }
+              
+              throw new Error(`RPC Error: ${data.error.message || data.error}`);
             }
-            
-            throw new Error(`RPC Error: ${data.error.message || data.error}`);
-          }
 
           // Cache successful response
           if (!method.includes('Filter')) {
@@ -106,6 +121,12 @@ export class EthereumRpcClient {
           return data.result;
         } catch (error) {
           clearTimeout(timeoutId);
+          
+          // Log network errors as info instead of error
+          if (RpcRetryHelper.isRetryableError(error)) {
+            console.info(`ℹ️ RPC connection issue (attempt ${attempt + 1}/${this.config.retries + 1}): ${error.message}`);
+          }
+          
           this.errorTracker.track(error, { rpcUrl, method, params, attempt });
           
           if (rpcIndex === this.rpcUrls.length - 1 && attempt === this.config.retries) {
@@ -167,15 +188,28 @@ export class EthereumRpcClient {
     console.log(`   📦 Ethereum analysis: ${totalBlocks} blocks for contract ${contractAddress}`);
     
     try {
-      // Step 1: Fetch contract events (most efficient for Ethereum)
+      // Step 1: Fetch contract events in chunks (prevents timeout on high-activity contracts)
       console.log(`   📋 Fetching contract events from blocks ${fromBlock}-${toBlock}...`);
-      const allLogs = await this._makeRpcCall('eth_getLogs', [{
-        fromBlock: '0x' + fromBlock.toString(16),
-        toBlock: '0x' + toBlock.toString(16),
-        address: contractAddress
-      }]);
       
-      console.log(`   📋 Found ${allLogs.length} contract events`);
+      const CHUNK_SIZE = 2000; // Fetch 2000 blocks at a time
+      const allLogs = [];
+      
+      for (let start = fromBlock; start <= toBlock; start += CHUNK_SIZE) {
+        const end = Math.min(start + CHUNK_SIZE - 1, toBlock);
+        
+        const chunkLogs = await this._makeRpcCall('eth_getLogs', [{
+          fromBlock: '0x' + start.toString(16),
+          toBlock: '0x' + end.toString(16),
+          address: contractAddress
+        }]);
+        
+        allLogs.push(...chunkLogs);
+        
+        const progress = ((start - fromBlock) / totalBlocks * 100).toFixed(1);
+        console.log(`   📦 Chunk ${start}-${end}: ${chunkLogs.length} events (${progress}% complete, total: ${allLogs.length})`);
+      }
+      
+      console.log(`   📋 Found ${allLogs.length} contract events total`);
       
       // Process events
       for (const log of allLogs) {

@@ -9506,5 +9506,174 @@
     "updatedAt": "2026-02-24T18:03:03.563Z",
     "currentStep": "Fetching contract transactions...",
     "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "adbd6002-360f-4e32-b9c5-ed99217ed580",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T11:47:05.311Z"
+    },
+    "createdAt": "2026-02-25T11:47:05.318Z",
+    "updatedAt": "2026-02-25T11:49:25.851Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "b5962184-5df2-4cf4-af17-eea937c97ecd",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T11:50:09.491Z"
+    },
+    "createdAt": "2026-02-25T11:50:09.496Z",
+    "updatedAt": "2026-02-25T11:50:16.699Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "5e835a2d-a34a-494d-b854-2d2b3904d7eb",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T11:53:02.897Z"
+    },
+    "createdAt": "2026-02-25T11:53:02.903Z",
+    "updatedAt": "2026-02-25T11:55:21.554Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "e1a000e5-2d88-438f-85e9-942e65af9172",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 0,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T12:04:22.694Z"
+    },
+    "createdAt": "2026-02-25T12:04:22.703Z",
+    "updatedAt": "2026-02-25T12:06:42.637Z",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "f2e54e7b-39ff-42df-a0b1-7a23c001c5fa",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T12:04:26.639Z"
+    },
+    "createdAt": "2026-02-25T12:04:27.789Z",
+    "updatedAt": "2026-02-25T12:16:09.274Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "30c43590-8fd8-47ca-a124-f73a7968f56c",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T12:19:20.161Z"
+    },
+    "createdAt": "2026-02-25T12:19:20.170Z",
+    "updatedAt": "2026-02-25T12:21:32.659Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "904c6a7d-426f-40e1-b6e4-7263dcaa82ea",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T12:22:28.723Z"
+    },
+    "createdAt": "2026-02-25T12:22:28.733Z",
+    "updatedAt": "2026-02-25T12:24:41.467Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "d064c485-835c-4b91-bd5a-1d68299de27e",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T12:32:08.637Z"
+    },
+    "createdAt": "2026-02-25T12:32:08.654Z",
+    "updatedAt": "2026-02-25T12:32:15.813Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "138561cc-e2f0-411f-a4e6-09f5b6b4c9a8",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T12:48:59.384Z"
+    },
+    "createdAt": "2026-02-25T12:48:59.400Z",
+    "updatedAt": "2026-02-25T12:51:15.921Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
+  },
+  {
+    "id": "5e2a0b58-b14f-4ef8-99b9-5a53b5958042",
+    "userId": "09276bb3-a7dc-40af-8f25-034bbc94698d",
+    "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "chain": "ethereum",
+    "analysisType": "quick-index",
+    "status": "failed",
+    "progress": 20,
+    "metadata": {
+      "isDefaultContract": true,
+      "startedAt": "2026-02-25T12:54:06.438Z"
+    },
+    "createdAt": "2026-02-25T12:54:06.443Z",
+    "updatedAt": "2026-02-25T12:56:19.478Z",
+    "currentStep": "Fetching contract transactions...",
+    "errorMessage": "Blockchain connection temporarily unavailable. Please try again later."
   }
 ]

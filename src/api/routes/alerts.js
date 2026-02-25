@@ -6,11 +6,10 @@ import express from 'express';
 import { UserStorage } from '../database/index.js';
 import AlertConfigurationStorage from '../database/AlertConfigurationStorage.js';
 import AlertNotificationService from '../../services/AlertNotificationService.js';
-import SubscriptionService from '../../services/SubscriptionService.js';
+import subscriptionService from '../../services/SubscriptionService.js';
 
 const router = express.Router();
 const alertService = new AlertNotificationService();
-const subscriptionService = new SubscriptionService();
 
 /**
  * @swagger

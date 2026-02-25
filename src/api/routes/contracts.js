@@ -8,7 +8,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import path from 'path';
-import { ContractStorage } from '../database/index.js';
+import { ContractStorage, UserStorage } from '../database/index.js';
 import { requireTier } from '../middleware/auth.js';
 
 dotenv.config();
@@ -351,7 +351,8 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({
       message: 'Contract configuration created successfully',
-      config
+      id: config.id,
+      ...config
     });
 
   } catch (error) {
@@ -431,13 +432,9 @@ router.get('/:id', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
   try {
-    const config = await ContractConfig.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      isActive: true
-    });
+    const config = await ContractStorage.findById(req.params.id);
 
-    if (!config) {
+    if (!config || config.userId !== req.user.id || config.isActive === false) {
       return res.status(404).json({
         error: 'Configuration not found',
         message: 'Contract configuration not found or access denied'
@@ -450,17 +447,18 @@ router.put('/:id', async (req, res) => {
       'rpcConfig', 'analysisParams', 'tags'
     ];
 
+    const updates = {};
     allowedUpdates.forEach(field => {
       if (req.body[field] !== undefined) {
-        config[field] = req.body[field];
+        updates[field] = req.body[field];
       }
     });
 
-    await config.save();
+    const updatedConfig = await ContractStorage.update(req.params.id, updates);
 
     res.json({
       message: 'Configuration updated successfully',
-      config
+      config: updatedConfig
     });
 
   } catch (error) {
@@ -493,13 +491,9 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
-    const config = await ContractConfig.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      isActive: true
-    });
+    const config = await ContractStorage.findById(req.params.id);
 
-    if (!config) {
+    if (!config || config.userId !== req.user.id || config.isActive === false) {
       return res.status(404).json({
         error: 'Configuration not found',
         message: 'Contract configuration not found or access denied'
@@ -507,8 +501,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     // Soft delete
-    config.isActive = false;
-    await config.save();
+    await ContractStorage.delete(req.params.id);
 
     res.json({
       message: 'Configuration deleted successfully'
@@ -551,13 +544,9 @@ router.delete('/:id', async (req, res) => {
  */
 router.post('/:id/duplicate', async (req, res) => {
   try {
-    const originalConfig = await ContractConfig.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      isActive: true
-    });
+    const originalConfig = await ContractStorage.findById(req.params.id);
 
-    if (!originalConfig) {
+    if (!originalConfig || originalConfig.userId !== req.user.id || originalConfig.isActive === false) {
       return res.status(404).json({
         error: 'Configuration not found',
         message: 'Contract configuration not found or access denied'
@@ -573,11 +562,8 @@ router.post('/:id/duplicate', async (req, res) => {
     }
 
     // Check if name already exists
-    const existingConfig = await ContractConfig.findOne({
-      userId: req.user._id,
-      name: name,
-      isActive: true
-    });
+    const userConfigs = await ContractStorage.findByUserId(req.user.id);
+    const existingConfig = userConfigs.find(c => c.name === name && c.isActive !== false);
 
     if (existingConfig) {
       return res.status(400).json({
@@ -587,18 +573,16 @@ router.post('/:id/duplicate', async (req, res) => {
     }
 
     // Create duplicate
-    const duplicateConfig = new ContractConfig({
-      userId: req.user._id,
+    const duplicateConfig = await ContractStorage.create({
+      userId: req.user.id,
       name,
       description: `Copy of ${originalConfig.description || originalConfig.name}`,
       targetContract: originalConfig.targetContract,
       competitors: originalConfig.competitors,
       rpcConfig: originalConfig.rpcConfig,
       analysisParams: originalConfig.analysisParams,
-      tags: [...originalConfig.tags, 'duplicate']
+      tags: [...(originalConfig.tags || []), 'duplicate']
     });
-
-    await duplicateConfig.save();
 
     res.status(201).json({
       message: 'Configuration duplicated successfully',

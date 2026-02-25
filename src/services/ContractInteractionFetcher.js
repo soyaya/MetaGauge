@@ -16,9 +16,9 @@ export class ContractInteractionFetcher extends EventEmitter {
     this.config = {
       maxRequestsPerSecond: config.maxRequestsPerSecond || 10,
       requestWindow: config.requestWindow || 1000,
-      failoverTimeout: config.failoverTimeout || 30000,
+      failoverTimeout: config.failoverTimeout || 5 * 60 * 1000, // 5 minutes for busy contracts
       maxRetries: config.maxRetries || 3,
-      batchSize: config.batchSize || 50,
+      batchSize: config.batchSize || 10, // Reduced for rate limiting
       maxEventsPerQuery: config.maxEventsPerQuery || 10000,
       ...config
     };
@@ -27,14 +27,19 @@ export class ContractInteractionFetcher extends EventEmitter {
     this.providerConfigs = {
       ethereum: [
         {
-          name: 'publicnode',
-          url: 'https://ethereum-rpc.publicnode.com',
+          name: 'env-primary',
+          url: process.env.ETHEREUM_RPC_URL || 'https://ethereum-rpc.publicnode.com',
           priority: 1
         },
         {
-          name: 'nownodes',
-          url: process.env.ETHEREUM_RPC_URL || 'https://eth.nownodes.io/2ca1a1a6-9040-4ca9-8727-33a186414a1f',
+          name: 'env-fallback',
+          url: process.env.ETHEREUM_RPC_URL_FALLBACK || 'https://eth.llamarpc.com',
           priority: 2
+        },
+        {
+          name: 'ankr',
+          url: 'https://rpc.ankr.com/eth',
+          priority: 3
         }
       ],
       starknet: [
@@ -141,7 +146,7 @@ export class ContractInteractionFetcher extends EventEmitter {
         
         console.log(`✅ Initialized ${config.name} provider for ${chain} (interaction mode)`);
       } catch (error) {
-        console.error(`❌ Failed to initialize ${config.name} provider for ${chain}:`, error.message);
+        console.info(`ℹ️ Could not initialize ${config.name} provider for ${chain}: ${error.message}`);
       }
     }
     
@@ -247,7 +252,7 @@ export class ContractInteractionFetcher extends EventEmitter {
     console.log(`🎯 Fetching contract interactions for ${contractAddress} on ${chain}`);
     console.log(`   📊 Block range: ${fromBlock} to ${toBlock} (${toBlock - fromBlock + 1} blocks)`);
     
-    const FETCH_TIMEOUT = 2 * 60 * 1000; // 2 minutes timeout
+    const FETCH_TIMEOUT = 5 * 60 * 1000; // 5 minutes timeout for busy contracts
     
     return await this._executeWithRateLimit(async () => {
       return await this._withTimeout(

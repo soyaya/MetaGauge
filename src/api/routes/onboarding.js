@@ -172,19 +172,30 @@ router.post('/complete', async (req, res) => {
       abi,
       purpose,
       category,
-      startDate
+      startDate,
+      defaultContract // Support nested format too
     } = req.body;
 
+    // Support both flat and nested formats
+    const address = contractAddress || defaultContract?.address;
+    const contractChain = chain || defaultContract?.chain;
+    const name = contractName || defaultContract?.name;
+    const contractPurpose = purpose || defaultContract?.purpose || 'General';
+    const contractCategory = category || defaultContract?.category || 'other';
+    const contractStartDate = startDate || defaultContract?.startDate || new Date().toISOString();
+    const contractAbi = abi || defaultContract?.abi;
+
     // Validation
-    if (!contractAddress || !chain || !contractName || !purpose || !category || !startDate) {
+    if (!address || !contractChain || !name) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'Contract address, chain, name, purpose, category, and start date are required'
+        message: 'Contract address, chain, and name are required',
+        requiredFields: ['contractAddress or defaultContract.address', 'chain or defaultContract.chain', 'contractName or defaultContract.name']
       });
     }
 
     const validCategories = ['defi', 'nft', 'gaming', 'dao', 'infrastructure', 'other'];
-    if (!validCategories.includes(category)) {
+    if (!validCategories.includes(contractCategory)) {
       return res.status(400).json({
         error: 'Invalid category',
         message: `Category must be one of: ${validCategories.join(', ')}`
@@ -202,13 +213,13 @@ router.post('/complete', async (req, res) => {
       },
       logo: logo || null,
       defaultContract: {
-        address: contractAddress,
-        chain,
-        abi: abi || null,
-        name: contractName,
-        purpose,
-        category,
-        startDate: startDate || new Date().toISOString(),
+        address,
+        chain: contractChain,
+        abi: contractAbi || null,
+        name,
+        purpose: contractPurpose,
+        category: contractCategory,
+        startDate: contractStartDate,
         isIndexed: false,
         indexingProgress: 0,
         lastAnalysisId: null

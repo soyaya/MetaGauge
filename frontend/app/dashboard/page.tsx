@@ -20,6 +20,9 @@ import { MetricsTab } from "@/components/analyzer/metrics-tab"
 import { UsersTab } from "@/components/analyzer/users-tab"
 import { TransactionsTab } from "@/components/analyzer/transactions-tab"
 import { UxTab } from "@/components/analyzer/ux-tab"
+import { EnhancedAIInsights } from "@/components/analyzer/enhanced-ai-insights"
+import { CompetitiveTab } from "@/components/analyzer/competitive-tab"
+import { FunctionsTab } from "@/components/analyzer/functions-tab"
 
 // Import subscription components
 import { SubscriptionStatus } from "@/components/subscription/subscription-status"
@@ -401,12 +404,15 @@ export default function DashboardPage() {
             {/* Detailed Metrics Tabs - Always Show */}
             <div className="mb-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-8 gap-1">
                   <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
                   <TabsTrigger value="metrics" className="text-xs sm:text-sm">Metrics</TabsTrigger>
                   <TabsTrigger value="users" className="text-xs sm:text-sm">Users</TabsTrigger>
                   <TabsTrigger value="transactions" className="text-xs sm:text-sm">Transactions</TabsTrigger>
-                  <TabsTrigger value="ux" className="text-xs sm:text-sm col-span-2 sm:col-span-1">UX Analysis</TabsTrigger>
+                  <TabsTrigger value="functions" className="text-xs sm:text-sm">Functions</TabsTrigger>
+                  <TabsTrigger value="ux" className="text-xs sm:text-sm">UX Analysis</TabsTrigger>
+                  <TabsTrigger value="ai-insights" className="text-xs sm:text-sm">AI Insights</TabsTrigger>
+                  <TabsTrigger value="competitive" className="text-xs sm:text-sm">Competitive</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview">
@@ -450,8 +456,36 @@ export default function DashboardPage() {
                   />
                 </TabsContent>
 
+                <TabsContent value="functions">
+                  <FunctionsTab 
+                    contractAddress={defaultContract.contract.address}
+                    chain={defaultContract.contract.chain}
+                  />
+                </TabsContent>
+
                 <TabsContent value="ux">
                   <UxTab 
+                    analysisResults={{
+                      results: {
+                        target: defaultContract.fullResults
+                      }
+                    }}
+                  />
+                </TabsContent>
+
+                <TabsContent value="ai-insights">
+                  <EnhancedAIInsights 
+                    analysisId={defaultContract.analysisHistory.latest?.id || ''}
+                    analysisResults={{
+                      results: {
+                        target: defaultContract.fullResults
+                      }
+                    }}
+                  />
+                </TabsContent>
+
+                <TabsContent value="competitive">
+                  <CompetitiveTab 
                     analysisResults={{
                       results: {
                         target: defaultContract.fullResults

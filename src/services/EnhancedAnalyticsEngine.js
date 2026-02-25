@@ -377,6 +377,15 @@ export class EnhancedAnalyticsEngine {
       console.error(`   ❌ Enhanced analysis error: ${error.message}`);
       console.error(`   Stack: ${error.stack}`);
       
+      // Log to file for debugging
+      try {
+        const fs = await import('fs');
+        const logMsg = `[${new Date().toISOString()}] Analysis error for ${contractAddress} on ${chain}: ${error.message}\n${error.stack}\n\n`;
+        fs.appendFileSync('analysis-errors.log', logMsg);
+      } catch (logError) {
+        // Ignore logging errors
+      }
+      
       // Import MetricsNormalizer for error case
       const { MetricsNormalizer } = await import('./MetricsNormalizer.js');
       

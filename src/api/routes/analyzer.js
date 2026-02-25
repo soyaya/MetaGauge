@@ -6,7 +6,7 @@
 import express from 'express';
 import { OptimizedQuickScan } from '../../services/OptimizedQuickScan.js';
 import { AnalysisStorage } from '../database/index.js';
-import SubscriptionService from '../../services/SubscriptionService.js';
+import subscriptionService from '../../services/SubscriptionService.js';
 import { MetricsNormalizer } from '../../services/MetricsNormalizer.js';
 
 const router = express.Router();
@@ -27,7 +27,6 @@ router.post('/analyze', async (req, res) => {
     }
 
     // Get user's subscription tier for block range limits
-    const subscriptionService = new SubscriptionService();
     let subscriptionTier = 'Free';
     let historicalDays = 7; // Default for free tier
 

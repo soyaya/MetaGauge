@@ -4,6 +4,7 @@
  */
 
 import { ethers } from 'ethers';
+import { createRobustProvider } from './RobustProvider.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -44,8 +45,14 @@ class FaucetService {
     }
 
     try {
-      this.provider = new ethers.JsonRpcProvider(LISK_SEPOLIA_RPC);
-      this.wallet = new ethers.Wallet(FAUCET_PRIVATE_KEY, this.provider);
+      // Use RobustProvider to prevent filter errors
+      const baseProvider = new ethers.JsonRpcProvider(LISK_SEPOLIA_RPC);
+      this.provider = createRobustProvider(baseProvider, {
+        disableFilters: true,
+        usePolling: true
+      });
+      
+      this.wallet = new ethers.Wallet(FAUCET_PRIVATE_KEY, this.provider.provider);
       this.tokenContract = new ethers.Contract(
         CONTRACTS.MGT_TOKEN,
         TOKEN_ABI,

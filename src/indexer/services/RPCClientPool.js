@@ -5,6 +5,7 @@
 
 import { getChainConfig } from '../config/chains.js';
 import { INDEXER_CONFIG } from '../config/indexer.js';
+import { RpcRetryHelper } from '../../services/RpcRetryHelper.js';
 
 export class RPCClientPool {
   constructor() {
@@ -78,10 +79,17 @@ export class RPCClientPool {
     if (health) {
       health.failures++;
       
+      // Log network errors as info instead of error
+      if (RpcRetryHelper.isRetryableError(error)) {
+        console.info(`ℹ️ Endpoint connection issue: ${endpoint} (${health.failures} failures)`);
+      } else {
+        console.warn(`⚠️ Endpoint error: ${endpoint} - ${error.message}`);
+      }
+      
       // Mark unhealthy after threshold
       if (health.failures >= INDEXER_CONFIG.circuitBreakerThreshold) {
         health.healthy = false;
-        console.warn(`Endpoint marked unhealthy: ${endpoint} (${health.failures} failures)`);
+        console.info(`ℹ️ Endpoint marked unhealthy: ${endpoint} (${health.failures} failures)`);
       }
     }
   }
@@ -159,6 +167,7 @@ export class RPCClientPool {
         this.markEndpointUnhealthy(endpoint, new Error(`HTTP ${response.status}`));
       }
     } catch (error) {
+      // Suppress network error logging - already handled in markEndpointUnhealthy
       this.markEndpointUnhealthy(endpoint, error);
     }
   }
