@@ -559,4 +559,50 @@ router.post('/refresh-api-key', authenticateToken, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     summary: Resend verification email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ */
+router.post('/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email required' });
+    }
+    
+    const user = await UserStorage.findByEmail(email);
+    if (!user) {
+      // Don't reveal if user exists
+      return res.json({ message: 'If the email exists, verification email has been sent' });
+    }
+    
+    if (user.emailVerified) {
+      return res.json({ message: 'Email already verified' });
+    }
+    
+    // In production, send actual email here
+    console.log(`Verification email would be sent to: ${email}`);
+    
+    res.json({ message: 'Verification email sent' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to resend verification', message: error.message });
+  }
+});
+
 export default router;
