@@ -1,0 +1,1 @@
+{"env": {"browser": true}, "extends": ["prettier"], "rules": {"prettier/prettier": "error", "require-eslint": "error", "no-unused-consts": "error", "no-unused-vars": "error", "semi": ["error", "always"]}}
