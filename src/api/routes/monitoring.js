@@ -105,11 +105,12 @@ router.post('/start', async (req, res) => {
 
     const contract = user.onboarding.defaultContract;
     
-    // Get subscription info
-    const SubscriptionService = (await import('../../services/SubscriptionService.js')).default;
-    const subscriptionInfo = await SubscriptionService.getSubscriptionInfo(user.walletAddress);
+    // Get tier from DB
+    const tierName = user.tier || 'free';
+    const TIER_NUMBERS = { free: 0, starter: 1, pro: 2, enterprise: 3 };
+    const tierNumber = TIER_NUMBERS[tierName] || 0;
     
-    if (subscriptionInfo.tier === 0) {
+    if (tierNumber === 0) {
       return res.status(403).json({
         error: 'Tier not supported',
         message: 'Continuous monitoring is only available for Starter, Pro, and Enterprise tiers'
@@ -120,10 +121,10 @@ router.post('/start', async (req, res) => {
       req.user.id,
       contract,
       {
-        tierName: subscriptionInfo.tierName,
-        tierNumber: subscriptionInfo.tier,
+        tierName: tierName.charAt(0).toUpperCase() + tierName.slice(1),
+        tierNumber,
         continuousSync: true,
-        apiCallsPerMonth: ContinuousMonitoringService.getApiLimitForTier(subscriptionInfo.tier)
+        apiCallsPerMonth: ContinuousMonitoringService.getApiLimitForTier(tierNumber)
       },
       contract.lastAnalysisId
     );
@@ -164,17 +165,11 @@ router.get('/usage', async (req, res) => {
     const user = await UserStorage.findById(req.user.id);
     const apiCallsUsed = await ContinuousMonitoringService.getMonthlyApiCallCount(req.user.id);
     
-    // Get subscription info
-    const SubscriptionService = (await import('../../services/SubscriptionService.js')).default;
-    let subscriptionInfo = { tier: 0, tierName: 'Free' };
-    
-    if (user.walletAddress) {
-      try {
-        subscriptionInfo = await SubscriptionService.getSubscriptionInfo(user.walletAddress);
-      } catch (error) {
-        console.warn('Could not fetch subscription:', error.message);
-      }
-    }
+    // Get tier from DB
+    const tierName = user?.tier || 'free';
+    const TIER_NUMBERS = { free: 0, starter: 1, pro: 2, enterprise: 3 };
+    const tierNumber = TIER_NUMBERS[tierName] || 0;
+    const subscriptionInfo = { tier: tierNumber, tierName: tierName.charAt(0).toUpperCase() + tierName.slice(1) };
     
     const apiLimit = ContinuousMonitoringService.getApiLimitForTier(subscriptionInfo.tier);
     

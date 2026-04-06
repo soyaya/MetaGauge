@@ -1164,4 +1164,24 @@ function getEstimatedTime(analysisType, config) {
   }
 }
 
+/**
+ * GET /api/analysis/:id/ai-summary
+ * Returns AI summary for an analysis — delegates to quick-insights.
+ */
+router.get('/:id/ai-summary', async (req, res) => {
+  try {
+    const analysis = await AnalysisStorage.findById(req.params.id);
+    if (!analysis || analysis.userId !== req.user.id) {
+      return res.status(404).json({ error: 'Analysis not found' });
+    }
+    if (analysis.status !== 'completed') {
+      return res.json({ summary: null, message: 'Analysis not yet completed' });
+    }
+    const insights = await GeminiAIService.generateQuickInsights(analysis, req.user.id);
+    res.json({ analysisId: analysis.id, summary: insights, aiEnabled: GeminiAIService.isEnabled(), generatedAt: new Date().toISOString() });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

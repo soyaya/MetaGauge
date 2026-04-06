@@ -30,7 +30,7 @@ import { HealthMonitor } from './services/HealthMonitor.js';
 /**
  * Initialize streaming indexer system
  */
-export async function initializeStreamingIndexer(dataDir = './data') {
+export async function initializeStreamingIndexer(dataDir = './data', wsManager = null) {
   // Create logs directory
   await import('fs/promises').then(fs => fs.mkdir('logs', { recursive: true }));
 
@@ -43,7 +43,7 @@ export async function initializeStreamingIndexer(dataDir = './data') {
   const fetcher = new SmartContractFetcher(rpcPool);
   const deploymentFinder = new DeploymentBlockFinder(rpcPool, fetcher);
   const validator = new HorizontalValidator();
-  const chunkManager = new ChunkManager(fetcher, validator);
+  const chunkManager = new ChunkManager(fetcher, validator, wsManager);
   
   // Initialize monitoring and security
   const metricsCollector = new MetricsCollector();
@@ -57,6 +57,7 @@ export async function initializeStreamingIndexer(dataDir = './data') {
     deploymentFinder,
     validator,
     chunkManager,
+    wsManager,
     metricsCollector,
     anomalyDetector,
     subscriptionLimiter

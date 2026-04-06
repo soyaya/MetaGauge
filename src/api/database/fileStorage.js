@@ -1,6 +1,7 @@
 /**
  * File-based data storage system
- * Uses JSON files for persistence instead of MongoDB
+ * Per-user isolated storage: data/users/{userId}/ for all analytics data
+ * Global: data/users.json for auth only
  */
 
 import fs from 'fs/promises';
@@ -12,28 +13,27 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Use absolute path relative to project root
 const PROJECT_ROOT = path.resolve(__dirname, '../../..');
 const DATA_DIR = path.join(PROJECT_ROOT, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const CONTRACTS_FILE = path.join(DATA_DIR, 'contracts.json');
-const ANALYSES_FILE = path.join(DATA_DIR, 'analyses.json');
 
-// Ensure data directory exists
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR);
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  }
+function userDir(userId) {
+  return path.join(DATA_DIR, 'users', userId);
+}
+function userFile(userId, name) {
+  return path.join(userDir(userId), name);
 }
 
-// Generic file operations
-async function readJsonFile(filePath, defaultValue = []) {
+async function ensureDir(dir) {
+  await fs.mkdir(dir, { recursive: true });
+}
+
+// ── Atomic read/write ────────────────────────────────────────────────────────
+
+export async function readJsonFile(filePath, defaultValue = []) {
   try {
     const data = await fs.readFile(filePath, 'utf8');
     if (!data || data.trim() === '') {
-      console.warn(`⚠️  Empty file ${filePath}, using default value`);
       await writeJsonFile(filePath, defaultValue);
       return defaultValue;
     }
@@ -45,13 +45,12 @@ async function readJsonFile(filePath, defaultValue = []) {
     }
     if (error instanceof SyntaxError) {
       console.error(`❌ JSON parse error in ${filePath}:`, error.message);
-      // Try to recover from backup
       const backupPath = `${filePath}.backup`;
       try {
         const backupData = await fs.readFile(backupPath, 'utf8');
         console.log(`✅ Recovered from backup: ${backupPath}`);
         return JSON.parse(backupData);
-      } catch (backupError) {
+      } catch {
         console.error(`❌ Backup recovery failed, using default value`);
         return defaultValue;
       }
@@ -60,48 +59,38 @@ async function readJsonFile(filePath, defaultValue = []) {
   }
 }
 
-async function writeJsonFile(filePath, data) {
-  await ensureDataDir();
-  
-  // Create backup before writing
+export async function writeJsonFile(filePath, data) {
+  await ensureDir(path.dirname(filePath));
+  const json = JSON.stringify(data, null, 2);
   try {
-    const exists = await fs.access(filePath).then(() => true).catch(() => false);
-    if (exists) {
-      const backupPath = `${filePath}.backup`;
-      await fs.copyFile(filePath, backupPath);
-    }
-  } catch (backupError) {
-    console.warn(`⚠️  Backup failed for ${filePath}:`, backupError.message);
-  }
-  
-  // Write directly (simpler approach for WSL compatibility)
-  try {
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+    try { await fs.copyFile(filePath, `${filePath}.backup`); } catch { /* new file */ }
+    await fs.writeFile(filePath, json, 'utf8');
   } catch (error) {
     console.error(`❌ Failed to write ${filePath}:`, error.message);
     throw error;
   }
 }
 
-// User operations
+// ── UserStorage (global — auth only) ────────────────────────────────────────
+
 export class UserStorage {
   static async findAll() {
-    return await readJsonFile(USERS_FILE, []);
+    return readJsonFile(USERS_FILE, []);
   }
 
   static async findById(id) {
     const users = await this.findAll();
-    return users.find(user => user.id === id);
+    return users.find(u => u.id === id) || null;
   }
 
   static async findByEmail(email) {
     const users = await this.findAll();
-    return users.find(user => user.email === email);
+    return users.find(u => u.email === email) || null;
   }
 
   static async findByApiKey(apiKey) {
     const users = await this.findAll();
-    return users.find(user => user.apiKey === apiKey);
+    return users.find(u => u.apiKey === apiKey) || null;
   }
 
   static async create(userData) {
@@ -119,147 +108,128 @@ export class UserStorage {
 
   static async update(id, updates) {
     const users = await this.findAll();
-    const userIndex = users.findIndex(user => user.id === id);
-    if (userIndex === -1) return null;
-
-    users[userIndex] = {
-      ...users[userIndex],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
+    const idx = users.findIndex(u => u.id === id);
+    if (idx === -1) return null;
+    users[idx] = { ...users[idx], ...updates, updatedAt: new Date().toISOString() };
     await writeJsonFile(USERS_FILE, users);
-    return users[userIndex];
+    return users[idx];
   }
 
   static async delete(id) {
     const users = await this.findAll();
-    const filteredUsers = users.filter(user => user.id !== id);
-    await writeJsonFile(USERS_FILE, filteredUsers);
+    await writeJsonFile(USERS_FILE, users.filter(u => u.id !== id));
     return true;
   }
 }
 
-// Contract configuration operations
+// ── ContractStorage (per-user) ───────────────────────────────────────────────
+
 export class ContractStorage {
+  static _file(userId) { return userFile(userId, 'contracts.json'); }
+
   static async findAll() {
-    return await readJsonFile(CONTRACTS_FILE, []);
+    // Aggregate across all users for admin use
+    const users = await UserStorage.findAll();
+    const all = [];
+    for (const u of users) {
+      const contracts = await readJsonFile(this._file(u.id), []);
+      all.push(...contracts);
+    }
+    return all;
   }
 
   static async findById(id) {
-    const contracts = await this.findAll();
-    return contracts.find(contract => contract.id === id);
+    const all = await this.findAll();
+    return all.find(c => c.id === id) || null;
   }
 
   static async findByUserId(userId, filters = {}) {
-    const contracts = await this.findAll();
-    let userContracts = contracts.filter(contract => 
-      contract.userId === userId && contract.isActive !== false
-    );
-
-    // Apply filters
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      userContracts = userContracts.filter(contract =>
-        contract.name.toLowerCase().includes(searchLower) ||
-        contract.description?.toLowerCase().includes(searchLower) ||
-        contract.targetContract.name.toLowerCase().includes(searchLower)
-      );
-    }
-
-    if (filters.chain) {
-      userContracts = userContracts.filter(contract =>
-        contract.targetContract.chain === filters.chain
-      );
-    }
-
-    if (filters.tags && filters.tags.length > 0) {
-      userContracts = userContracts.filter(contract =>
-        contract.tags && contract.tags.some(tag => filters.tags.includes(tag))
-      );
-    }
-
-    return userContracts;
+    let contracts = await readJsonFile(this._file(userId), []);
+    if (filters.isActive !== undefined) contracts = contracts.filter(c => c.isActive === filters.isActive);
+    return contracts;
   }
 
   static async create(contractData) {
-    const contracts = await this.findAll();
+    const { userId } = contractData;
+    const contracts = await readJsonFile(this._file(userId), []);
     const newContract = {
       id: crypto.randomUUID(),
       ...contractData,
-      isActive: true,
-      lastAnalyzed: null,
-      analysisCount: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     contracts.push(newContract);
-    await writeJsonFile(CONTRACTS_FILE, contracts);
+    await writeJsonFile(this._file(userId), contracts);
     return newContract;
   }
 
   static async update(id, updates) {
-    const contracts = await this.findAll();
-    const contractIndex = contracts.findIndex(contract => contract.id === id);
-    if (contractIndex === -1) return null;
-
-    contracts[contractIndex] = {
-      ...contracts[contractIndex],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    await writeJsonFile(CONTRACTS_FILE, contracts);
-    return contracts[contractIndex];
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const contracts = await readJsonFile(this._file(u.id), []);
+      const idx = contracts.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        contracts[idx] = { ...contracts[idx], ...updates, updatedAt: new Date().toISOString() };
+        await writeJsonFile(this._file(u.id), contracts);
+        return contracts[idx];
+      }
+    }
+    return null;
   }
 
   static async delete(id) {
-    const contracts = await this.findAll();
-    const contractIndex = contracts.findIndex(contract => contract.id === id);
-    if (contractIndex === -1) return null;
-
-    contracts[contractIndex].isActive = false;
-    contracts[contractIndex].updatedAt = new Date().toISOString();
-    await writeJsonFile(CONTRACTS_FILE, contracts);
-    return true;
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const contracts = await readJsonFile(this._file(u.id), []);
+      const filtered = contracts.filter(c => c.id !== id);
+      if (filtered.length !== contracts.length) {
+        await writeJsonFile(this._file(u.id), filtered);
+        return true;
+      }
+    }
+    return false;
   }
 
   static async countByUserId(userId) {
-    const contracts = await this.findByUserId(userId);
-    return contracts.length;
+    const contracts = await readJsonFile(this._file(userId), []);
+    return contracts.filter(c => c.isActive !== false).length;
   }
 }
 
-// Analysis results operations
+// ── AnalysisStorage (per-user) ───────────────────────────────────────────────
+
 export class AnalysisStorage {
+  static _file(userId) { return userFile(userId, 'analyses.json'); }
+
   static async findAll() {
-    return await readJsonFile(ANALYSES_FILE, []);
+    const users = await UserStorage.findAll();
+    const all = [];
+    for (const u of users) {
+      const analyses = await readJsonFile(this._file(u.id), []);
+      all.push(...analyses);
+    }
+    return all;
   }
 
   static async findById(id) {
-    const analyses = await this.findAll();
-    return analyses.find(analysis => analysis.id === id);
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const analyses = await readJsonFile(this._file(u.id), []);
+      const found = analyses.find(a => a.id === id);
+      if (found) return found;
+    }
+    return null;
   }
 
   static async findByUserId(userId, filters = {}) {
-    const analyses = await this.findAll();
-    let userAnalyses = analyses.filter(analysis => analysis.userId === userId);
-
-    // Apply filters
-    if (filters.status) {
-      userAnalyses = userAnalyses.filter(analysis => analysis.status === filters.status);
-    }
-
-    if (filters.analysisType) {
-      userAnalyses = userAnalyses.filter(analysis => analysis.analysisType === filters.analysisType);
-    }
-
-    // Sort by creation date (newest first)
-    userAnalyses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    return userAnalyses;
+    let analyses = await readJsonFile(this._file(userId), []);
+    if (filters.status) analyses = analyses.filter(a => a.status === filters.status);
+    return analyses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
   static async create(analysisData) {
-    const analyses = await this.findAll();
+    const { userId } = analysisData;
+    const analyses = await readJsonFile(this._file(userId), []);
     const newAnalysis = {
       id: crypto.randomUUID(),
       ...analysisData,
@@ -267,243 +237,292 @@ export class AnalysisStorage {
       updatedAt: new Date().toISOString()
     };
     analyses.push(newAnalysis);
-    await writeJsonFile(ANALYSES_FILE, analyses);
+    await writeJsonFile(this._file(userId), analyses);
     return newAnalysis;
   }
 
   static async update(id, updates) {
-    const analyses = await this.findAll();
-    const analysisIndex = analyses.findIndex(analysis => analysis.id === id);
-    if (analysisIndex === -1) return null;
-
-    analyses[analysisIndex] = {
-      ...analyses[analysisIndex],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    await writeJsonFile(ANALYSES_FILE, analyses);
-    return analyses[analysisIndex];
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const analyses = await readJsonFile(this._file(u.id), []);
+      const idx = analyses.findIndex(a => a.id === id);
+      if (idx !== -1) {
+        analyses[idx] = { ...analyses[idx], ...updates, updatedAt: new Date().toISOString() };
+        await writeJsonFile(this._file(u.id), analyses);
+        return analyses[idx];
+      }
+    }
+    return null;
   }
 
   static async getStats(userId) {
     const analyses = await this.findByUserId(userId);
-    
-    const stats = {
+    return {
       total: analyses.length,
       completed: analyses.filter(a => a.status === 'completed').length,
       failed: analyses.filter(a => a.status === 'failed').length,
       pending: analyses.filter(a => ['pending', 'running'].includes(a.status)).length,
       avgExecutionTime: 0
     };
-
-    // Calculate average execution time
-    const completedAnalyses = analyses.filter(a => a.status === 'completed' && a.metadata?.executionTimeMs);
-    if (completedAnalyses.length > 0) {
-      const totalTime = completedAnalyses.reduce((sum, a) => sum + a.metadata.executionTimeMs, 0);
-      stats.avgExecutionTime = totalTime / completedAnalyses.length;
-    }
-
-    return stats;
   }
 
   static async getMonthlyCount(userId, monthStart) {
     const analyses = await this.findByUserId(userId);
-    return analyses.filter(analysis => 
-      new Date(analysis.createdAt) >= monthStart
-    ).length;
+    return analyses.filter(a => new Date(a.createdAt) >= monthStart).length;
   }
 }
 
-// Chat Session operations
+// ── MetricsStorage (per-user) ────────────────────────────────────────────────
+
+export class MetricsStorage {
+  static _file(userId) { return userFile(userId, 'metrics.json'); }
+
+  static async get(userId) {
+    return readJsonFile(this._file(userId), {});
+  }
+
+  static async save(userId, metrics) {
+    await writeJsonFile(this._file(userId), { ...metrics, updatedAt: new Date().toISOString() });
+  }
+}
+
+// ── MetricsHistoryStorage — daily snapshots per user ─────────────────────────
+export class MetricsHistoryStorage {
+  static _file(userId) { return userFile(userId, 'metrics_history.json'); }
+
+  static async append(userId, snapshot) {
+    const history = await readJsonFile(this._file(userId), []);
+    const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    // One snapshot per day — overwrite if same date
+    const idx = history.findIndex(h => h.date === date);
+    if (idx >= 0) history[idx] = { date, ...snapshot };
+    else history.push({ date, ...snapshot });
+    // Keep last 90 days
+    const trimmed = history.sort((a, b) => a.date.localeCompare(b.date)).slice(-90);
+    await writeJsonFile(this._file(userId), trimmed);
+  }
+
+  static async get(userId) {
+    return readJsonFile(this._file(userId), []);
+  }
+}
+
+// ── LivePollStorage (per-user) ───────────────────────────────────────────────
+
+export class LivePollStorage {
+  static _file(userId) { return userFile(userId, 'live_poll.json'); }
+
+  static async get(userId) {
+    return readJsonFile(this._file(userId), { lastBlock: null, updatedAt: null });
+  }
+
+  static async save(userId, data) {
+    await writeJsonFile(this._file(userId), { ...data, updatedAt: new Date().toISOString() });
+  }
+
+  static async getAllActive() {
+    try {
+      const { readdir } = await import("fs/promises");
+      const { join } = await import("path");
+      const usersDir = join(process.cwd(), "data", "users");
+      const userDirs = await readdir(usersDir).catch(() => []);
+      const results = [];
+      for (const userId of userDirs) {
+        const poll = await this.get(userId);
+        if (poll && poll.active && poll.contractAddress) {
+          results.push({ userId, ...poll });
+        }
+      }
+      return results;
+    } catch { return []; }
+  }
+}
+
+// ── ChatSessionStorage (per-user) ────────────────────────────────────────────
+
 export class ChatSessionStorage {
+  static _file(userId) { return userFile(userId, 'chat_sessions.json'); }
+
   static async findAll() {
-    const data = await readJsonFile('./data/chat_sessions.json', []);
-    return data.map(item => ({
-      id: item.id,
-      userId: item.userId,
-      contractAddress: item.contractAddress,
-      contractChain: item.contractChain,
-      contractName: item.contractName || 'Unknown Contract',
-      title: item.title || `Chat: ${item.contractName}`,
-      isActive: item.isActive !== false,
-      lastMessageAt: item.lastMessageAt || null,
-      messageCount: item.messageCount || 0,
-      metadata: item.metadata || {},
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt
-    }));
+    const users = await UserStorage.findAll();
+    const all = [];
+    for (const u of users) {
+      const sessions = await readJsonFile(this._file(u.id), []);
+      all.push(...sessions);
+    }
+    return all;
   }
 
   static async findById(id) {
-    const sessions = await this.findAll();
-    return sessions.find(session => session.id === id);
+    const all = await this.findAll();
+    return all.find(s => s.id === id) || null;
   }
 
   static async findByUserId(userId, filters = {}) {
-    const sessions = await this.findAll();
-    let userSessions = sessions.filter(session => 
-      session.userId === userId && session.isActive !== false
-    );
-
-    // Apply filters
-    if (filters.contractAddress) {
-      userSessions = userSessions.filter(session =>
-        session.contractAddress.toLowerCase() === filters.contractAddress.toLowerCase()
-      );
-    }
-
-    if (filters.contractChain) {
-      userSessions = userSessions.filter(session =>
-        session.contractChain === filters.contractChain
-      );
-    }
-
-    // Sort by last message date (most recent first)
-    userSessions.sort((a, b) => {
-      const aDate = new Date(a.lastMessageAt || a.createdAt);
-      const bDate = new Date(b.lastMessageAt || b.createdAt);
-      return bDate - aDate;
-    });
-
-    return userSessions;
+    let sessions = await readJsonFile(this._file(userId), []);
+    if (filters.contractAddress) sessions = sessions.filter(s => s.contractAddress === filters.contractAddress);
+    if (filters.contractChain) sessions = sessions.filter(s => s.contractChain === filters.contractChain);
+    return sessions.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
   }
 
   static async findByContract(userId, contractAddress, contractChain) {
     const sessions = await this.findByUserId(userId, { contractAddress, contractChain });
-    return sessions[0] || null; // Return the most recent session for this contract
+    return sessions[0] || null;
   }
 
   static async create(sessionData) {
-    const sessions = await readJsonFile('./data/chat_sessions.json', []);
+    const { userId } = sessionData;
+    const sessions = await readJsonFile(this._file(userId), []);
     const newSession = {
       id: crypto.randomUUID(),
       ...sessionData,
-      isActive: true,
       messageCount: 0,
-      metadata: sessionData.metadata || {},
+      isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    
     sessions.push(newSession);
-    await writeJsonFile('./data/chat_sessions.json', sessions);
-    
-    // Return the session object directly (no need for toJSON method)
+    await writeJsonFile(this._file(userId), sessions);
     return newSession;
   }
 
   static async update(id, updates) {
-    const sessions = await readJsonFile('./data/chat_sessions.json', []);
-    const sessionIndex = sessions.findIndex(session => session.id === id);
-    if (sessionIndex === -1) return null;
-
-    sessions[sessionIndex] = {
-      ...sessions[sessionIndex],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    
-    await writeJsonFile('./data/chat_sessions.json', sessions);
-    return sessions[sessionIndex];
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const sessions = await readJsonFile(this._file(u.id), []);
+      const idx = sessions.findIndex(s => s.id === id);
+      if (idx !== -1) {
+        sessions[idx] = { ...sessions[idx], ...updates, updatedAt: new Date().toISOString() };
+        await writeJsonFile(this._file(u.id), sessions);
+        return sessions[idx];
+      }
+    }
+    return null;
   }
 
   static async delete(id) {
-    const sessions = await readJsonFile('./data/chat_sessions.json', []);
-    const sessionIndex = sessions.findIndex(session => session.id === id);
-    if (sessionIndex === -1) return null;
-
-    sessions[sessionIndex].isActive = false;
-    sessions[sessionIndex].updatedAt = new Date().toISOString();
-    await writeJsonFile('./data/chat_sessions.json', sessions);
-    return true;
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const sessions = await readJsonFile(this._file(u.id), []);
+      const filtered = sessions.filter(s => s.id !== id);
+      if (filtered.length !== sessions.length) {
+        await writeJsonFile(this._file(u.id), filtered);
+        return true;
+      }
+    }
+    return false;
   }
 }
 
-// Chat Message operations
+// ── ChatMessageStorage (per-user) ────────────────────────────────────────────
+
 export class ChatMessageStorage {
+  static _file(userId) { return userFile(userId, 'chat_messages.json'); }
+
   static async findAll() {
-    const data = await readJsonFile('./data/chat_messages.json', []);
-    return data.map(item => ({
-      id: item.id,
-      sessionId: item.sessionId,
-      role: item.role, // 'user' | 'assistant' | 'system'
-      content: item.content,
-      components: item.components || [],
-      metadata: item.metadata || {},
-      isStreaming: item.isStreaming || false,
-      createdAt: item.createdAt
-    }));
+    const users = await UserStorage.findAll();
+    const all = [];
+    for (const u of users) {
+      const msgs = await readJsonFile(this._file(u.id), []);
+      all.push(...msgs);
+    }
+    return all;
+  }
+
+  static async findById(id) {
+    const all = await this.findAll();
+    return all.find(m => m.id === id) || null;
   }
 
   static async findBySessionId(sessionId, limit = 50, offset = 0) {
-    const messages = await this.findAll();
-    const sessionMessages = messages
-      .filter(message => message.sessionId === sessionId)
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .slice(offset, offset + limit);
-    
-    return sessionMessages;
-  }
-
-  static async create(messageData) {
-    const messages = await readJsonFile('./data/chat_messages.json', []);
-    const newMessage = {
-      id: crypto.randomUUID(),
-      ...messageData,
-      components: messageData.components || [],
-      metadata: messageData.metadata || {},
-      isStreaming: messageData.isStreaming || false,
-      createdAt: new Date().toISOString()
-    };
-    
-    messages.push(newMessage);
-    await writeJsonFile('./data/chat_messages.json', messages);
-    
-    // Update session's last message time and count
-    await ChatSessionStorage.update(newMessage.sessionId, {
-      lastMessageAt: newMessage.createdAt,
-      messageCount: messages.filter(m => m.sessionId === newMessage.sessionId).length
-    });
-    
-    return newMessage;
-  }
-
-  static async update(id, updates) {
-    const messages = await readJsonFile('./data/chat_messages.json', []);
-    const messageIndex = messages.findIndex(message => message.id === id);
-    if (messageIndex === -1) return null;
-
-    messages[messageIndex] = {
-      ...messages[messageIndex],
-      ...updates
-    };
-    
-    await writeJsonFile('./data/chat_messages.json', messages);
-    return messages[messageIndex];
+    const all = await this.findAll();
+    const msgs = all
+      .filter(m => m.sessionId === sessionId)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    return msgs.slice(offset, offset + limit);
   }
 
   static async getRecentContext(sessionId, limit = 10) {
     const messages = await this.findBySessionId(sessionId, limit);
-    return messages.slice(-limit); // Get the most recent messages
+    return messages.slice(-limit);
+  }
+
+  static async create(messageData) {
+    // Find which user owns this session
+    const session = await ChatSessionStorage.findById(messageData.sessionId);
+    const userId = session?.userId || messageData.userId;
+    if (!userId) throw new Error('Cannot determine userId for message');
+
+    const msgs = await readJsonFile(this._file(userId), []);
+    const newMsg = {
+      id: crypto.randomUUID(),
+      ...messageData,
+      createdAt: new Date().toISOString()
+    };
+    msgs.push(newMsg);
+    await writeJsonFile(this._file(userId), msgs);
+
+    // Update session message count
+    if (session) {
+      await ChatSessionStorage.update(session.id, {
+        messageCount: (session.messageCount || 0) + 1,
+        lastMessageAt: newMsg.createdAt
+      });
+    }
+
+    return newMsg;
+  }
+
+  static async update(id, updates) {
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const msgs = await readJsonFile(this._file(u.id), []);
+      const idx = msgs.findIndex(m => m.id === id);
+      if (idx !== -1) {
+        msgs[idx] = { ...msgs[idx], ...updates };
+        await writeJsonFile(this._file(u.id), msgs);
+        return msgs[idx];
+      }
+    }
+    return null;
+  }
+
+  static async delete(id) {
+    const users = await UserStorage.findAll();
+    for (const u of users) {
+      const msgs = await readJsonFile(this._file(u.id), []);
+      const filtered = msgs.filter(m => m.id !== id);
+      if (filtered.length !== msgs.length) {
+        await writeJsonFile(this._file(u.id), filtered);
+        return true;
+      }
+    }
+    return false;
   }
 }
 
-// Initialize storage
+// ── Storage initialisation ───────────────────────────────────────────────────
+
 export async function initializeStorage() {
-  try {
-    await ensureDataDir();
-    console.log('✅ File storage initialized successfully');
-    return true;
-  } catch (error) {
-    console.error('❌ File storage initialization failed:', error.message);
-    throw error;
+  await ensureDir(DATA_DIR);
+  await ensureDir(path.join(DATA_DIR, 'users'));
+  // Ensure global users file exists
+  await readJsonFile(USERS_FILE, []);
+  // Ensure per-user dirs exist for all known users
+  const users = await UserStorage.findAll();
+  for (const u of users) {
+    await ensureDir(userDir(u.id));
   }
+  console.log('✅ File storage initialized successfully');
+  return true;
 }
 
 export default {
   UserStorage,
   ContractStorage,
   AnalysisStorage,
+  MetricsStorage,
+  LivePollStorage,
   ChatSessionStorage,
   ChatMessageStorage,
   initialize: initializeStorage

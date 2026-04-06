@@ -11,6 +11,8 @@ import { Mail, EyeOff, Eye, Loader2 } from "lucide-react"
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { api } from "@/lib/api"
+import { OAuthButtons } from "@/components/auth/oauth-buttons"
+import { AuthDivider } from "@/components/auth/divider"
 
 function LoginForm() {
   const router = useRouter()
@@ -28,57 +30,90 @@ function LoginForm() {
     setError("")
     setIsLoading(true)
 
-    if (!email || !password) {
-      setError('Please enter both email and password')
+    // Client-side validation
+    if (!email.trim()) {
+      setError('Please enter your email address')
+      setIsLoading(false)
+      return
+    }
+
+    if (!password) {
+      setError('Please enter your password')
+      setIsLoading(false)
+      return
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address')
       setIsLoading(false)
       return
     }
 
     try {
-      // Use real API login
-      const result = await api.auth.login({ email, password })
+      const result = await api.auth.login({ 
+        email: email.toLowerCase().trim(), 
+        password 
+      })
       
-      // Update Global Auth State
-      login(result.token, result.user)
-
-      // Handle redirect logic
-      if (redirectTo === 'analyzer') {
-        router.push("/analyzer")
+      // If email not verified, send OTP and redirect to verify
+      if (!result.user.emailVerified && !result.user.is_verified) {
+        localStorage.setItem('pending_token', result.token)
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/send-verification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${result.token}` },
+        })
+        const params = new URLSearchParams({ email: email.toLowerCase().trim() })
+        if (redirectTo) params.set('redirect', redirectTo)
+        router.push(`/verify?${params.toString()}`)
         return
       }
 
-      // Default redirect to analyzer for first-time users, dashboard for returning users
-      router.push("/analyzer")
+      login(result.token, result.user)
+      router.push(redirectTo ? decodeURIComponent(redirectTo) : '/dashboard')
       
     } catch (error: any) {
       console.error('Login error:', error)
-      setError(error.message || 'Login failed. Please try again.')
+      
+      // Handle specific error types from backend
+      let errorMessage = 'Login failed. Please try again.'
+      
+      if (error.message) {
+        errorMessage = error.message
+        
+        // Add helpful suggestions for common errors
+        if (error.message.includes('No account found')) {
+          errorMessage += ' You may need to create an account first.'
+        } else if (error.message.includes('Incorrect password')) {
+          errorMessage += ' You can reset your password using the "Forgot Password" link.'
+        } else if (error.message.includes('deactivated')) {
+          errorMessage = error.message // Keep the full deactivation message
+        }
+      }
+      
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <AuthCard>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">Sign In</h1>
-        <p className="text-muted-foreground mt-1">Welcome back to MetaGauge</p>
-      </div>
-
+    <AuthCard heading="Welcome back" subheading="Sign in to your MetaGauge account">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
+          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
             {error}
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
             <Input
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="pr-10"
@@ -88,13 +123,18 @@ function LoginForm() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative">
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="••••••••••"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pr-10"
@@ -111,24 +151,20 @@ function LoginForm() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Signing In...
-            </>
-          ) : (
-            'Sign In'
-          )}
+        <Button type="submit" className="w-full gradient-brand text-white" disabled={isLoading}>
+          {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : 'Sign in'}
         </Button>
       </form>
 
-      <p className="text-center text-sm mt-6">
+      <p className="text-center text-sm mt-6 text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-semibold hover:underline">
-          Sign up
+        <Link href="/signup" className="font-semibold text-foreground hover:underline">
+          Create one
         </Link>
       </p>
+
+      <AuthDivider />
+      <OAuthButtons mode="signin" redirectTo={redirectTo || undefined} />
     </AuthCard>
   )
 }
@@ -136,10 +172,9 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <AuthCard>
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold">Sign In</h1>
-          <p className="text-muted-foreground mt-1">Loading...</p>
+      <AuthCard heading="Welcome back" subheading="Sign in to your MetaGauge account">
+        <div className="h-48 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </AuthCard>
     }>

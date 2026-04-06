@@ -15,15 +15,13 @@ export class SmartRpcManager {
    */
   getRpcUrls() {
     const rpcConfig = {
-      lisk: [
-        { name: 'drpc', url: process.env.LISK_RPC_URL1 || 'https://lisk.drpc.org' },
-        { name: 'tenderly', url: process.env.LISK_RPC_URL2 || 'https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye' }
-      ],
       ethereum: [
-        { name: 'publicnode', url: 'https://ethereum-rpc.publicnode.com' }
+        { name: 'publicnode', url: process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com' },
+        { name: 'llamarpc', url: process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com' }
       ],
       starknet: [
-        { name: 'lava', url: 'https://rpc.starknet.lava.build' }
+        { name: 'publicnode', url: process.env.STARKNET_RPC_URL1 || 'https://starknet-rpc.publicnode.com' },
+        { name: 'lava', url: process.env.STARKNET_RPC_URL2 || 'https://rpc.starknet.lava.build' }
       ]
     };
 

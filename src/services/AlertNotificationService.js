@@ -1,156 +1,139 @@
 /**
- * Alert Notification Service
- * Handles delivery of alerts via multiple channels
+ * AlertNotificationService
+ * Delivers alerts via email (Resend API) with AI-generated messages via Gemini.
  */
+
+import geminiService from './GeminiAIService.js';
+
+const gemini = geminiService;
 
 export class AlertNotificationService {
   constructor() {
-    this.channels = {
-      inApp: true,
-      email: process.env.SMTP_HOST ? true : false,
-      webhook: true,
-      sms: false // Requires Twilio setup
-    };
+    this.resendApiKey = process.env.RESEND_API_KEY || null;
+    this.fromEmail    = process.env.ALERT_FROM_EMAIL || 'alerts@metagauge.io';
   }
 
-  /**
-   * Get allowed channels for subscription tier
-   */
   getAllowedChannels(tier) {
-    const tierNumber = typeof tier === 'string' ? this.getTierNumber(tier) : tier;
-    
-    switch (tierNumber) {
-      case 0: // Free
-        return ['inApp'];
-      case 1: // Starter
-        return ['inApp', 'email', 'webhook'];
-      case 2: // Pro
-        return ['inApp', 'email', 'webhook'];
-      case 3: // Enterprise
-        return ['inApp', 'email', 'webhook', 'sms'];
-      default:
-        return ['inApp'];
-    }
+    const t = typeof tier === 'string' ? tier.toLowerCase() : 'free';
+    if (t === 'free')       return ['inApp'];
+    if (t === 'starter')    return ['inApp', 'email'];
+    return ['inApp', 'email', 'webhook'];
   }
 
-  /**
-   * Get tier number from name
-   */
-  getTierNumber(tierName) {
-    const tiers = { 'Free': 0, 'Starter': 1, 'Pro': 2, 'Enterprise': 3 };
-    return tiers[tierName] || 0;
-  }
-
-  /**
-   * Get max alerts for tier
-   */
   getMaxAlerts(tier) {
-    const tierNumber = typeof tier === 'string' ? this.getTierNumber(tier) : tier;
-    
-    switch (tierNumber) {
-      case 0: return 3;      // Free
-      case 1: return 10;     // Starter
-      case 2: return 50;     // Pro
-      case 3: return 999999; // Enterprise (unlimited)
-      default: return 3;
+    const limits = { free: 3, starter: 10, pro: 50, enterprise: 999999 };
+    return limits[(tier || 'free').toLowerCase()] ?? 3;
+  }
+
+  /**
+   * Generate AI-written alert message using Gemini.
+   */
+  async generateAIMessage(alert, metrics = {}) {
+    try {
+      const prompt = `You are a blockchain analytics assistant. Write a concise, actionable alert email body (3-4 sentences max) for this event:
+
+Alert: ${alert.title}
+Severity: ${alert.severity}
+Contract: ${alert.contractAddress || 'unknown'}
+Details: ${alert.message}
+Key metrics: ${JSON.stringify(metrics).slice(0, 500)}
+
+Be specific, mention the metric values, and suggest one action the user should take. No markdown, plain text only.`;
+
+      const insights = await gemini.generateQuickInsights({ summary: metrics, alert }, 'system');
+      return insights?.summary || alert.message;
+    } catch {
+      return alert.message;
     }
   }
 
   /**
-   * Send alert notification
+   * Send alert via all configured channels.
    */
-  async sendAlert(alert, channels = ['inApp']) {
-    const results = {
-      inApp: false,
-      email: false,
-      webhook: false,
-      sms: false
-    };
+  async sendAlert(alert, channels = ['inApp'], userEmail = null, webhookUrl = null, metrics = {}) {
+    const results = { inApp: true, email: false, webhook: false };
 
-    for (const channel of channels) {
-      try {
-        switch (channel) {
-          case 'inApp':
-            results.inApp = await this.sendInAppNotification(alert);
-            break;
-          case 'email':
-            results.email = await this.sendEmailNotification(alert);
-            break;
-          case 'webhook':
-            results.webhook = await this.sendWebhookNotification(alert);
-            break;
-          case 'sms':
-            results.sms = await this.sendSmsNotification(alert);
-            break;
-        }
-      } catch (error) {
-        console.error(`Failed to send ${channel} notification:`, error.message);
-      }
+    if (channels.includes('email') && userEmail) {
+      results.email = await this.sendEmail(alert, userEmail, metrics);
+    }
+
+    if (channels.includes('webhook') && webhookUrl) {
+      results.webhook = await this.sendWebhook(alert, webhookUrl);
     }
 
     return results;
   }
 
-  /**
-   * Send in-app notification (store in database)
-   */
-  async sendInAppNotification(alert) {
-    // In-app notifications are stored in database
-    // Frontend polls or uses WebSocket to receive them
-    return true;
-  }
-
-  /**
-   * Send email notification
-   */
-  async sendEmailNotification(alert) {
-    if (!this.channels.email) {
-      console.log('Email not configured, skipping');
-      return false;
-    }
-
-    // Email sending would require nodemailer setup
-    // For now, just log
-    console.log(`📧 Email notification: ${alert.title} to ${alert.userEmail}`);
-    return true;
-  }
-
-  /**
-   * Send webhook notification
-   */
-  async sendWebhookNotification(alert) {
-    if (!alert.webhookUrl) {
+  async sendEmail(alert, toEmail, metrics = {}) {
+    if (!this.resendApiKey) {
+      console.log(`[Alert] Email not sent (no RESEND_API_KEY): ${alert.title} → ${toEmail}`);
       return false;
     }
 
     try {
-      const response = await fetch(alert.webhookUrl, {
+      const aiBody = await this.generateAIMessage(alert, metrics);
+      const severityEmoji = { critical: '🚨', high: '⚠️', medium: '📊', low: 'ℹ️' }[alert.severity] || '📊';
+
+      const html = `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:#1D4ED8;color:white;padding:20px;border-radius:8px 8px 0 0">
+            <h2 style="margin:0">${severityEmoji} MetaGauge Alert</h2>
+            <p style="margin:4px 0 0;opacity:0.8;font-size:14px">${alert.severity?.toUpperCase()} severity</p>
+          </div>
+          <div style="background:#f9fafb;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
+            <h3 style="margin:0 0 12px;color:#111827">${alert.title}</h3>
+            <p style="color:#374151;line-height:1.6">${aiBody}</p>
+            <div style="margin-top:20px;padding:12px;background:white;border-radius:6px;border:1px solid #e5e7eb">
+              <p style="margin:0;font-size:12px;color:#6b7280">
+                Contract: ${alert.contractAddress || 'N/A'} &nbsp;|&nbsp;
+                ${new Date().toLocaleString()}
+              </p>
+            </div>
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/alerts"
+               style="display:inline-block;margin-top:16px;padding:10px 20px;background:#1D4ED8;color:white;text-decoration:none;border-radius:6px;font-size:14px">
+              View in Dashboard →
+            </a>
+          </div>
+        </div>`;
+
+      const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${this.resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          type: 'alert',
-          severity: alert.severity,
-          title: alert.title,
-          message: alert.message,
-          timestamp: new Date().toISOString(),
-          data: alert.data
-        })
+          from: this.fromEmail,
+          to:   [toEmail],
+          subject: `${severityEmoji} [MetaGauge] ${alert.title}`,
+          html,
+        }),
       });
 
-      return response.ok;
-    } catch (error) {
-      console.error('Webhook delivery failed:', error.message);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('[Alert] Resend error:', err);
+        return false;
+      }
+      console.log(`[Alert] Email sent to ${toEmail}: ${alert.title}`);
+      return true;
+    } catch (e) {
+      console.error('[Alert] Email failed:', e.message);
       return false;
     }
   }
 
-  /**
-   * Send SMS notification
-   */
-  async sendSmsNotification(alert) {
-    // SMS requires Twilio or similar service
-    console.log(`📱 SMS notification: ${alert.title} (not configured)`);
-    return false;
+  async sendWebhook(alert, webhookUrl) {
+    try {
+      const res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'alert', ...alert, timestamp: new Date().toISOString() }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
   }
 }
 

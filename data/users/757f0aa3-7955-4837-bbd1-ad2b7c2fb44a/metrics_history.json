@@ -1,0 +1,19 @@
+[
+  {
+    "date": "2026-04-06",
+    "ops": 73,
+    "dau": 0,
+    "wau": 3,
+    "mau": 28,
+    "totalTxs": 50,
+    "uniqueUsers": 28,
+    "retentionRate": 43,
+    "d7Retention": 7,
+    "churnRate": 57,
+    "activationRate": 43,
+    "bounceRate": 57,
+    "avgGasCostUSD": 0.4708,
+    "walletQuality": 32,
+    "openTasks": 12
+  }
+]

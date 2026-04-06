@@ -7,6 +7,8 @@ import express from 'express';
 import { ChatSessionStorage, ChatMessageStorage, ContractStorage } from '../database/index.js';
 import ChatAIService from '../../services/ChatAIService.js';
 import { authenticateToken } from '../middleware/auth.js';
+import businessAI from '../../services/BusinessAIEngine.js';
+import subscriptionService from '../../services/SubscriptionService.js';
 
 const router = express.Router();
 
@@ -325,7 +327,7 @@ router.get('/sessions/:sessionId/messages', async (req, res) => {
  *       404:
  *         description: Session not found
  */
-router.post('/sessions/:sessionId/messages', async (req, res) => {
+router.post('/sessions/:sessionId/messages', subscriptionService.chargeMiddleware('ai_query'), async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { content, message } = req.body;
@@ -368,32 +370,25 @@ router.post('/sessions/:sessionId/messages', async (req, res) => {
     // Get recent chat history for context
     const chatHistory = await ChatMessageStorage.getRecentContext(sessionId, 10);
 
-    // Build session context for AI
-    const sessionContext = {
+    // Generate AI response via BusinessAIEngine (RAG-grounded)
+    const aiResponse = await businessAI.chat({
+      userId,
+      message: messageContent.trim(),
       contractAddress: session.contractAddress,
-      contractChain: session.contractChain,
-      contractData: contractContext.contractData,
-      analysisData: contractContext.analysisData,
-      chatHistory: chatHistory.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }))
-    };
+      chain: session.contractChain,
+      metrics: contractContext.analysisData?.results?.target?.metrics ||
+               contractContext.analysisData?.results?.target?.fullReport?.metrics || {},
+      analysisData: contractContext.analysisData || null,
+      sessionHistory: chatHistory.map(m => ({ role: m.role, content: m.content })),
+    });
 
-    // Generate AI response
-    const aiResponse = await ChatAIService.generateChatResponse(
-      content.trim(),
-      sessionContext,
-      userId
-    );
-
-    // Save AI response
+    // Save AI response (aiResponse is now { content, components[] })
     const assistantMessage = await ChatMessageStorage.create({
       sessionId,
       role: 'assistant',
-      content: aiResponse.content,
-      components: aiResponse.components,
-      metadata: aiResponse.metadata
+      content: aiResponse.content || "I don't have enough data to answer that. Please run an analysis first.",
+      components: aiResponse.components || [],
+      metadata: { ragGrounded: true },
     });
 
     res.json({

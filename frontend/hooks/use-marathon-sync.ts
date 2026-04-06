@@ -21,6 +21,7 @@ interface MarathonSyncState {
   cycleStartTime: string | null;
   estimatedCycleDuration: string | null;
   cyclesCompleted: number;
+  isStuck?: boolean;
 }
 
 interface MarathonSyncHook {

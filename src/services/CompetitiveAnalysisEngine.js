@@ -36,7 +36,6 @@ export class CompetitiveAnalysisEngine {
   _initializeAnalyzers() {
     this.analyzers.set('ethereum', new EthereumCompetitorAnalyzer());
     this.analyzers.set('starknet', new StarknetCompetitorAnalyzer());
-    this.analyzers.set('lisk', new LiskCompetitorAnalyzer());
     
     errorHandler.info('Competitive analysis engine initialized');
   }

@@ -24,41 +24,42 @@ export class PriceService {
     }
 
     try {
-      // Use CoinGecko API (free tier)
       const coinIds = {
-        'eth': 'ethereum',
-        'ethereum': 'ethereum',
-        'lsk': 'lisk',
-        'lisk': 'lisk',
-        'strk': 'starknet',
-        'starknet': 'starknet'
+        'eth': 'ethereum', 'ethereum': 'ethereum',
+        'strk': 'starknet', 'starknet': 'starknet'
       };
-
       const coinId = coinIds[symbol.toLowerCase()] || 'ethereum';
-      
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
-        {
-          headers: {
-            'Accept': 'application/json',
-          },
-          timeout: 5000
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error(`Price API error: ${response.status}`);
+      // Try CoinGecko first, fall back to Binance public API
+      let price = null;
+
+      try {
+        const res = await fetch(
+          `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
+          { headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          price = data[coinId]?.usd || null;
+        }
+      } catch {}
+
+      // Fallback: Binance ticker (ETH only)
+      if (!price && (symbol.toLowerCase() === 'eth' || symbol.toLowerCase() === 'ethereum')) {
+        try {
+          const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT',
+            { signal: AbortSignal.timeout(5000) });
+          if (res.ok) {
+            const data = await res.json();
+            price = parseFloat(data.price) || null;
+          }
+        } catch {}
       }
 
-      const data = await response.json();
-      const price = data[coinId]?.usd || 0;
+      if (!price) throw new Error('All price sources failed');
 
       // Cache the result
-      this.cache.set(cacheKey, {
-        price,
-        timestamp: Date.now()
-      });
-
+      this.cache.set(cacheKey, { price, timestamp: Date.now() });
       return price;
     } catch (error) {
       console.warn(`Failed to fetch price for ${symbol}:`, error.message);
@@ -67,8 +68,6 @@ export class PriceService {
       const fallbackPrices = {
         'eth': 2500,
         'ethereum': 2500,
-        'lsk': 1.2,
-        'lisk': 1.2,
         'strk': 0.5,
         'starknet': 0.5
       };
@@ -131,7 +130,6 @@ export class PriceService {
   getDecimals(chain) {
     const decimals = {
       'ethereum': 18,
-      'lisk': 18,
       'starknet': 18
     };
     

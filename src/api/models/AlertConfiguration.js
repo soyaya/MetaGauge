@@ -43,6 +43,11 @@ export class AlertConfiguration {
       dailyTime: '09:00',
       weeklyDay: 'monday'
     };
+    this.competitorAlerts = data.competitorAlerts || {
+      volumeSpike: false,
+      userGrowth: false,
+      tvlChange: false
+    };
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || new Date().toISOString();
   }
@@ -58,6 +63,7 @@ export class AlertConfiguration {
       thresholds: this.thresholds,
       notifications: this.notifications,
       schedule: this.schedule,
+      competitorAlerts: this.competitorAlerts,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

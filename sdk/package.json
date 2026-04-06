@@ -1,0 +1,13 @@
+{
+  "name": "@metagauge/sdk",
+  "version": "1.0.0",
+  "description": "MetaGauge JavaScript SDK for blockchain analytics",
+  "main": "index.js",
+  "type": "module",
+  "keywords": ["blockchain", "analytics", "defi", "sdk"],
+  "author": "MetaGauge",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.0"
+  }
+}

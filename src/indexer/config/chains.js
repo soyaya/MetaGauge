@@ -1,25 +1,15 @@
 /**
- * Chain configuration for multi-chain support
+ * Chain configuration — Ethereum and Starknet only
  */
 
 export const CHAIN_CONFIGS = {
-  lisk: {
-    chainId: 'lisk',
-    name: 'Lisk',
-    rpcEndpoints: [
-      process.env.LISK_RPC_URL1 || 'https://lisk.drpc.org',
-      process.env.LISK_RPC_URL2 || 'https://lisk.gateway.tenderly.co'
-    ],
-    blockTime: 12, // seconds
-    explorerApi: 'https://blockscout.lisk.com/api',
-    startBlock: 0
-  },
   ethereum: {
     chainId: 'ethereum',
     name: 'Ethereum',
     rpcEndpoints: [
-      process.env.ETHEREUM_RPC_URL1 || 'https://eth.public-rpc.com',
-      process.env.ETHEREUM_RPC_URL2 || 'https://ethereum.publicnode.com'
+      process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com',
+      process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com',
+      process.env.ETHEREUM_RPC_URL3 || 'https://rpc.ankr.com/eth'
     ],
     blockTime: 12,
     explorerApi: 'https://api.etherscan.io/api',
@@ -29,8 +19,9 @@ export const CHAIN_CONFIGS = {
     chainId: 'starknet',
     name: 'Starknet',
     rpcEndpoints: [
-      process.env.STARKNET_RPC_URL1 || 'https://starknet-mainnet.public.blastapi.io',
-      process.env.STARKNET_RPC_URL2 || 'https://starknet.publicnode.com'
+      process.env.STARKNET_RPC_URL1 || 'https://starknet-rpc.publicnode.com',
+      process.env.STARKNET_RPC_URL2 || 'https://rpc.starknet.lava.build',
+      process.env.STARKNET_RPC_URL3 || 'https://free-rpc.nethermind.io/mainnet-juno'
     ],
     blockTime: 30,
     explorerApi: 'https://api.starkscan.co',

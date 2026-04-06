@@ -43,7 +43,7 @@ export function HeroSection() {
           and Scale Your Web3 Project
         </h1>
         <p className="text-muted-foreground text-base md:text-lg mt-6">
-          Track feature adoption, wallet behavior, and financial health across Ethereum, Polygon, and Starknet
+          Track feature adoption, wallet behavior, and financial health across Ethereum and Starknet
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-2xl mx-auto mt-8">

@@ -294,11 +294,9 @@ export class AnalyticsEngine {
     // Chain-specific defaults
     switch (chain.toLowerCase()) {
       case 'starknet':
-        return 'standard'; // Starknet has different event patterns
-      case 'lisk':
-        return 'comprehensive'; // Lisk often has cross-chain activity
+        return 'standard';
       case 'ethereum':
-        return 'standard'; // Ethereum has high activity, standard is usually sufficient
+        return 'standard';
       default:
         return 'standard';
     }

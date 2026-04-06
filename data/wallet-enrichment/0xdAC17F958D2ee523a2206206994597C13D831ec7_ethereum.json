@@ -1,0 +1,454 @@
+{
+  "0xf9b07bd1488873cf671fd2d757886e26d3a65b75": {
+    "address": "0xf9b07bd1488873cf671fd2d757886e26d3a65b75",
+    "totalTxsEver": 4,
+    "ethBalance": 0.00015,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:55:48.073Z"
+  },
+  "0x693ca5c6852a7d212dabc98b28e15257465c11f3": {
+    "address": "0x693ca5c6852a7d212dabc98b28e15257465c11f3",
+    "totalTxsEver": 213472,
+    "ethBalance": 0.658386,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:55:55.535Z"
+  },
+  "0xf204f3acb05c405c0010f2a2ecfa9fe61783f1d1": {
+    "address": "0xf204f3acb05c405c0010f2a2ecfa9fe61783f1d1",
+    "totalTxsEver": 50511,
+    "ethBalance": 18.704918,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:56:05.498Z"
+  },
+  "0xdf8adfe10d4a4d9f0fc4d3e377a6e8d5730eb40c": {
+    "address": "0xdf8adfe10d4a4d9f0fc4d3e377a6e8d5730eb40c",
+    "totalTxsEver": 197824,
+    "ethBalance": 12.450858,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:56:12.746Z"
+  },
+  "0xae2fc483527b8ef99eb5d9b44875f005ba1fae13": {
+    "address": "0xae2fc483527b8ef99eb5d9b44875f005ba1fae13",
+    "totalTxsEver": 6042011,
+    "ethBalance": 160.057836,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-02T10:46:10.518Z"
+  },
+  "0xb19c265d240326578eeb346189ebd96ae84949a9": {
+    "address": "0xb19c265d240326578eeb346189ebd96ae84949a9",
+    "totalTxsEver": 46158,
+    "ethBalance": 11.22969,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-02T10:46:10.627Z"
+  },
+  "0x9307514e06a07b149471ccfd690d0e3e6ace8df2": {
+    "address": "0x9307514e06a07b149471ccfd690d0e3e6ace8df2",
+    "totalTxsEver": 20219,
+    "ethBalance": 3.354744,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:56:39.397Z"
+  },
+  "0x5884b2faa9ad6f38010831e2290e515af17a7d47": {
+    "address": "0x5884b2faa9ad6f38010831e2290e515af17a7d47",
+    "totalTxsEver": 46434,
+    "ethBalance": 3.196674,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:56:47.245Z"
+  },
+  "0xf07b4d27cae6571857e51ab3fb209f5226de2d88": {
+    "address": "0xf07b4d27cae6571857e51ab3fb209f5226de2d88",
+    "totalTxsEver": 34597,
+    "ethBalance": 33.336056,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:56:48.245Z"
+  },
+  "0x790f117af8169487725a1c3e92828176042cfc88": {
+    "address": "0x790f117af8169487725a1c3e92828176042cfc88",
+    "totalTxsEver": 86734,
+    "ethBalance": 0.345145,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:56:48.245Z"
+  },
+  "0xffc8de81c34e08cc8fb36ee3791c400017627626": {
+    "address": "0xffc8de81c34e08cc8fb36ee3791c400017627626",
+    "totalTxsEver": 450,
+    "ethBalance": 0.476873,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:56:57.307Z"
+  },
+  "0x3c3dd70be82e23448894ca9352d9134bde138915": {
+    "address": "0x3c3dd70be82e23448894ca9352d9134bde138915",
+    "totalTxsEver": 75340,
+    "ethBalance": 0.430109,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:57:09.791Z"
+  },
+  "0xbafaf9b9a0bda51d047d40cf192eac4f13726ca2": {
+    "address": "0xbafaf9b9a0bda51d047d40cf192eac4f13726ca2",
+    "totalTxsEver": 11,
+    "ethBalance": 0.002441,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-02T10:49:28.364Z"
+  },
+  "0xf70927ec0e21e9258f4d2bd6842a9af573ea5217": {
+    "address": "0xf70927ec0e21e9258f4d2bd6842a9af573ea5217",
+    "totalTxsEver": 72,
+    "ethBalance": 0.000085,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:57:23.230Z"
+  },
+  "0xd37ac934502619cee14908cef22138f4b98e06b4": {
+    "address": "0xd37ac934502619cee14908cef22138f4b98e06b4",
+    "totalTxsEver": 182358,
+    "ethBalance": 126.845634,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:57:31.553Z"
+  },
+  "0xaa8ba7d4611437141192e7ceced531bc0a133efb": {
+    "address": "0xaa8ba7d4611437141192e7ceced531bc0a133efb",
+    "totalTxsEver": 676844,
+    "ethBalance": 134.374866,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:57:41.166Z"
+  },
+  "0x3a3035a3a16e8ab3fbfc0ec05fa01786fcdbec80": {
+    "address": "0x3a3035a3a16e8ab3fbfc0ec05fa01786fcdbec80",
+    "totalTxsEver": 11838,
+    "ethBalance": 13.111809,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:57:48.086Z"
+  },
+  "0x559432e18b281731c054cd703d4b49872be4ed53": {
+    "address": "0x559432e18b281731c054cd703d4b49872be4ed53",
+    "totalTxsEver": 3966418,
+    "ethBalance": 66.613892,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:03.164Z"
+  },
+  "0x6a9d99aa48084936f6cede28720eb67a74abd951": {
+    "address": "0x6a9d99aa48084936f6cede28720eb67a74abd951",
+    "totalTxsEver": 12,
+    "ethBalance": 0.000357,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:05.727Z"
+  },
+  "0xa7104af6236132973c7701bf425be69ef4e46461": {
+    "address": "0xa7104af6236132973c7701bf425be69ef4e46461",
+    "totalTxsEver": 92,
+    "ethBalance": 0.00026,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:12.103Z"
+  },
+  "0x56eddb7aa87536c09ccc2793473599fd21a8b17f": {
+    "address": "0x56eddb7aa87536c09ccc2793473599fd21a8b17f",
+    "totalTxsEver": 9251757,
+    "ethBalance": 7182.706465,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:22.425Z"
+  },
+  "0x8210c43f03ffbf9a7964232c4ae88029dfc2bbef": {
+    "address": "0x8210c43f03ffbf9a7964232c4ae88029dfc2bbef",
+    "totalTxsEver": 60,
+    "ethBalance": 0.001341,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:31.350Z"
+  },
+  "0xc962a2a8252f0fe504c06e8f18904003c641025c": {
+    "address": "0xc962a2a8252f0fe504c06e8f18904003c641025c",
+    "totalTxsEver": 413,
+    "ethBalance": 0.03224,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:37.535Z"
+  },
+  "0x54ba38f7e7e6396f7f0d23b28a975ccc021af61c": {
+    "address": "0x54ba38f7e7e6396f7f0d23b28a975ccc021af61c",
+    "totalTxsEver": 135,
+    "ethBalance": 0.000186,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:47.917Z"
+  },
+  "0xcbc9e65301e747d933a698794167da480dafcbc9": {
+    "address": "0xcbc9e65301e747d933a698794167da480dafcbc9",
+    "totalTxsEver": 51,
+    "ethBalance": 0.004364,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:47.918Z"
+  },
+  "0x0e3eb60df4d14b213dc4de53316ed7bcd4aadc87": {
+    "address": "0x0e3eb60df4d14b213dc4de53316ed7bcd4aadc87",
+    "totalTxsEver": 666,
+    "ethBalance": 2.998535,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:58:59.887Z"
+  },
+  "0x29e619b6006a97403990cc7da76bf23cf98aa2fb": {
+    "address": "0x29e619b6006a97403990cc7da76bf23cf98aa2fb",
+    "totalTxsEver": 4567,
+    "ethBalance": 0.000134,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:59:08.154Z"
+  },
+  "0x23796cfde2d067a7a91513862e5136965686fd40": {
+    "address": "0x23796cfde2d067a7a91513862e5136965686fd40",
+    "totalTxsEver": 612,
+    "ethBalance": 0.008701,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:59:14.307Z"
+  },
+  "0x17d745596b36ba08610f03665d9e38bb31e186d8": {
+    "address": "0x17d745596b36ba08610f03665d9e38bb31e186d8",
+    "totalTxsEver": 372,
+    "ethBalance": 0.055311,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:59:20.734Z"
+  },
+  "0x91ffba7e6e40faf640a8f3ab611b40ee6bfa95a4": {
+    "address": "0x91ffba7e6e40faf640a8f3ab611b40ee6bfa95a4",
+    "totalTxsEver": 81,
+    "ethBalance": 0.089354,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:59:28.585Z"
+  },
+  "0x6d37fb5342bef90c16b6f8b310991971ee573ba2": {
+    "address": "0x6d37fb5342bef90c16b6f8b310991971ee573ba2",
+    "totalTxsEver": 53068,
+    "ethBalance": 0.158257,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:59:38.277Z"
+  },
+  "0xd698ed756cc8f8e67ddc6c9c194f012033b04a32": {
+    "address": "0xd698ed756cc8f8e67ddc6c9c194f012033b04a32",
+    "totalTxsEver": 146,
+    "ethBalance": 0.004629,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:59:45.518Z"
+  },
+  "0x03eed0c64e56b63a6a6643631460a002059415db": {
+    "address": "0x03eed0c64e56b63a6a6643631460a002059415db",
+    "totalTxsEver": 56,
+    "ethBalance": 0.003382,
+    "recentTransferOut": 1,
+    "recentTransferIn": 0,
+    "contractsUsed": [
+      "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    ],
+    "enrichedAt": "2026-04-01T16:59:55.482Z"
+  },
+  "0xf7b4385d269e94b918a44ed6f8499b0e1d73bda0": {
+    "address": "0xf7b4385d269e94b918a44ed6f8499b0e1d73bda0",
+    "totalTxsEver": 3648,
+    "ethBalance": 0.058759,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T16:59:56.710Z"
+  },
+  "0x6586ada1c6b59bb1945104d8a9598adb23ccee57": {
+    "address": "0x6586ada1c6b59bb1945104d8a9598adb23ccee57",
+    "totalTxsEver": 62,
+    "ethBalance": 0.034968,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:00:03.533Z"
+  },
+  "0xff67d7211d4837607d601e65f27b97622540c47f": {
+    "address": "0xff67d7211d4837607d601e65f27b97622540c47f",
+    "totalTxsEver": 2360,
+    "ethBalance": 0.002313,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:00:11.927Z"
+  },
+  "0x909ed665fe4a65271788665c21d7d7067d8da4e8": {
+    "address": "0x909ed665fe4a65271788665c21d7d7067d8da4e8",
+    "totalTxsEver": 43,
+    "ethBalance": 0.000487,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:00:17.408Z"
+  },
+  "0x7f4f5da659ce93deac95e8886ad10bd41f9045f9": {
+    "address": "0x7f4f5da659ce93deac95e8886ad10bd41f9045f9",
+    "totalTxsEver": 38,
+    "ethBalance": 0.105412,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:00:26.399Z"
+  },
+  "0x90cf2ae77a4ec34553c70da0828886123323a240": {
+    "address": "0x90cf2ae77a4ec34553c70da0828886123323a240",
+    "totalTxsEver": 13959,
+    "ethBalance": 0.331763,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:00:34.590Z"
+  },
+  "0xccb4f77f49ff0b1c0cdf8770a2f4b2274e206b28": {
+    "address": "0xccb4f77f49ff0b1c0cdf8770a2f4b2274e206b28",
+    "totalTxsEver": 963,
+    "ethBalance": 0.68301,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:01:19.424Z"
+  },
+  "0x53dc74d99518d752ae866b1efc4fa52b0dde12de": {
+    "address": "0x53dc74d99518d752ae866b1efc4fa52b0dde12de",
+    "totalTxsEver": 1742,
+    "ethBalance": 0.049845,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:01:34.055Z"
+  },
+  "0xa7b5ce53d71d2215d679642307adfa3f39de5448": {
+    "address": "0xa7b5ce53d71d2215d679642307adfa3f39de5448",
+    "totalTxsEver": 156013,
+    "ethBalance": 2.856755,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:01:41.732Z"
+  },
+  "0xbca34ed5875079cc561840f3409a790769821dbc": {
+    "address": "0xbca34ed5875079cc561840f3409a790769821dbc",
+    "totalTxsEver": 212310,
+    "ethBalance": 1.854598,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:01:49.151Z"
+  },
+  "0xc7b793b18b3fb88226be699bed6343ae292655b0": {
+    "address": "0xc7b793b18b3fb88226be699bed6343ae292655b0",
+    "totalTxsEver": 30,
+    "ethBalance": 0.003319,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:01:57.891Z"
+  },
+  "0x589d7f52cdead3e50438af7b7a20bacf05ca8e08": {
+    "address": "0x589d7f52cdead3e50438af7b7a20bacf05ca8e08",
+    "totalTxsEver": 72,
+    "ethBalance": 0.014213,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:02:04.474Z"
+  },
+  "0x282fb83344e36e7b906c4bfb615ad8f8351fb644": {
+    "address": "0x282fb83344e36e7b906c4bfb615ad8f8351fb644",
+    "totalTxsEver": 68101,
+    "ethBalance": 82.453012,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:02:14.361Z"
+  },
+  "0xf49b93f911e0867b917f3870f1d66f9ac0f217d5": {
+    "address": "0xf49b93f911e0867b917f3870f1d66f9ac0f217d5",
+    "totalTxsEver": 3011,
+    "ethBalance": 0.029698,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:02:25.324Z"
+  },
+  "0xf8419a4e26e70b155886ac7ed2c1414218002d75": {
+    "address": "0xf8419a4e26e70b155886ac7ed2c1414218002d75",
+    "totalTxsEver": 46,
+    "ethBalance": 0.000262,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:02:38.850Z"
+  },
+  "0xb70e61fbc01255c27cca3b3e0171f69fb8745860": {
+    "address": "0xb70e61fbc01255c27cca3b3e0171f69fb8745860",
+    "totalTxsEver": 269,
+    "ethBalance": 0.014734,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:02:42.908Z"
+  },
+  "0xabc0000000000000000000000000000000000001": {
+    "address": "0xabc0000000000000000000000000000000000001",
+    "totalTxsEver": null,
+    "ethBalance": null,
+    "recentTransferOut": 0,
+    "recentTransferIn": 0,
+    "contractsUsed": [],
+    "enrichedAt": "2026-04-01T17:06:46.082Z"
+  }
+}

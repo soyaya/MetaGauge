@@ -50,8 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Protected Route Logic
     useEffect(() => {
-        const PUBLIC_ROUTES = ['/', '/login', '/signup', '/verify', '/explore'];
-        const isPublicRoute = PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/verify');
+        const PUBLIC_ROUTES = ['/', '/login', '/signup', '/verify', '/explore', '/forgot-password', '/reset-password', '/onboarding'];
+        const isPublicRoute = PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/verify') || pathname.startsWith('/reset-password');
 
         if (!isLoading && !token && !isPublicRoute) {
             // Store the intended destination for redirect after login
@@ -65,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(newUser);
         localStorage.setItem('token', newToken);
         localStorage.setItem('user', JSON.stringify(newUser));
+        localStorage.removeItem('pending_token'); // clean up any leftover registration token
     };
 
     const logout = () => {
@@ -72,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('pending_token');
         window.location.href = '/';
     };
 
@@ -81,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         login,
         logout,
-        isAuthenticated: !!user,
+        isAuthenticated: !!token,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

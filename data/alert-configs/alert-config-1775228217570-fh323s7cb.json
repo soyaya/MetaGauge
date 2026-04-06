@@ -1,0 +1,77 @@
+{
+  "id": "alert-config-1775228217570-fh323s7cb",
+  "userId": "206f1eff-67bd-4eff-a98a-c9e6a4247c6e",
+  "contractId": null,
+  "enabled": true,
+  "categories": {
+    "security": true,
+    "performance": true,
+    "liquidity": true,
+    "anomaly": true,
+    "growth": true
+  },
+  "severityLevels": {
+    "critical": true,
+    "high": true,
+    "medium": true,
+    "low": false
+  },
+  "thresholds": {
+    "gasPrice": {
+      "enabled": false,
+      "value": 100,
+      "unit": "gwei"
+    },
+    "failureRate": {
+      "enabled": false,
+      "value": 5,
+      "unit": "%"
+    },
+    "tvlChange": {
+      "enabled": false,
+      "value": 20,
+      "unit": "%"
+    },
+    "volumeChange": {
+      "enabled": false,
+      "value": 30,
+      "unit": "%"
+    },
+    "userDropoff": {
+      "enabled": false,
+      "value": 25,
+      "unit": "%"
+    },
+    "whaleActivity": {
+      "enabled": false,
+      "value": 100000,
+      "unit": "USD"
+    }
+  },
+  "notifications": {
+    "inApp": true,
+    "email": false,
+    "webhook": false,
+    "webhookUrl": null
+  },
+  "schedule": {
+    "realTime": true,
+    "daily": false,
+    "weekly": false,
+    "dailyTime": "09:00",
+    "weeklyDay": "monday"
+  },
+  "competitorAlerts": {
+    "volumeSpike": false,
+    "userGrowth": false,
+    "tvlChange": false
+  },
+  "createdAt": "2026-04-03T14:56:57.570Z",
+  "updatedAt": "2026-04-03T14:56:57.570Z",
+  "type": "competitive",
+  "competitorId": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2_ethereum",
+  "metric": "uniqueUsers",
+  "condition": "above",
+  "threshold": 100,
+  "name": "WETH users spike"
+}

@@ -86,7 +86,7 @@ router.get('/signatures', async (req, res) => {
       return res.json(cached);
     }
     
-    const signatures = await analyticsService.getFunctionSignatures(contractAddress, chain, dateRange);
+    const signatures = await analyticsService.getFunctionSignatures(contractAddress, chain, dateRange, req.user?.id);
     
     // Cache result
     cacheService.set(cacheKey, signatures);

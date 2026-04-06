@@ -54,7 +54,6 @@ export class EnhancedAnalyticsEngine {
       // Check for common ABIs based on chain
       const commonAbis = {
         'ethereum': ['common-defi.json', 'usdc.json', 'competitor-4-uniswap-v3.json'],
-        'lisk': ['common-defi.json', 'usdc.json'],
         'starknet': ['common-defi.json', 'trip.json']
       };
       

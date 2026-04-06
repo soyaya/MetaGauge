@@ -1,0 +1,191 @@
+{
+  "retentionRate7d": {
+    "definition": "Percentage of users who interact with the contract again within 7 days of their first interaction",
+    "unit": "%",
+    "goodRange": ">40",
+    "warnRange": "20-40",
+    "badRange": "<20",
+    "alertThreshold": 20,
+    "interpretation": "Low D7 retention means users are not finding enough value to return. Above 40% is strong for DeFi."
+  },
+  "retentionRate30d": {
+    "definition": "Percentage of users who interact again within 30 days",
+    "unit": "%",
+    "goodRange": ">25",
+    "warnRange": "10-25",
+    "badRange": "<10",
+    "alertThreshold": 10,
+    "interpretation": "D30 retention above 25% indicates a sticky product. Below 10% signals serious churn risk."
+  },
+  "successRate": {
+    "definition": "Percentage of transactions that complete without reverting",
+    "unit": "%",
+    "goodRange": ">95",
+    "warnRange": "85-95",
+    "badRange": "<85",
+    "alertThreshold": 85,
+    "interpretation": "Below 85% success rate indicates UX friction, gas estimation issues, or contract bugs."
+  },
+  "failureRate": {
+    "definition": "Percentage of transactions that revert or fail",
+    "unit": "%",
+    "goodRange": "<5",
+    "warnRange": "5-15",
+    "badRange": ">15",
+    "alertThreshold": 15,
+    "interpretation": "High failure rate directly damages user trust and increases gas costs for users."
+  },
+  "botRatio": {
+    "definition": "Percentage of wallets classified as bots based on behavioral patterns",
+    "unit": "%",
+    "goodRange": "<5",
+    "warnRange": "5-20",
+    "badRange": ">20",
+    "alertThreshold": 20,
+    "interpretation": "High bot ratio inflates metrics and may indicate wash trading or MEV exploitation."
+  },
+  "whaleConcentration": {
+    "definition": "Percentage of total volume controlled by top 10 wallets",
+    "unit": "%",
+    "goodRange": "<30",
+    "warnRange": "30-60",
+    "badRange": ">60",
+    "alertThreshold": 60,
+    "interpretation": "High whale concentration creates exit risk. Healthy protocols have distributed activity."
+  },
+  "dau": {
+    "definition": "Daily Active Users — unique wallets interacting per day",
+    "unit": "count",
+    "goodRange": "growing",
+    "warnRange": "flat",
+    "badRange": "declining",
+    "alertThreshold": null,
+    "interpretation": "DAU trend is more important than absolute value. 7-day declining trend is a warning signal."
+  },
+  "mau": {
+    "definition": "Monthly Active Users — unique wallets interacting in the last 30 days",
+    "unit": "count",
+    "goodRange": "growing",
+    "warnRange": "flat",
+    "badRange": "declining",
+    "alertThreshold": null,
+    "interpretation": "MAU/DAU ratio above 0.3 indicates strong daily engagement relative to monthly base."
+  },
+  "newUsers": {
+    "definition": "Wallets interacting with the contract for the first time in the period",
+    "unit": "count",
+    "goodRange": "growing",
+    "warnRange": "flat",
+    "badRange": "declining",
+    "alertThreshold": null,
+    "interpretation": "New user growth is the primary acquisition signal. Declining new users means marketing or product issues."
+  },
+  "churnRate": {
+    "definition": "Percentage of previously active users who did not return in the current period",
+    "unit": "%",
+    "goodRange": "<20",
+    "warnRange": "20-40",
+    "badRange": ">40",
+    "alertThreshold": 40,
+    "interpretation": "Churn above 40% monthly means the protocol is losing users faster than it acquires them."
+  },
+  "tvl": {
+    "definition": "Total Value Locked — USD value of assets deposited in the contract",
+    "unit": "USD",
+    "goodRange": "growing",
+    "warnRange": "flat",
+    "badRange": "declining >10% in 7d",
+    "alertThreshold": null,
+    "interpretation": "TVL is the primary trust signal for DeFi. A 10%+ drop in 7 days warrants immediate investigation."
+  },
+  "volume": {
+    "definition": "Total USD value of transactions processed in the period",
+    "unit": "USD",
+    "goodRange": "growing",
+    "warnRange": "flat",
+    "badRange": "declining",
+    "alertThreshold": null,
+    "interpretation": "Volume growth indicates increasing protocol utility. Compare against TVL for utilization ratio."
+  },
+  "fees": {
+    "definition": "Total protocol fees collected in the period",
+    "unit": "USD",
+    "goodRange": "growing",
+    "warnRange": "flat",
+    "badRange": "declining",
+    "alertThreshold": null,
+    "interpretation": "Fee revenue is the sustainability metric. Protocols with growing fees can fund development."
+  },
+  "gasEfficiency": {
+    "definition": "Average gas used per transaction relative to the contract's historical baseline",
+    "unit": "gwei",
+    "goodRange": "<100000 gas",
+    "warnRange": "100000-300000 gas",
+    "badRange": ">300000 gas",
+    "alertThreshold": 300000,
+    "interpretation": "High gas usage reduces accessibility. Optimization opportunities exist above 300k gas/tx."
+  },
+  "avgGasUsed": {
+    "definition": "Mean gas units consumed per transaction",
+    "unit": "gas units",
+    "goodRange": "<150000",
+    "warnRange": "150000-300000",
+    "badRange": ">300000",
+    "alertThreshold": 300000,
+    "interpretation": "Compare against similar protocol types. ERC20 transfers should be ~65k, complex DeFi ~200k."
+  },
+  "liquidityUtilization": {
+    "definition": "Ratio of volume to TVL — how efficiently locked liquidity is being used",
+    "unit": "%",
+    "goodRange": ">50",
+    "warnRange": "20-50",
+    "badRange": "<20",
+    "alertThreshold": 20,
+    "interpretation": "Low utilization means capital is sitting idle. High utilization (>100%) may indicate liquidity risk."
+  },
+  "volumeToTvlRatio": {
+    "definition": "Daily volume divided by TVL — capital efficiency metric",
+    "unit": "ratio",
+    "goodRange": ">0.1",
+    "warnRange": "0.05-0.1",
+    "badRange": "<0.05",
+    "alertThreshold": 0.05,
+    "interpretation": "A ratio above 0.1 means the protocol turns over 10%+ of its TVL daily — strong capital efficiency."
+  },
+  "engagementScore": {
+    "definition": "Composite score (0-100) based on transaction frequency, value, and recency per user",
+    "unit": "score",
+    "goodRange": ">60",
+    "warnRange": "30-60",
+    "badRange": "<30",
+    "alertThreshold": 30,
+    "interpretation": "Engagement score below 30 means users are passive or disengaged. Target high-engagement cohorts for retention."
+  },
+  "avgTransactionsPerUser": {
+    "definition": "Mean number of transactions per unique wallet in the period",
+    "unit": "count",
+    "goodRange": ">3",
+    "warnRange": "1-3",
+    "badRange": "<1",
+    "alertThreshold": 1,
+    "interpretation": "Average below 1 means most users only interact once — a strong signal of poor retention."
+  },
+  "uniqueUsers": {
+    "definition": "Total unique wallet addresses that interacted with the contract",
+    "unit": "count",
+    "goodRange": "growing",
+    "warnRange": "flat",
+    "badRange": "declining",
+    "alertThreshold": null,
+    "interpretation": "Unique user count is the base audience metric. Growth rate matters more than absolute number."
+  },
+  "revenuePerUser": {
+    "definition": "Total fee revenue divided by unique users in the period",
+    "unit": "USD",
+    "goodRange": ">1",
+    "warnRange": "0.1-1",
+    "badRange": "<0.1",
+    "alertThreshold": 0.1,
+    "interpretation": "Revenue per user below $0.10 means the protocol is not monetizing its user base effectively."
+  }
+}

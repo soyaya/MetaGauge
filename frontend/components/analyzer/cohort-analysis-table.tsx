@@ -47,16 +47,17 @@ export function CohortAnalysisTable({ contractAddress, chain }: CohortAnalysisTa
       setLoading(true)
       setError(null)
       
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
       const response = await fetch(
-        `/api/functions/cohorts?contractAddress=${contractAddress}&chain=${chain}&metricType=${metricType}&cohortPeriod=${cohortPeriod}`
+        `${API_BASE}/api/functions/cohorts?contractAddress=${encodeURIComponent(contractAddress)}&chain=${encodeURIComponent(chain)}&metricType=${metricType}&cohortPeriod=${cohortPeriod}`,
+        { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } }
       )
       
-      if (!response.ok) {
-        throw new Error('Failed to load cohorts')
-      }
+      if (!response.ok) throw new Error(`Failed to load cohorts (${response.status})`)
       
       const data = await response.json()
-      setCohorts(data)
+      setCohorts(Array.isArray(data) ? data : [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {

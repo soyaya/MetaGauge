@@ -1,40 +1,55 @@
 /**
- * Subscription API Routes
- * Handles subscription-related API endpoints
+ * Subscription Routes
+ * Handles subscription status and usage tracking
  */
 
 import express from 'express';
+import { UserStorage } from '../database/index.js';
 import subscriptionService from '../../services/SubscriptionService.js';
-import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
 /**
- * GET /api/subscription/status/:walletAddress
- * Get subscription status for a wallet address
+ * GET /api/subscription/status
+ * Returns user's subscription status and tier information
  */
-router.get('/status/:walletAddress', authenticateToken, async (req, res) => {
+router.get('/status', async (req, res) => {
   try {
-    const { walletAddress } = req.params;
-    
-    const isActive = await subscriptionService.isSubscriberActive(walletAddress);
-    
-    if (!isActive) {
-      return res.json({
-        isActive: false,
-        tier: 0,
-        tierName: 'Free'
-      });
+    const user = await UserStorage.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    const subscriptionInfo = await subscriptionService.getSubscriptionInfo(walletAddress);
-    
+    // Get subscription status from service
+    const status = await subscriptionService.getSubscriptionStatus(req.user.id);
+
     res.json({
-      isActive: true,
-      ...subscriptionInfo
+      tier: user.tier || 'free',
+      tierName: getTierDisplayName(user.tier || 'free'),
+      isActive: user.isActive !== false,
+      limits: {
+        monthly: status.limits?.monthly || 10,
+        remaining: status.limits?.remaining || 10,
+        maxProjects: status.limits?.maxProjects || 1,
+        maxAlerts: status.limits?.maxAlerts || 3,
+        historicalDays: status.limits?.historicalDays || 7
+      },
+      usage: {
+        analysisCount: user.usage?.analysisCount || 0,
+        monthlyAnalysisCount: user.usage?.monthlyAnalysisCount || 0,
+        lastAnalysis: user.usage?.lastAnalysis || null,
+        monthlyResetDate: user.usage?.monthlyResetDate || new Date().toISOString()
+      },
+      features: {
+        aiInsights: ['pro', 'enterprise'].includes(user.tier),
+        competitiveAnalysis: ['enterprise'].includes(user.tier),
+        apiAccess: ['pro', 'enterprise'].includes(user.tier),
+        continuousSync: ['starter', 'pro', 'enterprise'].includes(user.tier)
+      }
     });
+
   } catch (error) {
-    console.error('Error getting subscription status:', error);
+    console.error('Subscription status error:', error);
     res.status(500).json({
       error: 'Failed to get subscription status',
       message: error.message
@@ -43,217 +58,106 @@ router.get('/status/:walletAddress', authenticateToken, async (req, res) => {
 });
 
 /**
- * GET /api/subscription/info/:walletAddress
- * Get detailed subscription information
+ * GET /api/subscription/usage
+ * Returns detailed usage statistics
  */
-router.get('/info/:walletAddress', authenticateToken, async (req, res) => {
+router.get('/usage', async (req, res) => {
   try {
-    const { walletAddress } = req.params;
-    
-    const subscriptionInfo = await subscriptionService.getSubscriptionInfo(walletAddress);
-    
-    res.json(subscriptionInfo);
+    const usage = await subscriptionService.getUsage(req.user.id);
+    res.json(usage);
   } catch (error) {
-    console.error('Error getting subscription info:', error);
+    console.error('Subscription usage error:', error);
     res.status(500).json({
-      error: 'Failed to get subscription info',
+      error: 'Failed to get usage statistics',
       message: error.message
     });
   }
 });
 
 /**
- * GET /api/subscription/plans
- * Get all available subscription plans
+ * POST /api/subscription/verify
+ * Verifies subscription payment and updates user tier
  */
-router.get('/plans', async (req, res) => {
+router.post('/verify', async (req, res) => {
   try {
-    const plans = await subscriptionService.getAllPlans();
-    
-    res.json({
-      plans,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Error getting subscription plans:', error);
-    res.status(500).json({
-      error: 'Failed to get subscription plans',
-      message: error.message
-    });
-  }
-});
+    const { transactionHash, chain = 'ethereum' } = req.body;
 
-/**
- * GET /api/subscription/plan/:tier
- * Get specific plan information
- */
-router.get('/plan/:tier', async (req, res) => {
-  try {
-    const { tier } = req.params;
-    const tierNumber = parseInt(tier);
-    
-    if (isNaN(tierNumber) || tierNumber < 0 || tierNumber > 3) {
+    if (!transactionHash) {
       return res.status(400).json({
-        error: 'Invalid tier. Must be 0-3'
+        error: 'Missing transaction hash',
+        message: 'Transaction hash is required for verification'
       });
     }
 
-    const planInfo = await subscriptionService.getPlanInfo(tierNumber);
+    // Verify the transaction (placeholder - implement actual verification)
+    const verification = await verifySubscriptionPayment(transactionHash, chain);
     
-    res.json(planInfo);
-  } catch (error) {
-    console.error('Error getting plan info:', error);
-    res.status(500).json({
-      error: 'Failed to get plan info',
-      message: error.message
-    });
-  }
-});
-
-/**
- * POST /api/subscription/validate
- * Validate user access for specific features
- */
-router.post('/validate', authenticateToken, async (req, res) => {
-  try {
-    const { walletAddress, requiredFeature, requiredTier } = req.body;
-    
-    if (!walletAddress) {
+    if (!verification.valid) {
       return res.status(400).json({
-        error: 'Wallet address is required'
+        error: 'Invalid transaction',
+        message: verification.reason || 'Transaction could not be verified'
       });
     }
 
-    const access = await subscriptionService.validateUserAccess(walletAddress, requiredFeature);
-    
-    // Check tier requirement if specified
-    if (requiredTier !== undefined && access.hasAccess && access.tier < requiredTier) {
-      access.hasAccess = false;
-      access.reason = `Tier ${requiredTier} or higher required`;
-    }
-
-    res.json(access);
-  } catch (error) {
-    console.error('Error validating subscription:', error);
-    res.status(500).json({
-      error: 'Failed to validate subscription',
-      message: error.message
+    // Update user subscription
+    const user = await UserStorage.findById(req.user.id);
+    const updatedUser = await UserStorage.update(req.user.id, {
+      tier: verification.tier,
+      subscriptionTier: verification.tier,
+      subscriptionExpiry: verification.expiryDate,
+      lastPayment: {
+        transactionHash,
+        amount: verification.amount,
+        tier: verification.tier,
+        date: new Date().toISOString(),
+        chain
+      }
     });
-  }
-});
-
-/**
- * GET /api/subscription/stats
- * Get subscription statistics (admin only)
- */
-router.get('/stats', authenticateToken, async (req, res) => {
-  try {
-    // Check if user is admin (implement your admin check logic)
-    // if (!req.user.isAdmin) {
-    //   return res.status(403).json({ error: 'Admin access required' });
-    // }
-
-    const stats = await subscriptionService.getSubscriptionStats();
-    
-    res.json(stats);
-  } catch (error) {
-    console.error('Error getting subscription stats:', error);
-    res.status(500).json({
-      error: 'Failed to get subscription stats',
-      message: error.message
-    });
-  }
-});
-
-/**
- * POST /api/subscription/link
- * Link wallet address to user account
- */
-router.post('/link', authenticateToken, async (req, res) => {
-  try {
-    const { walletAddress } = req.body;
-    const userId = req.user.id;
-    
-    if (!walletAddress) {
-      return res.status(400).json({
-        error: 'Wallet address is required'
-      });
-    }
-
-    // Validate wallet address format
-    if (!walletAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
-      return res.status(400).json({
-        error: 'Invalid wallet address format'
-      });
-    }
-
-    // Here you would typically save the wallet-user mapping to your database
-    // Example:
-    // await User.updateOne(
-    //   { _id: userId },
-    //   { walletAddress: walletAddress.toLowerCase() }
-    // );
-
-    console.log(`Linking wallet ${walletAddress} to user ${userId}`);
-
-    // Get subscription status for the linked wallet
-    const subscriptionStatus = await subscriptionService.isSubscriberActive(walletAddress);
-    let subscriptionInfo = null;
-
-    if (subscriptionStatus) {
-      subscriptionInfo = await subscriptionService.getSubscriptionInfo(walletAddress);
-    }
 
     res.json({
       success: true,
-      walletAddress: walletAddress.toLowerCase(),
-      subscriptionActive: subscriptionStatus,
-      subscriptionInfo
+      message: 'Subscription verified and updated',
+      tier: verification.tier,
+      expiryDate: verification.expiryDate,
+      user: {
+        id: updatedUser.id,
+        tier: updatedUser.tier,
+        subscriptionTier: updatedUser.subscriptionTier
+      }
     });
+
   } catch (error) {
-    console.error('Error linking wallet:', error);
+    console.error('Subscription verification error:', error);
     res.status(500).json({
-      error: 'Failed to link wallet',
+      error: 'Failed to verify subscription',
       message: error.message
     });
   }
 });
 
-/**
- * GET /api/subscription/user/:userId
- * Get subscription info for a user ID
- */
-router.get('/user/:userId', authenticateToken, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    // Here you would typically get the wallet address from your database
-    // Example:
-    // const user = await User.findById(userId);
-    // if (!user || !user.walletAddress) {
-    //   return res.status(404).json({ error: 'User wallet not found' });
-    // }
-    // const walletAddress = user.walletAddress;
+// Helper functions
+function getTierDisplayName(tier) {
+  const tierNames = {
+    free: 'Free',
+    starter: 'Starter',
+    pro: 'Pro',
+    enterprise: 'Enterprise'
+  };
+  return tierNames[tier] || 'Free';
+}
 
-    // For now, return a placeholder response
-    res.json({
-      error: 'User-wallet mapping not implemented',
-      message: 'Please implement user-wallet database mapping'
-    });
-  } catch (error) {
-    console.error('Error getting user subscription:', error);
-    res.status(500).json({
-      error: 'Failed to get user subscription',
-      message: error.message
-    });
-  }
-});
-
-/**
- * Middleware for protecting routes based on subscription
- */
-export const requireSubscription = (requiredTier = 0, requiredFeature = null) => {
-  return subscriptionService.createSubscriptionMiddleware(requiredTier, requiredFeature);
-};
+async function verifySubscriptionPayment(transactionHash, chain) {
+  // Placeholder implementation
+  // In production, this would verify the transaction on-chain
+  
+  // For now, return a mock verification
+  return {
+    valid: true,
+    tier: 'starter',
+    amount: '0.01',
+    expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+    reason: null
+  };
+}
 
 export default router;

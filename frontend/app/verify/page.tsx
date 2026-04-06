@@ -1,130 +1,147 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import React, { useState, useEffect, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { AuthCard } from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/components/auth/auth-provider"
+import { Loader2, Mail } from "lucide-react"
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 function VerifyForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { login } = useAuth()
+  const { token: authToken, login } = useAuth()
+
+  // Use verified token if available, otherwise fall back to pending registration token
+  const getToken = () => authToken || (typeof window !== 'undefined' ? localStorage.getItem('pending_token') : null)
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState("")
+  const [resending, setResending] = useState(false)
+  const [error, setError] = useState("")
+  const [resendMsg, setResendMsg] = useState("")
+  const [countdown, setCountdown] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const email = searchParams.get('email') || ''
   const redirectTo = searchParams.get('redirect')
 
+  // Auto-focus OTP input
+  useEffect(() => { inputRef.current?.focus() }, [])
+
+  // Countdown timer for resend
   useEffect(() => {
-    const emailParam = searchParams.get('email')
-    if (emailParam) {
-      setEmail(emailParam)
+    if (countdown <= 0) return
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [countdown])
+
+  const sendOtp = async (isResend = false) => {
+    const token = getToken()
+    if (!token) return
+    isResend ? setResending(true) : null
+    setResendMsg("")
+    setError("")
+    try {
+      const res = await fetch(`${API}/api/auth/send-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (isResend) {
+        setResendMsg('New code sent!')
+        setCountdown(60)
+        // Dev mode: show OTP in message
+        if (data.devOtp) setResendMsg(`Dev mode — code: ${data.devOtp}`)
+      }
+    } catch {
+      if (isResend) setError('Failed to resend code. Try again.')
+    } finally {
+      if (isResend) setResending(false)
     }
-  }, [searchParams])
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (otp.length !== 6) { setError('Enter the 6-digit code'); return }
+    if (loading) return  // prevent double-fire
+    setError("")
     setLoading(true)
-    
-    // Validate OTP format
-    if (otp.length !== 6) {
-      alert('Please enter a 6-digit verification code')
-      setLoading(false)
-      return
-    }
-
     try {
-      // Call backend API to verify OTP
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/verify-otp`, {
+      const res = await fetch(`${API}/api/auth/verify-otp`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          otp
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
       })
-
-      if (!response.ok) {
-        const error = await response.json()
-        alert(error.message || 'Verification failed')
-        setLoading(false)
-        return
-      }
-
-      const data = await response.json()
-      
-      // Login with real token from backend
+      const data = await res.json()
+      if (!res.ok) { setError(data.message || 'Verification failed'); return }
+      localStorage.removeItem('pending_token')
       login(data.token, data.user)
-
-      // Handle redirect based on user state
-      if (redirectTo === 'analyzer') {
-        router.push('/analyzer')
-      } else if (!data.user.onboarding_completed) {
-        router.push("/onboarding")
-      } else {
-        const roles = data.user.roles || []
-        if (roles.includes('startup')) {
-          router.push("/startup")
-        } else {
-          router.push("/dashboard")
-        }
-      }
-    } catch (error) {
-      console.error('Verification error:', error)
-      alert('Failed to verify code. Please try again.')
+      router.push(redirectTo ? decodeURIComponent(redirectTo) : '/onboarding')
+    } catch {
+      setError('Failed to verify. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
+  // Auto-submit when 6 digits entered
+  useEffect(() => {
+    if (otp.length === 6 && !loading) {
+      handleSubmit({ preventDefault: () => {} } as any)
+    }
+  }, [otp]) // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <AuthCard>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">Verify Your Email</h1>
-        <p className="text-muted-foreground mt-1">
-          We sent a verification code to {email}
-        </p>
-        <p className="text-sm text-muted-foreground mt-2 text-center">
-          Enter the 6-digit verification code sent to your email
-        </p>
+    <AuthCard heading="Check your email" subheading={`We sent a 6-digit code to ${email}`}>
+      <div className="flex justify-center mb-6">
+        <div className="w-14 h-14 rounded-2xl gradient-brand flex items-center justify-center">
+          <Mail className="w-7 h-7 text-white" />
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">{error}</p>}
+        {resendMsg && <p className="text-sm text-green-600 bg-green-50 p-3 rounded-lg">{resendMsg}</p>}
+
         <div className="space-y-2">
-          <Label htmlFor="otp">Verification Code</Label>
+          <Label htmlFor="otp">Verification code</Label>
           <Input
+            ref={inputRef}
             id="otp"
             type="text"
-            placeholder="Enter 6-digit code"
+            inputMode="numeric"
+            placeholder="000000"
             value={otp}
-            onChange={(e) => setOtp(e.target.value)}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
             maxLength={6}
-            className="text-center text-lg tracking-widest"
+            className="text-center text-2xl tracking-[0.5em] font-mono h-14"
+            disabled={loading}
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading || otp.length !== 6}>
-          {loading ? "Verifying..." : "Verify Email"}
+        <Button type="submit" className="w-full gradient-brand text-white" disabled={loading || otp.length !== 6}>
+          {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying...</> : 'Verify Email'}
         </Button>
       </form>
 
-      <div className="text-center mt-6">
+      <div className="text-center mt-4">
         <p className="text-sm text-muted-foreground">
-          Didn't receive the code?{" "}
-          <button 
-            type="button"
-            className="font-semibold hover:underline text-primary"
-            onClick={() => {
-              // Implement resend logic here
-              alert("Resend functionality would be implemented here")
-            }}
-          >
-            Resend
-          </button>
+          Didn't get it?{' '}
+          {countdown > 0 ? (
+            <span className="text-muted-foreground">Resend in {countdown}s</span>
+          ) : (
+            <button
+              onClick={() => sendOtp(true)}
+              disabled={resending}
+              className="font-semibold text-primary hover:underline disabled:opacity-50"
+            >
+              {resending ? 'Sending...' : 'Resend code'}
+            </button>
+          )}
         </p>
       </div>
     </AuthCard>
@@ -134,11 +151,8 @@ function VerifyForm() {
 export default function VerifyPage() {
   return (
     <Suspense fallback={
-      <AuthCard>
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold">Verify Your Email</h1>
-          <p className="text-muted-foreground mt-1">Loading...</p>
-        </div>
+      <AuthCard heading="Check your email" subheading="Enter the code we sent you">
+        <div className="h-32 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
       </AuthCard>
     }>
       <VerifyForm />

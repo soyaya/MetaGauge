@@ -1,10 +1,9 @@
 /**
  * Ethereum RPC Client
- * Optimized client for Ethereum's JSON-RPC API with robust filter handling
+ * Optimized client for Ethereum's JSON-RPC API with chunked fetching
  * Multi-Chain RPC Integration - Compatible with MultiChainContractIndexer
  */
 
-import { createRobustProvider } from './RobustProvider.js';
 import { RpcCache } from './RpcCache.js';
 import { RpcRequestQueue } from './RpcRequestQueue.js';
 import { RpcErrorTracker } from './RpcErrorTracker.js';
@@ -25,15 +24,8 @@ export class EthereumRpcClient {
     this.queue = new RpcRequestQueue(this.config.tier);
     this.errorTracker = new RpcErrorTracker();
     this.blockTimestampCache = new Map();
-    
-    // Create robust provider to handle filter errors (use first URL)
-    // IMPORTANT: Disable filter-based polling to prevent "filter not found" errors
-    this.robustProvider = createRobustProvider(this.rpcUrls[0], {
-      maxBlockRange: options.maxBlockRange || 2000,
-      pollingInterval: options.pollingInterval || 4000,
-      usePolling: true,
-      disableFilters: true // Explicitly disable filter-based polling
-    });
+    // API key for gateway RPC (set via ETHEREUM_RPC_API_KEY env var)
+    this.apiKey = process.env.ETHEREUM_RPC_API_KEY || null;
   }
 
   setTier(tier) {
@@ -49,18 +41,7 @@ export class EthereumRpcClient {
     }
 
     return this.queue.enqueue(async () => {
-      // Use robust provider for filter-related calls
-      if (method === 'eth_getLogs') {
-        try {
-          const result = await this.robustProvider.getLogs(params[0]);
-          this.cache.set(method, params, result);
-          return result;
-        } catch (error) {
-          this.errorTracker.track(error, { method, params, provider: 'robust' });
-          // Fall through to direct RPC call with failover
-        }
-      }
-      
+      // Direct RPC call with failover (no RobustProvider)
       const payload = {
         jsonrpc: '2.0',
         method,
@@ -86,7 +67,10 @@ export class EthereumRpcClient {
           try {
             const response = await fetch(rpcUrl, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                ...(this.apiKey && rpcUrl.includes('thebuidl.xyz') ? { 'x-api-key': this.apiKey } : {}),
+              },
               body: JSON.stringify(payload),
               signal: controller.signal
             });
@@ -98,6 +82,14 @@ export class EthereumRpcClient {
             }
 
             const data = await response.json();
+
+            // Normalise gateway wrapper: { status, result: { jsonrpc, result, id }, message }
+            // The actual RPC result is nested at data.result.result
+            if (data.status === 'success' && data.result?.jsonrpc === '2.0') {
+              // Unwrap — treat as standard JSON-RPC from here
+              data.result = data.result.result;
+              data.error  = data.result?.error ?? null;
+            }
             
             if (data.error) {
               // Handle specific filter errors - suppress and return empty results
@@ -140,6 +132,10 @@ export class EthereumRpcClient {
 
   async getBlockNumber() {
     const result = await this._makeRpcCall('eth_blockNumber', [], 10000);
+    // Standard JSON-RPC returns hex string; gateway may return { blockNumber: "decimal" }
+    if (result && typeof result === 'object' && result.blockNumber) {
+      return parseInt(result.blockNumber, 10);
+    }
     return parseInt(result, 16);
   }
 
@@ -180,7 +176,7 @@ export class EthereumRpcClient {
   /**
    * Optimized transaction fetching for Ethereum - focuses on events first
    */
-  async getTransactionsByAddress(contractAddress, fromBlock, toBlock) {
+  async getTransactionsByAddress(contractAddress, fromBlock, toBlock, progressCallback = null) {
     const transactions = [];
     const events = [];
     const totalBlocks = toBlock - fromBlock + 1;
@@ -191,7 +187,7 @@ export class EthereumRpcClient {
       // Step 1: Fetch contract events in chunks (prevents timeout on high-activity contracts)
       console.log(`   📋 Fetching contract events from blocks ${fromBlock}-${toBlock}...`);
       
-      const CHUNK_SIZE = 2000; // Fetch 2000 blocks at a time
+      const CHUNK_SIZE = 1000; // Reduced to 1000 blocks for faster fetching
       const allLogs = [];
       
       for (let start = fromBlock; start <= toBlock; start += CHUNK_SIZE) {
@@ -207,6 +203,11 @@ export class EthereumRpcClient {
         
         const progress = ((start - fromBlock) / totalBlocks * 100).toFixed(1);
         console.log(`   📦 Chunk ${start}-${end}: ${chunkLogs.length} events (${progress}% complete, total: ${allLogs.length})`);
+        
+        // Call progress callback if provided
+        if (progressCallback) {
+          await progressCallback(parseFloat(progress) / 100, allLogs.length);
+        }
       }
       
       console.log(`   📋 Found ${allLogs.length} contract events total`);
@@ -230,16 +231,21 @@ export class EthereumRpcClient {
       const eventTxHashes = new Set(allLogs.map(log => log.transactionHash));
       console.log(`   🔗 Found ${eventTxHashes.size} unique transactions from events`);
       
-      // Step 3: Batch fetch transaction details for event transactions
-      // Use tier-based batch sizes for optimal performance
-      const batchSize = this.config.tier === 'enterprise' ? 25 : 
-                        this.config.tier === 'pro' ? 20 : 15;
+      // Hard cap at 50 transactions for historical fetch
+      const maxTransactions = 50;
       const txHashArray = Array.from(eventTxHashes);
+      const limitedTxHashes = txHashArray.slice(0, maxTransactions);
+      if (limitedTxHashes.length < txHashArray.length) {
+        console.log(`   ⚠️ Limiting to ${maxTransactions} historical transactions`);
+      }
       
-      console.log(`   📦 Processing ${txHashArray.length} transactions in batches of ${batchSize}...`);
+      // Step 3: Batch fetch transaction details
+      const batchSize = 15;
       
-      for (let i = 0; i < txHashArray.length; i += batchSize) {
-        const batch = txHashArray.slice(i, i + batchSize);
+      console.log(`   📦 Processing ${limitedTxHashes.length} transactions in batches of ${batchSize}...`);
+      
+      for (let i = 0; i < limitedTxHashes.length; i += batchSize) {
+        const batch = limitedTxHashes.slice(i, i + batchSize);
         const batchPromises = batch.map(async (txHash) => {
           try {
             const [tx, receipt] = await Promise.all([
@@ -278,7 +284,15 @@ export class EthereumRpcClient {
         const batchResults = await Promise.all(batchPromises);
         transactions.push(...batchResults.filter(tx => tx !== null));
         
-        console.log(`   📊 Progress: ${Math.min(i + batchSize, txHashArray.length)}/${txHashArray.length} transactions processed`);
+        const processedCount = Math.min(i + batchSize, limitedTxHashes.length);
+        console.log(`   📊 Progress: ${processedCount}/${limitedTxHashes.length} transactions processed`);
+        
+        // Call progress callback for transaction processing (50-80% range)
+        if (progressCallback) {
+          const txProgress = processedCount / limitedTxHashes.length;
+          const overallProgress = 0.5 + (txProgress * 0.3); // 50% to 80%
+          await progressCallback(overallProgress, events.length);
+        }
       }
       
       // Step 4: Limited direct transaction scanning (only for small ranges)

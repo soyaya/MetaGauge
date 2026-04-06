@@ -70,7 +70,7 @@ export class RpcRetryHelper {
    */
   static isRetryableError(error) {
     const message = error.message?.toLowerCase() || '';
-    const code = error.code?.toLowerCase() || '';
+    const code = typeof error.code === 'string' ? error.code.toLowerCase() : '';
 
     // Network errors that should be retried
     const retryablePatterns = [

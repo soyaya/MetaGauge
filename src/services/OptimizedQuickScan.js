@@ -181,7 +181,6 @@ export class OptimizedQuickScan {
     );
     
     // Handle different return formats
-    // LiskRpcClient returns array directly
     // Some clients might return {transactions, events}
     if (Array.isArray(txData)) {
       return {

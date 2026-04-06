@@ -15,15 +15,15 @@ export const config = {
   
   // Contract
   contractAddress: process.env.CONTRACT_ADDRESS,
-  contractChain: process.env.CONTRACT_CHAIN || 'lisk',
+  contractChain: process.env.CONTRACT_CHAIN || 'ethereum',
   contractName: process.env.CONTRACT_NAME,
   
   // RPC URLs
-  liskRpcUrl1: process.env.LISK_RPC_URL1 || 'https://rpc.api.lisk.com',
-  liskRpcUrl2: process.env.LISK_RPC_URL2 || 'https://lisk.drpc.org',
-  liskRpcUrl3: process.env.LISK_RPC_URL3,
-  liskRpcUrl4: process.env.LISK_RPC_URL4,
   ethereumRpcUrl: process.env.ETHEREUM_RPC_URL || 'https://ethereum-rpc.publicnode.com',
+  ethereumRpcUrl1: process.env.ETHEREUM_RPC_URL1 || process.env.ETHEREUM_RPC_URL || 'https://gateway.thebuidl.xyz/query',
+  ethereumRpcUrl2: process.env.ETHEREUM_RPC_URL2 || 'https://ethereum-rpc.publicnode.com',
+  ethereumRpcUrl3: process.env.ETHEREUM_RPC_URL3 || 'https://eth.llamarpc.com',
+  ethereumRpcApiKey: process.env.ETHEREUM_RPC_API_KEY || null,
   starknetRpcUrl1: process.env.STARKNET_RPC_URL1 || 'https://rpc.starknet.lava.build',
   starknetRpcUrl2: process.env.STARKNET_RPC_URL2,
   starknetRpcUrl3: process.env.STARKNET_RPC_URL3,

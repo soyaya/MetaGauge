@@ -4,8 +4,10 @@
  */
 
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { UserStorage, ContractStorage, AnalysisStorage } from '../database/index.js';
+import { requireRole } from '../middleware/requireRole.js';
 
 const router = express.Router();
 
@@ -24,21 +26,28 @@ const router = express.Router();
 router.get('/profile', async (req, res) => {
   try {
     const user = await UserStorage.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({
-        error: 'User not found',
-        message: 'User profile not found'
-      });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Remove sensitive data
-    const { password, ...userProfile } = user;
-    res.json({ ...userProfile, user: userProfile });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get user profile',
-      message: error.message
+    // Get real analysis count — exclude auto-onboarding indexing
+    const analyses = await AnalysisStorage.findByUserId(req.user.id).catch(() => []);
+    const totalAnalyses = Array.isArray(analyses) ? analyses.filter(a => a.analysisType !== 'quick-index').length : 0;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyAnalysisCount = analyses.filter(a => new Date(a.createdAt) >= monthStart && a.analysisType !== 'quick-index').length;
+
+    const { password, resetToken, resetTokenExpiry, ...userProfile } = user;
+
+    res.json({
+      ...userProfile,
+      is_verified: user.emailVerified || user.is_verified || false,
+      usage: {
+        ...user.usage,
+        analysisCount: totalAnalyses,
+        monthlyAnalysisCount,
+      },
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -75,6 +84,7 @@ router.put('/profile', async (req, res) => {
       const user = await UserStorage.findById(req.user.id);
       updates.preferences = { ...user.preferences, ...preferences };
     }
+    // email change is intentionally excluded — locked once verified
 
     const updatedUser = await UserStorage.update(req.user.id, updates);
     if (!updatedUser) {
@@ -95,63 +105,6 @@ router.put('/profile', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       error: 'Failed to update profile',
-      message: error.message
-    });
-  }
-});
-
-/**
- * @swagger
- * /api/users/sync-subscription:
- *   post:
- *     summary: Sync subscription from smart contract
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               walletAddress:
- *                 type: string
- *     responses:
- *       200:
- *         description: Subscription synced
- */
-router.post('/sync-subscription', async (req, res) => {
-  try {
-    const { walletAddress } = req.body;
-    
-    if (!walletAddress) {
-      return res.status(400).json({
-        error: 'Wallet address required',
-        message: 'Please provide a wallet address'
-      });
-    }
-    
-    // Import sync function
-    const { syncSubscriptionFromBlockchain } = await import('../../services/sync-subscription.js');
-    
-    const result = await syncSubscriptionFromBlockchain(req.user.id, walletAddress);
-    
-    if (result.success) {
-      res.json({
-        message: 'Subscription synced successfully',
-        tier: result.tier,
-        historicalDays: result.historicalDays
-      });
-    } else {
-      res.status(500).json({
-        error: 'Sync failed',
-        message: result.error
-      });
-    }
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to sync subscription',
       message: error.message
     });
   }
@@ -200,11 +153,11 @@ router.get('/dashboard', async (req, res) => {
     // Get analysis stats
     const analysisStats = await AnalysisStorage.getStats(userId);
 
-    // Get monthly usage
+    // Get monthly usage — exclude auto-onboarding indexing
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthlyAnalyses = allAnalyses.filter(analysis => 
-      new Date(analysis.createdAt) >= monthStart
+      new Date(analysis.createdAt) >= monthStart && analysis.analysisType !== 'quick-index'
     ).length;
 
     // Remove sensitive data from user
@@ -380,7 +333,7 @@ router.get('/usage', async (req, res) => {
  *       200:
  *         description: Account deleted successfully
  */
-router.delete('/delete-account', async (req, res) => {
+router.delete('/delete-account', requireRole('admin'), async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -405,6 +358,27 @@ router.delete('/delete-account', async (req, res) => {
       error: 'Failed to delete account',
       message: error.message
     });
+  }
+});
+
+// Change password (authenticated — requires current password)
+router.post('/change-password', async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) return res.status(400).json({ message: 'Both passwords are required' });
+  if (newPassword.length < 6) return res.status(400).json({ message: 'New password must be at least 6 characters' });
+
+  try {
+    const user = await UserStorage.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const valid = await bcrypt.compare(currentPassword, user.password);
+    if (!valid) return res.status(401).json({ message: 'Current password is incorrect' });
+
+    const hashed = await bcrypt.hash(newPassword, 6);
+    await UserStorage.update(req.user.id, { password: hashed });
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

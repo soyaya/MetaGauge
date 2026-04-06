@@ -5,6 +5,7 @@
 
 import { FunctionAnalyticsStorage } from './FunctionAnalyticsStorage.js';
 import { functionDecoder } from './FunctionSignatureDecoder.js';
+import { UserStorage } from '../api/database/index.js';
 
 export class FunctionAnalyticsService {
   constructor(storage = null) {
@@ -12,13 +13,47 @@ export class FunctionAnalyticsService {
   }
 
   /**
+   * Load contract ABI from the user's onboarding data and register it with the decoder
+   */
+  async _loadABIForContract(contractAddress, userId = null) {
+    if (functionDecoder.hasABI(contractAddress)) return;
+    try {
+      if (userId) {
+        const user = await UserStorage.findById(userId);
+        const dc = user?.onboarding?.defaultContract;
+        if (dc?.address?.toLowerCase() === contractAddress.toLowerCase() && dc?.abi) {
+          functionDecoder.loadABI(contractAddress, JSON.parse(dc.abi));
+          return;
+        }
+      }
+      // Fallback: scan all users for this contract
+      const { readdir } = await import('fs/promises');
+      const { join } = await import('path');
+      const usersDir = join(process.cwd(), 'data', 'users');
+      const userDirs = await readdir(usersDir).catch(() => []);
+      for (const uid of userDirs) {
+        const u = await UserStorage.findById(uid).catch(() => null);
+        const dc = u?.onboarding?.defaultContract;
+        if (dc?.address?.toLowerCase() === contractAddress.toLowerCase() && dc?.abi) {
+          functionDecoder.loadABI(contractAddress, JSON.parse(dc.abi));
+          return;
+        }
+      }
+    } catch (e) {
+      // silent — decoder will fall back to built-in DB
+    }
+  }
+
+  /**
    * Get all function signatures with aggregated metrics
    * Requirements: 2.1, 2.2, 2.4
    */
-  async getFunctionSignatures(contractAddress, chain, dateRange = null) {
+  async getFunctionSignatures(contractAddress, chain, dateRange = null, userId = null) {
+    // Ensure ABI is loaded so contract-specific functions are decoded
+    await this._loadABIForContract(contractAddress, userId);
+
     const interactions = await this.storage.getInteractions(contractAddress, chain);
     
-    // Filter by date range if provided
     const filtered = dateRange
       ? interactions.filter(i => {
           const ts = new Date(i.timestamp);
@@ -26,7 +61,6 @@ export class FunctionAnalyticsService {
         })
       : interactions;
 
-    // Group by signature
     const signatureMap = new Map();
     
     for (const interaction of filtered) {
@@ -35,6 +69,7 @@ export class FunctionAnalyticsService {
       if (!signatureMap.has(interaction.signature)) {
         signatureMap.set(interaction.signature, {
           signature: interaction.signature,
+          txTo: interaction.txTo || null,
           wallets: new Set(),
           transactionCount: 0,
           firstSeen: new Date(interaction.timestamp),
@@ -51,25 +86,38 @@ export class FunctionAnalyticsService {
       if (ts > sig.lastSeen) sig.lastSeen = ts;
     }
 
-    // Convert to array and calculate metrics
-    const signatures = Array.from(signatureMap.values()).map(sig => ({
-      signature: sig.signature,
-      name: functionDecoder.decode(sig.signature, contractAddress),
-      walletCount: sig.wallets.size,
-      transactionCount: sig.transactionCount,
-      avgTransactionsPerWallet: sig.transactionCount / sig.wallets.size,
-      firstSeen: sig.firstSeen,
-      lastSeen: sig.lastSeen
-    }));
+    const signatures = Array.from(signatureMap.values()).map(sig => {
+      const name = functionDecoder.decodeWithContext
+        ? functionDecoder.decodeWithContext(sig.signature, sig.txTo, contractAddress)
+        : functionDecoder.decode(sig.signature, contractAddress);
+      return {
+        signature: sig.signature,
+        name,
+        walletCount: sig.wallets.size,
+        transactionCount: sig.transactionCount,
+        avgTransactionsPerWallet: sig.transactionCount / sig.wallets.size,
+        firstSeen: sig.firstSeen,
+        lastSeen: sig.lastSeen
+      };
+    });
 
-    // Sort by wallet count descending (Requirement 2.4)
     signatures.sort((a, b) => b.walletCount - a.walletCount);
+
+    // Resolve remaining unknowns via 4byte.directory
+    const unknownSelectors = signatures.filter(s => !s.name).map(s => s.signature);
+    if (unknownSelectors.length > 0) {
+      await functionDecoder.lookupUnknown(unknownSelectors);
+      for (const sig of signatures) {
+        if (!sig.name) {
+          sig.name = functionDecoder.decode(sig.signature, contractAddress);
+        }
+      }
+    }
 
     return signatures;
   }
 
   /**
-   * Get detailed metrics for a specific signature
    * Requirements: 2.1, 2.2, 3.1, 3.2
    */
   async getSignatureMetrics(contractAddress, chain, signature, dateRange = null) {

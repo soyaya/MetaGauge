@@ -65,7 +65,6 @@ export class UserJourneyTracker {
     const bridgeContracts = {
       ethereum: ['0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640', '0xa0b86a33e6441e8c8c7014b37c2a747b0c0d0e05'],
       starknet: ['0x073314940630fd6dcda0d772d4c972c4e0a9946bef9dabf4ef84eda8ef542b82'],
-      lisk: ['0x1234567890123456789012345678901234567890']
     };
     
     const isBridgeContract = bridgeContracts[chain]?.includes(transaction.to?.toLowerCase());
@@ -348,7 +347,7 @@ export class UserJourneyTracker {
    */
   _inferDestinationChain(transaction) {
     // Mock implementation - would analyze transaction data/logs
-    const chains = ['ethereum', 'starknet', 'lisk'];
+    const chains = ['ethereum', 'starknet'];
     return chains[Math.floor(Math.random() * chains.length)];
   }
 

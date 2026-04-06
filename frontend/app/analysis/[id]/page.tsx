@@ -110,7 +110,7 @@ export default function AnalysisResultPage() {
       // First create a contract config if needed, then start analysis
       const contractResponse = await api.contracts.create({
         address: analysis.contractAddress,
-        chain: analysis.analysisType || 'lisk',
+        chain: analysis.analysisType || 'ethereum',
         name: `Contract ${analysis.contractAddress.slice(0, 10)}...`,
         abi: null
       })
@@ -335,7 +335,7 @@ export default function AnalysisResultPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="page-shell">
         <Header />
         <div className="flex items-center justify-center h-96">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -346,9 +346,9 @@ export default function AnalysisResultPage() {
 
   if (error || !analysis) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="page-shell">
         <Header />
-        <div className="container mx-auto px-4 py-8">
+        <div className="page-container">
           <div className="text-center">
             <p className="text-red-600">{error || 'Analysis not found'}</p>
             <div className="flex gap-2 justify-center mt-4">
@@ -364,10 +364,10 @@ export default function AnalysisResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-shell">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="page-container">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="sm" asChild>
@@ -503,14 +503,13 @@ export default function AnalysisResultPage() {
             />
 
             <Tabs value={dashboardTab} onValueChange={setDashboardTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="metrics">Metrics</TabsTrigger>
-                <TabsTrigger value="users">Users</TabsTrigger>
-                <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                <TabsTrigger value="ux">UX Analysis</TabsTrigger>
-                <TabsTrigger value="competitive">Competitive</TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto pb-1">
+                <TabsList className="flex w-max min-w-full gap-1 h-auto p-1">
+                  {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Transactions'],['ux','UX'],['competitive','Competitive']].map(([v,l])=>(
+                    <TabsTrigger key={v} value={v} className="text-xs whitespace-nowrap px-3 py-1.5">{l}</TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
 
               <TabsContent value="overview">
                 <OverviewTab analysisResults={analysis.results} analysisId={analysis.id || undefined} />

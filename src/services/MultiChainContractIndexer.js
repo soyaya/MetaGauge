@@ -1,11 +1,9 @@
 /**
  * Multi-Chain Contract Indexer
- * Unified indexing-based contract interaction system for Lisk, Ethereum, and Starknet
- * Focuses on efficient event-based indexing with fallback mechanisms
+ * Unified indexing-based contract interaction system for Ethereum and Starknet
  */
 
 import { EventEmitter } from 'events';
-import { LiskRpcClient } from './LiskRpcClient.js';
 import { EthereumRpcClient } from './EthereumRpcClient.js';
 import { StarknetRpcClient } from './StarknetRpcClient.js';
 
@@ -18,29 +16,18 @@ export class MultiChainContractIndexer extends EventEmitter {
       requestTimeout: config.requestTimeout || 30000,
       maxRetries: config.maxRetries || 3,
       batchSize: config.batchSize || 20,
-      indexingMode: config.indexingMode || 'events-first', // 'events-first', 'hybrid', 'full-scan'
+      indexingMode: config.indexingMode || 'events-first',
       ...config
     };
     
-    // Chain configurations with multiple RPC endpoints
+    // Chain configurations — Ethereum and Starknet only
     this.chainConfigs = {
-      lisk: {
-        name: 'Lisk',
-        rpcUrls: [
-          process.env.LISK_RPC_URL1 || 'https://rpc.api.lisk.com',
-          process.env.LISK_RPC_URL2 || 'https://lisk.drpc.org',
-          process.env.LISK_RPC_URL3 || 'https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye',
-          process.env.LISK_RPC_URL4 || 'https://site1.moralis-nodes.com/lisk/7f6b7ac6edf2456fa240535cc2d8fc6e'
-        ],
-        clientClass: LiskRpcClient,
-        type: 'evm',
-        chainId: 1135
-      },
       ethereum: {
         name: 'Ethereum',
         rpcUrls: [
-          process.env.ETHEREUM_RPC_URL || 'https://ethereum-rpc.publicnode.com',
-          process.env.ETHEREUM_RPC_URL_FALLBACK || 'https://eth.nownodes.io/2ca1a1a6-9040-4ca9-8727-33a186414a1f'
+          process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com',
+          process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com',
+          process.env.ETHEREUM_RPC_URL3 || 'https://rpc.ankr.com/eth'
         ],
         clientClass: EthereumRpcClient,
         type: 'evm',
@@ -49,9 +36,9 @@ export class MultiChainContractIndexer extends EventEmitter {
       starknet: {
         name: 'Starknet',
         rpcUrls: [
-          process.env.STARKNET_RPC_URL1 || 'https://rpc.starknet.lava.build',
-          process.env.STARKNET_RPC_URL2 || 'https://starknet-rpc.publicnode.com',
-          process.env.STARKNET_RPC_URL3 || 'https://starknet-mainnet.infura.io/v3/52be4d01250949baa85cad00e7b955ab'
+          process.env.STARKNET_RPC_URL1 || 'https://starknet-rpc.publicnode.com',
+          process.env.STARKNET_RPC_URL2 || 'https://rpc.starknet.lava.build',
+          process.env.STARKNET_RPC_URL3 || 'https://free-rpc.nethermind.io/mainnet-juno'
         ],
         clientClass: StarknetRpcClient,
         type: 'cairo',

@@ -5,8 +5,7 @@
 
 import express from 'express';
 import { OptimizedQuickScan } from '../../services/OptimizedQuickScan.js';
-import { AnalysisStorage } from '../database/index.js';
-import subscriptionService from '../../services/SubscriptionService.js';
+import { AnalysisStorage, UserStorage } from '../database/index.js';
 import { MetricsNormalizer } from '../../services/MetricsNormalizer.js';
 
 const router = express.Router();
@@ -26,22 +25,12 @@ router.post('/analyze', async (req, res) => {
       });
     }
 
-    // Get user's subscription tier for block range limits
-    let subscriptionTier = 'Free';
-    let historicalDays = 7; // Default for free tier
-
-    try {
-      if (req.user?.walletAddress) {
-        const isActive = await subscriptionService.isSubscriberActive(req.user.walletAddress);
-        if (isActive) {
-          const subInfo = await subscriptionService.getSubscriptionInfo(req.user.walletAddress);
-          subscriptionTier = subscriptionService.getTierName(subInfo.tier);
-          historicalDays = subscriptionService.getHistoricalDataDays(subInfo.tier);
-        }
-      }
-    } catch (subError) {
-      console.warn('Could not fetch subscription info, using free tier:', subError.message);
-    }
+    // Get user's subscription tier from DB
+    const dbUser = await UserStorage.findById(req.user.id);
+    const tierName = dbUser?.tier || 'free';
+    const HISTORICAL_DAYS = { free: 7, starter: 90, pro: 365, enterprise: 730 };
+    let subscriptionTier = tierName.charAt(0).toUpperCase() + tierName.slice(1);
+    let historicalDays = HISTORICAL_DAYS[tierName] || 7;
 
     console.log(`📊 Starting optimized analysis for ${contractAddress} on ${chain}`);
     console.log(`   Subscription: ${subscriptionTier} (${historicalDays} days)`);

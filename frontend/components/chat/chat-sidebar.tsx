@@ -129,7 +129,6 @@ export function ChatSidebar({
   const getChainColor = (chain: string) => {
     const colors = {
       ethereum: 'bg-blue-100 text-blue-800',
-      lisk: 'bg-green-100 text-green-800',
       starknet: 'bg-purple-100 text-purple-800',
     };
     return colors[chain as keyof typeof colors] || 'bg-gray-100 text-gray-800';

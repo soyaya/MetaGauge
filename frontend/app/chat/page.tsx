@@ -8,7 +8,7 @@ import { ChatInterface } from '@/components/chat/chat-interface';
 import { ChatSidebar } from '@/components/chat/chat-sidebar';
 import { ContractDetailsSidebar } from '@/components/chat/contract-details-sidebar';
 import { Button } from '@/components/ui/button';
-import { PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { PanelRightOpen, PanelRightClose, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 
 function ChatPageContent() {
@@ -141,11 +141,8 @@ function ChatPageContent() {
   // Show loading while auth is being checked
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+      <div className="page-shell flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -156,7 +153,7 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-shell">
       <Header />
       
       <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
@@ -271,13 +268,10 @@ function ChatPageContent() {
 export default function ChatPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background">
+      <div className="page-shell">
         <Header />
         <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading chat...</p>
-          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     }>

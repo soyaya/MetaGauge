@@ -8,14 +8,41 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Save, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Bell, Save, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 
-export function AlertConfigurationPanel({ contractId = null }) {
+interface ThresholdConfig {
+  enabled: boolean
+  value: number
+  unit: string
+}
+
+interface AlertConfig {
+  id?: string
+  contractId: string | null
+  enabled: boolean
+  categories: Record<string, boolean>
+  severityLevels: Record<string, boolean>
+  thresholds: Record<string, ThresholdConfig>
+  notifications: {
+    inApp: boolean
+    email: boolean
+    webhook: boolean
+    webhookUrl: string | null
+  }
+  schedule: {
+    realTime: boolean
+    daily: boolean
+    weekly: boolean
+  }
+}
+
+export function AlertConfigurationPanel({ contractId = null }: { contractId?: string | null }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [config, setConfig] = useState(null);
+  const [config, setConfig] = useState<AlertConfig | null>(null);
   const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -24,14 +51,12 @@ export function AlertConfigurationPanel({ contractId = null }) {
   const loadConfig = async () => {
     try {
       setLoading(true);
-      const response = await api.alerts.getConfig();
-      const existingConfig = contractId 
-        ? response.configs.find(c => c.contractId === contractId)
-        : response.configs.find(c => !c.contractId);
-      
+      const response = await (api as any).alerts.getConfig();
+      const existingConfig = contractId
+        ? response.configs?.find((c: AlertConfig) => c.contractId === contractId)
+        : response.configs?.find((c: AlertConfig) => !c.contractId);
       setConfig(existingConfig || getDefaultConfig());
-    } catch (error) {
-      console.error('Failed to load config:', error);
+    } catch {
       setConfig(getDefaultConfig());
     } finally {
       setLoading(false);
@@ -76,48 +101,40 @@ export function AlertConfigurationPanel({ contractId = null }) {
   });
 
   const saveConfig = async () => {
+    if (!config) return;
     try {
       setSaving(true);
       setMessage('');
-      
       if (config.id) {
-        await api.alerts.updateConfig(config.id, config);
+        await (api as any).alerts.updateConfig(config.id, config);
       } else {
-        const response = await api.alerts.createConfig(config);
+        const response = await (api as any).alerts.createConfig(config);
         setConfig(response.config);
       }
-      
       setMessage('Configuration saved successfully!');
+      setIsError(false);
       setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
+    } catch {
       setMessage('Failed to save configuration');
+      setIsError(true);
     } finally {
       setSaving(false);
     }
   };
 
-  const updateCategory = (category, value) => {
-    setConfig(prev => ({
-      ...prev,
-      categories: { ...prev.categories, [category]: value }
-    }));
+  const updateCategory = (category: string, value: boolean) => {
+    setConfig(prev => prev ? ({ ...prev, categories: { ...prev.categories, [category]: value } }) : prev);
   };
 
-  const updateSeverity = (level, value) => {
-    setConfig(prev => ({
-      ...prev,
-      severityLevels: { ...prev.severityLevels, [level]: value }
-    }));
+  const updateSeverity = (level: string, value: boolean) => {
+    setConfig(prev => prev ? ({ ...prev, severityLevels: { ...prev.severityLevels, [level]: value } }) : prev);
   };
 
-  const updateThreshold = (key, field, value) => {
-    setConfig(prev => ({
+  const updateThreshold = (key: string, field: string, value: boolean | number) => {
+    setConfig(prev => prev ? ({
       ...prev,
-      thresholds: {
-        ...prev.thresholds,
-        [key]: { ...prev.thresholds[key], [field]: value }
-      }
-    }));
+      thresholds: { ...prev.thresholds, [key]: { ...prev.thresholds[key], [field]: value } }
+    }) : prev);
   };
 
   if (loading) {
@@ -129,6 +146,8 @@ export function AlertConfigurationPanel({ contractId = null }) {
       </Card>
     );
   }
+
+  if (!config) return null;
 
   return (
     <Card>
@@ -145,17 +164,18 @@ export function AlertConfigurationPanel({ contractId = null }) {
           </div>
           <Switch
             checked={config.enabled}
-            onCheckedChange={(value) => setConfig(prev => ({ ...prev, enabled: value }))}
+            onCheckedChange={(value) => setConfig(prev => prev ? ({ ...prev, enabled: value }) : prev)}
           />
         </div>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="severity">Severity</TabsTrigger>
             <TabsTrigger value="thresholds">Thresholds</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="competitors">Competitors</TabsTrigger>
           </TabsList>
 
           <TabsContent value="categories" className="space-y-4">
@@ -232,25 +252,29 @@ export function AlertConfigurationPanel({ contractId = null }) {
                 </div>
                 <Switch
                   checked={config.notifications.inApp}
-                  onCheckedChange={(val) => setConfig(prev => ({
-                    ...prev,
-                    notifications: { ...prev.notifications, inApp: val }
-                  }))}
+                  onCheckedChange={(val) => setConfig(prev => prev ? ({ ...prev, notifications: { ...prev.notifications, inApp: val } }) : prev)}
                 />
               </div>
 
-              <div className="flex items-center justify-between py-2 border-b">
-                <div>
-                  <Label>Email Notifications</Label>
-                  <p className="text-xs text-muted-foreground">Send alerts to your email</p>
+              <div className="space-y-2 py-2 border-b">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Email Notifications</Label>
+                    <p className="text-xs text-muted-foreground">AI-written alerts delivered to your email</p>
+                  </div>
+                  <Switch
+                    checked={config.notifications.email}
+                    onCheckedChange={(val) => setConfig(prev => prev ? ({ ...prev, notifications: { ...prev.notifications, email: val } }) : prev)}
+                  />
                 </div>
-                <Switch
-                  checked={config.notifications.email}
-                  onCheckedChange={(val) => setConfig(prev => ({
-                    ...prev,
-                    notifications: { ...prev.notifications, email: val }
-                  }))}
-                />
+                {config.notifications.email && (
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={(config.notifications as any).emailAddress || ''}
+                    onChange={(e) => setConfig(prev => prev ? ({ ...prev, notifications: { ...prev.notifications, emailAddress: e.target.value } }) : prev)}
+                  />
+                )}
               </div>
 
               <div className="space-y-2">
@@ -261,32 +285,51 @@ export function AlertConfigurationPanel({ contractId = null }) {
                   </div>
                   <Switch
                     checked={config.notifications.webhook}
-                    onCheckedChange={(val) => setConfig(prev => ({
-                      ...prev,
-                      notifications: { ...prev.notifications, webhook: val }
-                    }))}
+                    onCheckedChange={(val) => setConfig(prev => prev ? ({ ...prev, notifications: { ...prev.notifications, webhook: val } }) : prev)}
                   />
                 </div>
                 {config.notifications.webhook && (
                   <Input
                     placeholder="https://your-webhook-url.com"
                     value={config.notifications.webhookUrl || ''}
-                    onChange={(e) => setConfig(prev => ({
-                      ...prev,
-                      notifications: { ...prev.notifications, webhookUrl: e.target.value }
-                    }))}
+                    onChange={(e) => setConfig(prev => prev ? ({ ...prev, notifications: { ...prev.notifications, webhookUrl: e.target.value } }) : prev)}
                   />
                 )}
               </div>
             </div>
           </TabsContent>
+
+          <TabsContent value="competitors" className="space-y-4">
+            <p className="text-sm text-muted-foreground">Get alerted when competitor metrics change significantly</p>
+            {(['volumeSpike', 'userGrowth', 'tvlChange'] as const).map(key => (
+              <div key={key} className="flex items-center justify-between py-2 border-b">
+                <div>
+                  <Label className="capitalize">{key.replace(/([A-Z])/g, ' $1')}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {key === 'volumeSpike' && 'Alert when a competitor volume spikes >30%'}
+                    {key === 'userGrowth'  && 'Alert when a competitor gains users faster than you'}
+                    {key === 'tvlChange'   && 'Alert when competitor TVL changes >20%'}
+                  </p>
+                </div>
+                <Switch
+                  checked={(config as any).competitorAlerts?.[key] ?? false}
+                  onCheckedChange={(val) => setConfig(prev => prev ? ({
+                    ...prev,
+                    competitorAlerts: { ...(prev as any).competitorAlerts, [key]: val }
+                  }) : prev)}
+                />
+              </div>
+            ))}
+          </TabsContent>
         </Tabs>
 
         <div className="mt-6 flex items-center justify-between">
           {message && (
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-green-600">{message}</span>
+            <div className={`flex items-center gap-2 text-sm ${isError ? 'text-red-600' : 'text-green-600'}`}>
+              {isError
+                ? <XCircle className="h-4 w-4" />
+                : <CheckCircle className="h-4 w-4" />}
+              <span>{message}</span>
             </div>
           )}
           <Button onClick={saveConfig} disabled={saving} className="ml-auto">
@@ -308,8 +351,8 @@ export function AlertConfigurationPanel({ contractId = null }) {
   );
 }
 
-function getCategoryDescription(category) {
-  const descriptions = {
+function getCategoryDescription(category: string): string {
+  const descriptions: Record<string, string> = {
     security: 'Unusual patterns, exploits, suspicious addresses',
     performance: 'High gas usage, failed transactions, slow execution',
     liquidity: 'Low TVL, high slippage, liquidity drain',
@@ -319,8 +362,8 @@ function getCategoryDescription(category) {
   return descriptions[category] || '';
 }
 
-function getSeverityDescription(severity) {
-  const descriptions = {
+function getSeverityDescription(severity: string): string {
+  const descriptions: Record<string, string> = {
     critical: 'Immediate action required',
     high: 'Urgent attention needed',
     medium: 'Monitor closely',
@@ -329,8 +372,8 @@ function getSeverityDescription(severity) {
   return descriptions[severity] || '';
 }
 
-function getSeverityVariant(severity) {
-  const variants = {
+function getSeverityVariant(severity: string): 'destructive' | 'default' | 'secondary' {
+  const variants: Record<string, 'destructive' | 'default' | 'secondary'> = {
     critical: 'destructive',
     high: 'destructive',
     medium: 'default',

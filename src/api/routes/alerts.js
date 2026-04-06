@@ -6,10 +6,18 @@ import express from 'express';
 import { UserStorage } from '../database/index.js';
 import AlertConfigurationStorage from '../database/AlertConfigurationStorage.js';
 import AlertNotificationService from '../../services/AlertNotificationService.js';
-import subscriptionService from '../../services/SubscriptionService.js';
+import { requireRole } from '../middleware/requireRole.js';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 
 const router = express.Router();
 const alertService = new AlertNotificationService();
+
+const ALERTS_FILE = './data/alerts.json';
+function readAlerts() {
+  if (!existsSync(ALERTS_FILE)) return [];
+  try { return JSON.parse(readFileSync(ALERTS_FILE, 'utf8')); } catch { return []; }
+}
+function writeAlerts(a) { writeFileSync(ALERTS_FILE, JSON.stringify(a, null, 2), 'utf8'); }
 
 /**
  * @swagger
@@ -59,57 +67,10 @@ router.get('/config', async (req, res) => {
  */
 router.post('/config', async (req, res) => {
   try {
-    // Get user's subscription tier
-    const user = await UserStorage.findById(req.user.id);
-    let tier = 'Free';
-    
-    if (user.walletAddress) {
-      try {
-        const isActive = await subscriptionService.isSubscriberActive(user.walletAddress);
-        if (isActive) {
-          const subInfo = await subscriptionService.getSubscriptionInfo(user.walletAddress);
-          tier = subscriptionService.getTierName(subInfo.tier);
-        }
-      } catch (err) {
-        console.warn('Could not fetch subscription:', err.message);
-      }
-    }
-    
-    // Check alert limit based on tier
-    const existingAlerts = await AlertConfigurationStorage.findByUserId(req.user.id);
-    const maxAlerts = alertService.getMaxAlerts(tier);
-    
-    if (existingAlerts.length >= maxAlerts) {
-      return res.status(403).json({
-        error: 'Alert limit reached',
-        message: `You have reached your limit of ${maxAlerts} alerts. Upgrade your plan to add more.`,
-        currentCount: existingAlerts.length,
-        limit: maxAlerts,
-        tier
-      });
-    }
-    
-    // Validate notification channels
-    const allowedChannels = alertService.getAllowedChannels(tier);
-    const requestedChannels = req.body.channels || ['inApp'];
-    const invalidChannels = requestedChannels.filter(ch => !allowedChannels.includes(ch));
-    
-    if (invalidChannels.length > 0) {
-      return res.status(403).json({
-        error: 'Invalid notification channels',
-        message: `Your ${tier} plan does not support: ${invalidChannels.join(', ')}`,
-        allowedChannels,
-        tier
-      });
-    }
-    
     const config = await AlertConfigurationStorage.create({
       userId: req.user.id,
-      channels: requestedChannels,
-      tier,
       ...req.body
     });
-    
     res.status(201).json({ config });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create configuration', message: error.message });
@@ -194,19 +155,7 @@ router.delete('/config/:id', async (req, res) => {
 router.get('/limits', async (req, res) => {
   try {
     const user = await UserStorage.findById(req.user.id);
-    let tier = 'Free';
-    
-    if (user.walletAddress) {
-      try {
-        const isActive = await subscriptionService.isSubscriberActive(user.walletAddress);
-        if (isActive) {
-          const subInfo = await subscriptionService.getSubscriptionInfo(user.walletAddress);
-          tier = subscriptionService.getTierName(subInfo.tier);
-        }
-      } catch (err) {
-        console.warn('Could not fetch subscription:', err.message);
-      }
-    }
+    const tier = user?.tier ? (user.tier.charAt(0).toUpperCase() + user.tier.slice(1)) : 'Free';
     
     const existingAlerts = await AlertConfigurationStorage.findByUserId(req.user.id);
     const maxAlerts = alertService.getMaxAlerts(tier);
@@ -237,21 +186,30 @@ router.post('/test', async (req, res) => {
       title: 'Test Alert',
       message: 'This is a test notification from MetaGauge',
       severity: 'info',
-      userEmail: user.email,
-      webhookUrl,
-      data: { test: true }
+      contractAddress: null,
     };
     
-    const results = await alertService.sendAlert(testAlert, channels);
-    
-    res.json({
-      message: 'Test notification sent',
-      results,
-      channels
-    });
+    const results = await alertService.sendAlert(testAlert, channels, user?.email, webhookUrl);
+    res.json({ message: 'Test notification sent', results, channels });
   } catch (error) {
     res.status(500).json({ error: 'Failed to send test', message: error.message });
   }
+});
+
+// Task 5.3: Alert list and acknowledge
+router.get('/', requireRole('analyst'), async (req, res) => {
+  const alerts = readAlerts().filter(a => a.userId === req.user.id);
+  res.json({ alerts });
+});
+
+router.patch('/:id/acknowledge', requireRole('analyst'), async (req, res) => {
+  const alerts = readAlerts();
+  const idx = alerts.findIndex(a => a.id === req.params.id && a.userId === req.user.id);
+  if (idx === -1) return res.status(404).json({ error: 'Alert not found' });
+  alerts[idx].is_read = true;
+  alerts[idx].acknowledged_at = new Date().toISOString();
+  writeAlerts(alerts);
+  res.json({ alert: alerts[idx] });
 });
 
 export default router;

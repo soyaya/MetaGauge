@@ -28,6 +28,16 @@ import faucetRoutes from './routes/faucet.js';
 import { initializeIndexerRoutes } from './routes/indexer.js';
 import analyzerRoutes from './routes/analyzer.js';
 import functionsRoutes from './routes/functions.js';
+import alertRoutes from './routes/alerts.js';
+import billingRoutes from './routes/billing.js';
+import metricsRoutes from './routes/metrics.js';
+import dashboardRoutes from './routes/dashboard.js';
+import tractionRoutes from './routes/traction.js';
+import { competitiveRouter } from './routes/competitive.js';
+import { walletAnalyticsRouter } from './routes/wallet-analytics.js';
+import monitoringRoutes from './routes/monitoring.js';
+import indexingRoutes from './routes/indexing.js';
+import { resumeLivePoll } from './routes/trigger-indexing.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -285,8 +295,23 @@ app.use('/api/subscription', subscriptionRoutes); // Some routes require auth, s
 app.use('/api/faucet', faucetRoutes); // Public faucet endpoints
 
 // Alert configuration routes
-import alertRoutes from './routes/alerts.js';
 app.use('/api/alerts', authenticateToken, alertRoutes);
+
+app.use('/api/billing', billingRoutes); // auth handled inside billing.js
+
+app.use('/api/metrics', authenticateToken, metricsRoutes);
+
+app.use('/api/dashboard', authenticateToken, dashboardRoutes);
+
+app.use('/api/traction', authenticateToken, tractionRoutes);
+
+app.use('/api/competitive', authenticateToken, competitiveRouter);
+
+app.use('/api/functions/wallet-analytics', authenticateToken, walletAnalyticsRouter);
+
+app.use('/api/monitoring', authenticateToken, monitoringRoutes);
+
+app.use('/api/indexing', authenticateToken, indexingRoutes);
 
 // Streaming indexer routes
 if (streamingIndexer) {
@@ -313,6 +338,26 @@ async function startServer() {
   try {
     // Initialize file-based storage
     await initializeDatabase();
+
+    // Resume live polling for all users who had active polls before restart
+    try {
+      const { UserStorage: US, LivePollStorage: LPS } = await import('./database/index.js');
+      const users = await US.findAll();
+      let resumed = 0;
+      for (const user of users) {
+        const poll = await LPS.get(user.id).catch(() => null);
+        if (poll?.active && poll.contractAddress && poll.analysisId) {
+          console.log(`📡 Resuming live poll for user ${user.id} contract ${poll.contractAddress}`);
+          resumeLivePoll({ userId: user.id, ...poll }).catch(e =>
+            console.warn(`⚠️  Failed to resume live poll for ${user.id}: ${e.message}`)
+          );
+          resumed++;
+        }
+      }
+      if (resumed > 0) console.log(`✅ Resumed ${resumed} live poll(s)`);
+    } catch (e) {
+      console.warn('⚠️  Live poll resume failed:', e.message);
+    }
 
     // Auto-fix stuck analyses on startup
     console.log('🔍 Checking for stuck analyses...');

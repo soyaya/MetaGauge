@@ -1,0 +1,972 @@
+[
+  {
+    "id": "c5c760cc-5349-45e6-9152-82761c8c1227",
+    "email": "flowtest_1772465001689@example.com",
+    "password": "$2a$06$XtCh5ClDQcVSudjusxXzvePrUxana2f2hCh/DcqSIT3W98EdqqX4K",
+    "name": "Flow Validation User",
+    "tier": "free",
+    "apiKey": "428f3084a9cf4d672d05e4be400c1507cfe621981cef8f871c08ba6167e32d37",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.267Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "Wrapped Ether",
+        "purpose": "ERC20 wrapper for ETH",
+        "category": "defi",
+        "startDate": "2026-03-02T15:23:21.689Z",
+        "isIndexed": false,
+        "indexingProgress": 100,
+        "lastAnalysisId": null,
+        "currentStep": "Analysis complete!"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-03-02T15:23:37.961Z",
+    "updatedAt": "2026-03-02T15:29:48.922Z",
+    "lastLogin": "2026-03-02T15:23:40.034Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "0fbb0ac6-a031-4d91-a638-ed4ffb754e45",
+    "email": "davidlovedavid1015@gmail.com",
+    "password": "$2a$06$9GwTF3By/fGxMAXtg6HLMeCKLWHMALYIvpp49bcgF.zeUhNnh83HO",
+    "name": "Dii",
+    "tier": "free",
+    "apiKey": "a57bd7fb6f8476785622a98a0a2e4fb5bc2a89b423154d462935caebe6674dac",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "chain": "ethereum",
+        "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_upgradedAddress\",\"type\":\"address\"}],\"name\":\"deprecate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_spender\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"deprecated\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_evilUser\",\"type\":\"address\"}],\"name\":\"addBlackList\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_from\",\"type\":\"address\"},{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"upgradedAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"balances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maximumFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"_totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_maker\",\"type\":\"address\"}],\"name\":\"getBlackListStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowed\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"who\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newBasisPoints\",\"type\":\"uint256\"},{\"name\":\"newMaxFee\",\"type\":\"uint256\"}],\"name\":\"setParams\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"issue\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"redeem\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"remaining\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"basisPointsRate\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"isBlackListed\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_clearedUser\",\"type\":\"address\"}],\"name\":\"removeBlackList\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"MAX_UINT\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_blackListedUser\",\"type\":\"address\"}],\"name\":\"destroyBlackFunds\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_initialSupply\",\"type\":\"uint256\"},{\"name\":\"_name\",\"type\":\"string\"},{\"name\":\"_symbol\",\"type\":\"string\"},{\"name\":\"_decimals\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Issue\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Redeem\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"newAddress\",\"type\":\"address\"}],\"name\":\"Deprecate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"feeBasisPoints\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"maxFee\",\"type\":\"uint256\"}],\"name\":\"Params\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_blackListedUser\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_balance\",\"type\":\"uint256\"}],\"name\":\"DestroyedBlackFunds\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"AddedBlackList\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"RemovedBlackList\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Pause\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Unpause\",\"type\":\"event\"}]",
+        "name": "Defi",
+        "purpose": "asjkjashashhhasdsjhakhdjkashshashkhkhkHj:lhshdjkhjkhdhjkhskhsdkhdshkshksdaakjjkshasdjhkdhkhkasdh",
+        "category": "defi",
+        "startDate": "1988-12-22",
+        "isIndexed": true,
+        "indexingProgress": 100,
+        "lastAnalysisId": "63dd9921-04e4-4eae-a946-e27d784344fb",
+        "currentStep": "Historical complete — starting live monitoring"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-03-30T07:16:13.510Z",
+    "updatedAt": "2026-04-02T16:35:55.485Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "e1751448-a474-4117-b4c8-7c7e21fae7c6",
+    "email": "flowtest_1774872772063@test.com",
+    "password": "$2a$06$iQNtIOW6w3VKyqbIIm46Vuj/wqawyEW1CLfU6aUnDB83HS8dZsodq",
+    "name": "Flow Tester",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "9541827ad53a7d902ae4dd1641b4ec8311687c19cb28cc9d9cb220555568d46c",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "Wrapped Ether",
+        "purpose": "ERC20 wrapper for ETH",
+        "category": "defi",
+        "startDate": "2026-03-30T12:13:27.493Z",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null,
+        "currentStep": "Historical complete — starting live monitoring"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-03-30T12:13:26.657Z",
+    "updatedAt": "2026-03-30T12:16:40.370Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "df18e7fb-30e9-41e0-9323-0877f2faf73c",
+    "email": "flowtest_1774875616064@test.com",
+    "password": "$2a$06$cZ.XbGj31rqadiC7kuVJwuYyZon3z.B9GZO3i616QeMAUOStRBENi",
+    "name": "Flow Tester",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "73f6a8f355f5461087b279a9504f6f7021ea1c776aa5db6eeb2b047ccad4484a",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "chain": "ethereum",
+        "abi": null,
+        "name": "Wrapped Ether",
+        "purpose": "ERC20 wrapper for ETH",
+        "category": "defi",
+        "startDate": "2026-03-30T13:00:21.443Z",
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null,
+        "currentStep": "Historical complete — starting live monitoring"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-03-30T13:00:19.968Z",
+    "updatedAt": "2026-03-30T21:17:04.113Z",
+    "lastLogin": "2026-03-30T21:17:04.110Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "1446a4de-c477-4372-9ee1-31d05b7e2847",
+    "email": "test@example.com",
+    "password": "$2a$06$lKo0Zv6e9i1N7ylu6XfT/.xqGPnKl.ympxuSxwokRHbIhPck7K6RG",
+    "name": "Test User",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "b911bff6ad0401d47e8acf42b330e2bc6126c1b0f18200ca71b89ea608e35401",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-03-30T13:05:54.322Z",
+    "updatedAt": "2026-03-30T13:07:26.040Z",
+    "usage.analysisCount": 1,
+    "usage.monthlyAnalysisCount": 1,
+    "usage.lastAnalysis": "2026-03-30T13:07:26.039Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "71684a9b-a2ab-4c49-8137-6eccc632bc21",
+    "email": "healthcheck@test.com",
+    "password": "$2a$06$yinypTk7eKXegEz3z3apWO.VQcnFNI1OfeEvV.AH1ntM.XSVW/UiC",
+    "name": "Health Check",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "9ef2da5fba1ccb951dc246f7f6523af37e315230d2d5d389b017bd8367952ddf",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T15:28:54.136Z",
+    "updatedAt": "2026-04-01T15:28:54.136Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "939ff05a-a2ef-4560-925e-ca81116116dc",
+    "email": "apitest2@test.com",
+    "password": "$2a$06$yfg43ZP9fy6K7kmghX0MlOV9xgj0CZ4OCF3vXKXenhQX/3alSjHOy",
+    "name": "API Test",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "b3a29f9186b1defa1e7b3259c64a7060ec70aaaa890e901c2478417a66158452",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T15:34:36.460Z",
+    "updatedAt": "2026-04-01T15:34:36.460Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "c57907ab-c001-4f68-9a12-eb6439dfec7c",
+    "email": "fntest@test.com",
+    "password": "$2a$06$4a4DVI22F7eEg7ntQf9RjeDNxrOnPLkoNGFYtQDNyl2PsuauqIVKm",
+    "name": "FnTest",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "c26c0c6a3b27f03405b0925e21cc6cb6a627fcd0440674d867b8b35fc5a36d9a",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T16:12:17.049Z",
+    "updatedAt": "2026-04-01T16:12:17.049Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "e760dac1-89db-4be3-8c0e-43643a254afc",
+    "email": "fntest2@test.com",
+    "password": "$2a$06$gX0O4IoYZobOfqcDmBpZ5.tGGeZE/H05wHlvlsg83MoZWR9huygeW",
+    "name": "FnTest2",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "2e44ecf8874a5d351a266fe3edc45f4feb220b1416c5fa44d25ea6c268ab7e85",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T16:12:46.726Z",
+    "updatedAt": "2026-04-01T16:12:46.726Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "8263ff4a-5319-4e27-9c84-f2fdc5b1b9b9",
+    "email": "fntest3@test.com",
+    "password": "$2a$06$l6Bu5bmHt6UWs764PeZ0WeZPKJBUcAVbKSXJH2x359FOyf.enPWr2",
+    "name": "FnTest3",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "58489820d8dae9bf1132d88390192bdabee58680a9fb0ae12e886698b2d1b8f6",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T16:14:25.875Z",
+    "updatedAt": "2026-04-01T16:14:25.875Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "dab2e090-2f9c-418f-9aba-bf06d39b56ed",
+    "email": "wallettest@test.com",
+    "password": "$2a$06$BZAfQDtk90.xSkpsX3IM3etBpLxL8nv7x/C6kOfJBr/2mYfeZ2AAC",
+    "name": "WalletTest",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "3fb5fb94cf511a63876a892138a862c51f8011b1cdd61e38f4fb8aa63682ab81",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T16:26:00.383Z",
+    "updatedAt": "2026-04-01T16:26:00.383Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "3f69e639-2b91-4404-930b-ef39b76ae4fa",
+    "email": "fixtest@test.com",
+    "password": "$2a$06$B9BOSC/ozR312bzITUGxy.FNxmuIzkfE1m.mLtNYT/xhmwYn7wxVa",
+    "name": "Fix Test",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "556898439b5cc1dcff0ad251b9daac23ae66c9bb1ae4b0ea5baff88f8225f4f1",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T19:23:41.140Z",
+    "updatedAt": "2026-04-01T19:23:41.140Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "33c7ef45-b04a-452f-8cda-e15538c535b4",
+    "email": "fixtest2@test.com",
+    "password": "$2a$06$54fVsxhIUllUa/IOpHiYBuw4W451LapF5HGQlDmr01igsMOvukzs6",
+    "name": "Fix",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "6dbad3ec56d322a304543c2f719b1df453cd389d34f7a0c56681b033e62aa170",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T19:24:06.188Z",
+    "updatedAt": "2026-04-01T19:24:06.188Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "fb8a10f1-4acd-4057-b481-c18fc3ecced0",
+    "email": "aitest@test.com",
+    "password": "$2a$06$ehmWUOnl1D0JwPe2POIkauo0YyVq7CkquecgrSANxBwhoEURpfVx.",
+    "name": "AI Test",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "0953e80b6c18f68fb196e3e22564784080c33d42ddd953c862def0d4854841b7",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": false,
+      "socialLinks": {
+        "website": null,
+        "twitter": null,
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": null,
+        "chain": null,
+        "abi": null,
+        "name": null,
+        "purpose": null,
+        "category": null,
+        "startDate": null,
+        "isIndexed": false,
+        "indexingProgress": 0,
+        "lastAnalysisId": null
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-01T19:28:11.670Z",
+    "updatedAt": "2026-04-01T19:28:11.670Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "7fe4f3aa-bb3c-4a4c-8c12-7759d328e969",
+    "email": "soyaya1015@gmail.com",
+    "password": "$2a$06$tedzdc9l7HMVyU87d.GnbO58m8S3XSpD0.UrYlFBz8HTQRs9v6INa",
+    "name": "David David",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "a29fc3d43c562e57fa147628e9c61dcf9ae7451db591c7966d0ba54cd10c2740",
+    "isActive": true,
+    "emailVerified": true,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": null,
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z"
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        "chain": "ethereum",
+        "abi": "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"minter_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"mintingAllowedAfter_\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"delegator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"fromDelegate\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"toDelegate\",\"type\":\"address\"}],\"name\":\"DelegateChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"delegate\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousBalance\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newBalance\",\"type\":\"uint256\"}],\"name\":\"DelegateVotesChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"minter\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newMinter\",\"type\":\"address\"}],\"name\":\"MinterChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"DELEGATION_TYPEHASH\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"DOMAIN_TYPEHASH\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"PERMIT_TYPEHASH\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"rawAmount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"name\":\"checkpoints\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"fromBlock\",\"type\":\"uint32\"},{\"internalType\":\"uint96\",\"name\":\"votes\",\"type\":\"uint96\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegatee\",\"type\":\"address\"}],\"name\":\"delegate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegatee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiry\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"delegateBySig\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"delegates\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"getCurrentVotes\",\"outputs\":[{\"internalType\":\"uint96\",\"name\":\"\",\"type\":\"uint96\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"}],\"name\":\"getPriorVotes\",\"outputs\":[{\"internalType\":\"uint96\",\"name\":\"\",\"type\":\"uint96\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumTimeBetweenMints\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"dst\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"rawAmount\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mintCap\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minter\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mintingAllowedAfter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"nonces\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"numCheckpoints\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"rawAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"permit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"minter_\",\"type\":\"address\"}],\"name\":\"setMinter\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"dst\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"rawAmount\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"src\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"dst\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"rawAmount\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+        "name": "Defi",
+        "purpose": "ajkahkfsdkhakasdfjhajksdfhkhsdakhksdhkhasdkhkasdhkfhhkafkhakhashdkhshsakdsahkasdksdhkhsdkhsdhsdhdhsdshasdksdhsdjksddjkahksd",
+        "category": "defi",
+        "startDate": "1999-02-21",
+        "isIndexed": true,
+        "indexingProgress": 100,
+        "lastAnalysisId": "f3369da2-c103-40e8-9581-e17d0e23cd38",
+        "currentStep": "Historical complete — starting live monitoring"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-02T11:36:45.733Z",
+    "updatedAt": "2026-04-02T19:41:37.425Z",
+    "lastLogin": "2026-04-02T19:35:16.737Z",
+    "verifyOtp": null,
+    "verifyOtpExpiry": null,
+    "is_verified": true,
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": []
+    }
+  },
+  {
+    "id": "3da4bc51-8699-424b-afae-0a4f69736644",
+    "email": "techdavinvest@gmail.com",
+    "password": "$2a$06$n8W7Q0DrBmQMcsytTbynbuz4yJcICK4R2bBTUZDJ7GHUZB6lmjv1O",
+    "name": "David David",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "f7e484462e16365082250676e2ed815317293c292d71722e4cefa32052dce42d",
+    "isActive": true,
+    "emailVerified": true,
+    "usage": {
+      "analysisCount": 2,
+      "monthlyAnalysisCount": 2,
+      "monthlyAiQueryCount": 0,
+      "lastAnalysis": "2026-04-02T20:40:00.444Z",
+      "currentMonth": "2026-04",
+      "monthlyResetDate": "2026-04-02T20:36:02.268Z",
+      "aiQueryCount": 0
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "chain": "ethereum",
+        "abi": "[{\"constant\":false,\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\"},{\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"implementation\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"admin\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_implementation\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"previousAdmin\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"}]",
+        "name": "Defi",
+        "purpose": "dajsdkjajskasjasdkljldjljsajlsadjljsljslajldjsadasjjsajlsajljdslajlasjlasjkjljsdkjslklslslksklklasds",
+        "category": "defi",
+        "startDate": "1999-12-22",
+        "isIndexed": true,
+        "indexingProgress": 100,
+        "lastAnalysisId": "bd286905-1456-426a-980a-d2f1ae1c38f0",
+        "currentStep": "Historical complete — starting live monitoring"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-02T20:08:14.281Z",
+    "updatedAt": "2026-04-02T20:40:00.446Z",
+    "billing": {
+      "balance": 0,
+      "totalSpent": 0,
+      "transactions": [
+        {
+          "action": "analysis",
+          "quantity": 1,
+          "cost": 0,
+          "balance": 0,
+          "at": "2026-04-02T20:38:14.159Z"
+        },
+        {
+          "action": "analysis",
+          "quantity": 1,
+          "cost": 0,
+          "balance": 0,
+          "at": "2026-04-02T20:38:14.304Z"
+        },
+        {
+          "action": "analysis",
+          "quantity": 1,
+          "cost": 0,
+          "balance": 0,
+          "at": "2026-04-02T20:38:19.446Z"
+        }
+      ]
+    },
+    "verifyOtp": null,
+    "verifyOtpExpiry": null,
+    "is_verified": true
+  },
+  {
+    "id": "206f1eff-67bd-4eff-a98a-c9e6a4247c6e",
+    "email": "daviddlovedavid1015@gmail.com",
+    "password": "$2a$06$eHyVWK4JmLwhdYLFDiu3reok9Cny288MhXz5FP6VptNaKaDcs/.9C",
+    "name": "David David",
+    "role": "admin",
+    "tier": "free",
+    "apiKey": "9181bc08ded2f9dc9781a408bc70e54f683c1d0254be471934002e44fcff20cc",
+    "isActive": true,
+    "emailVerified": false,
+    "usage": {
+      "analysisCount": 0,
+      "monthlyAnalysisCount": 0,
+      "lastAnalysis": null,
+      "monthlyResetDate": "2026-04-03T11:46:57.518Z",
+      "currentMonth": "2026-04",
+      "monthlyAiQueryCount": 0
+    },
+    "onboarding": {
+      "completed": true,
+      "socialLinks": {
+        "website": "https://stitch.withgoogle.com ",
+        "twitter": "davidlordlove ",
+        "discord": null,
+        "telegram": null
+      },
+      "logo": null,
+      "defaultContract": {
+        "address": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+        "chain": "ethereum",
+        "abi": "[{\"inputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"_sushi\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"subtractedValue\",\"type\":\"uint256\"}],\"name\":\"decreaseAllowance\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"enter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"addedValue\",\"type\":\"uint256\"}],\"name\":\"increaseAllowance\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_share\",\"type\":\"uint256\"}],\"name\":\"leave\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sushi\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+        "name": "Sushiswap",
+        "purpose": "xSUSHI is a token similar to our SushiSwap's Liquidity Provider tokens, that you receive in exchange for staking SUSHI tokens in the Sushibar. While holding the token, it will appreciate it value, as fees from our exchange platform are \"served to the Sushibar\". The xSUSHI token is always worth more than a regular SUSHI token.",
+        "category": "defi",
+        "startDate": "2016-12-22",
+        "isIndexed": true,
+        "indexingProgress": 100,
+        "lastAnalysisId": "66edd345-540a-4634-8aaa-c2d51b7b65aa",
+        "currentStep": "Historical complete — starting live monitoring"
+      }
+    },
+    "preferences": {
+      "notifications": {
+        "email": true,
+        "analysis": true
+      },
+      "defaultChain": "ethereum"
+    },
+    "createdAt": "2026-04-03T11:46:57.520Z",
+    "updatedAt": "2026-04-03T11:54:51.043Z"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "contractAddress": "0x4dFae3690b93c47470b03036A17B23C1Be05127C",
+  "chain": "ethereum",
+  "analysisId": "fb382a0b-91d0-489d-9477-6ddf937821fb",
+  "transactions": 50,
+  "uniqueUsers": 28,
+  "totalValue": "72478000119368091",
+  "avgGasUsed": 190503,
+  "successRate": "100.00",
+  "failureRate": "0.00",
+  "volume": "72478000119368091",
+  "blockRange": {
+    "start": 24683087,
+    "end": 24823086
+  },
+  "updatedAt": "2026-04-06T20:44:35.561Z"
+}

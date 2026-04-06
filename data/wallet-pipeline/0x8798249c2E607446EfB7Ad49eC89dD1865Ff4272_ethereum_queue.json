@@ -1,0 +1,211 @@
+{
+  "pending": [
+    {
+      "address": "0xfc9928f6590d853752824b0b403a6ae36785e535",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 1,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured."
+    },
+    {
+      "address": "0xae2fc483527b8ef99eb5d9b44875f005ba1fae13",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 1,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured."
+    },
+    {
+      "address": "0x7c1fb21f233b1bce1e175725beb8f0045facd8bf",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0x0bde59981fdeac219ce9e618d27f193438bff786",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0x565d71956064516925b8d1085e1ec8c8cb1f8c33",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0x6e2c8549ecc8615f14351889066a4ef196a688cd",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0x4dd36c49b200a6d52ebb365f01bf0e4db8b9f765",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0x152fa7c3837c7cfa399d3732ed9dbebe0f3d1c8d",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0x5c8e47d95714c0dd48c7b0c91b0228ccd3dfbfbe",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    }
+  ],
+  "processing": [
+    {
+      "address": "0xae2fc483527b8ef99eb5d9b44875f005ba1fae13",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0xfc9928f6590d853752824b0b403a6ae36785e535",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    },
+    {
+      "address": "0x1d57184a354d58d8a0809b8a692e7a246b475c59",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 0,
+      "enqueuedAt": "2026-04-03T12:45:11.690Z"
+    }
+  ],
+  "dlq": [
+    {
+      "address": "0xae2fc483527b8ef99eb5d9b44875f005ba1fae13",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured.",
+      "failedAt": "2026-04-03T12:38:48.291Z"
+    },
+    {
+      "address": "0xfc9928f6590d853752824b0b403a6ae36785e535",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "RPC Error: invalid block range params",
+      "failedAt": "2026-04-03T12:38:56.702Z"
+    },
+    {
+      "address": "0x1d57184a354d58d8a0809b8a692e7a246b475c59",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "RPC Error: invalid block range params",
+      "failedAt": "2026-04-03T12:38:58.954Z"
+    },
+    {
+      "address": "0x7c1fb21f233b1bce1e175725beb8f0045facd8bf",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "HTTP 429: Too Many Requests",
+      "failedAt": "2026-04-03T12:40:02.931Z"
+    },
+    {
+      "address": "0x0bde59981fdeac219ce9e618d27f193438bff786",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "HTTP 429: Too Many Requests",
+      "failedAt": "2026-04-03T12:40:05.098Z"
+    },
+    {
+      "address": "0x565d71956064516925b8d1085e1ec8c8cb1f8c33",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "RPC Error: rate-limited until QuantaInstant(Nanos(1362614.970544285s))",
+      "failedAt": "2026-04-03T12:40:12.381Z"
+    },
+    {
+      "address": "0x6e2c8549ecc8615f14351889066a4ef196a688cd",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured.",
+      "failedAt": "2026-04-03T12:41:11.767Z"
+    },
+    {
+      "address": "0x4dd36c49b200a6d52ebb365f01bf0e4db8b9f765",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured.",
+      "failedAt": "2026-04-03T12:41:19.477Z"
+    },
+    {
+      "address": "0x152fa7c3837c7cfa399d3732ed9dbebe0f3d1c8d",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "HTTP 429: Too Many Requests",
+      "failedAt": "2026-04-03T12:41:19.523Z"
+    },
+    {
+      "address": "0x5c8e47d95714c0dd48c7b0c91b0228ccd3dfbfbe",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:37:46.169Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured.",
+      "failedAt": "2026-04-03T12:42:30.633Z"
+    },
+    {
+      "address": "0xae2fc483527b8ef99eb5d9b44875f005ba1fae13",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:39:27.353Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured.",
+      "failedAt": "2026-04-03T12:42:38.552Z"
+    },
+    {
+      "address": "0xfc9928f6590d853752824b0b403a6ae36785e535",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:39:27.353Z",
+      "lastError": "RPC Error: invalid block range params",
+      "failedAt": "2026-04-03T12:42:45.324Z"
+    },
+    {
+      "address": "0x1d57184a354d58d8a0809b8a692e7a246b475c59",
+      "contractAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-03T12:39:27.353Z",
+      "lastError": "RPC Error: Custom error: All RPCs are unreachable and no Alchemy fallback is configured.",
+      "failedAt": "2026-04-03T12:43:08.272Z"
+    }
+  ]
+}

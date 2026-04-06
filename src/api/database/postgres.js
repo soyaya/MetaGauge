@@ -19,7 +19,7 @@ const config = {
   password: process.env.POSTGRES_PASSWORD,
   max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000,
   ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false
 };
 

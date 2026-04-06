@@ -1,0 +1,151 @@
+openapi: 3.0.0
+info:
+  title: MetaGauge API
+  description: Enterprise blockchain analytics platform API
+  version: 1.0.0
+  contact:
+    email: support@metagauge.io
+servers:
+  - url: http://localhost:5000/api
+    description: Development server
+  - url: https://api.metagauge.io
+    description: Production server
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /contracts:
+    get:
+      tags: [Contracts]
+      summary: List user contracts
+      responses:
+        200:
+          description: List of contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contract'
+
+  /analysis/{contractId}/metrics:
+    get:
+      tags: [Analytics]
+      summary: Get contract metrics
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Contract metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+
+  /analysis/{contractId}/wallet-segments:
+    get:
+      tags: [Analytics]
+      summary: Get wallet segments
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Wallet segments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSegments'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        tier:
+          type: string
+
+    Contract:
+      type: object
+      properties:
+        id:
+          type: string
+        address:
+          type: string
+        chain:
+          type: string
+        name:
+          type: string
+
+    Metrics:
+      type: object
+      properties:
+        activeWallets:
+          type: integer
+        totalTransactions:
+          type: integer
+        d7Retention:
+          type: number
+
+    WalletSegments:
+      type: object
+      properties:
+        Bot:
+          type: integer
+        Whale:
+          type: integer
+        Active:
+          type: integer

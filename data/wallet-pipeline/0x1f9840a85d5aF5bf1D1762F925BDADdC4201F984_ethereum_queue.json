@@ -1,0 +1,15 @@
+{
+  "pending": [],
+  "processing": [],
+  "dlq": [
+    {
+      "address": "0xca4bc2199418b379400b3820ceb3c825b5552c6e",
+      "contractAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "chain": "ethereum",
+      "retries": 3,
+      "enqueuedAt": "2026-04-02T14:09:39.229Z",
+      "lastError": "outLogs is not iterable",
+      "failedAt": "2026-04-02T14:11:52.573Z"
+    }
+  ]
+}

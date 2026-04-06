@@ -5,7 +5,6 @@
  */
 
 import { EventEmitter } from 'events';
-import { LiskRpcClient } from './LiskRpcClient.js';
 import { StarknetRpcClient } from './StarknetRpcClient.js';
 import { RpcClientService } from './RpcClientService.js';
 
@@ -51,18 +50,6 @@ export class ContractInteractionFetcher extends EventEmitter {
         {
           name: 'publicnode',
           url: process.env.STARKNET_RPC_URL2 || 'https://starknet-rpc.publicnode.com',
-          priority: 2
-        }
-      ],
-      lisk: [
-        {
-          name: 'lisk-api',
-          url: process.env.LISK_RPC_URL1 || 'https://rpc.api.lisk.com',
-          priority: 1
-        },
-        {
-          name: 'drpc',
-          url: process.env.LISK_RPC_URL2 || 'https://lisk.drpc.org',
           priority: 2
         }
       ]
@@ -126,9 +113,7 @@ export class ContractInteractionFetcher extends EventEmitter {
       try {
         let rpcClient;
         
-        if (chain === 'lisk') {
-          rpcClient = new LiskRpcClient(config.url);
-        } else if (chain === 'starknet') {
+        if (chain === 'starknet') {
           rpcClient = new StarknetRpcClient(config.url);
         } else {
           rpcClient = new RpcClientService(config.url, chain);
@@ -259,7 +244,7 @@ export class ContractInteractionFetcher extends EventEmitter {
         this._executeWithFailover(
           chain.toLowerCase(),
           async (client) => {
-          // Use the optimized method from LiskRpcClient if available
+          // Use the optimized method if available
           if (client.getTransactionsByAddress && typeof client.getTransactionsByAddress === 'function') {
             const result = await client.getTransactionsByAddress(contractAddress, fromBlock, toBlock);
             

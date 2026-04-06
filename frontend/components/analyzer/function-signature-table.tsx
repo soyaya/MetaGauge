@@ -38,16 +38,17 @@ export function FunctionSignatureTable({ contractAddress, chain }: FunctionSigna
       setLoading(true)
       setError(null)
       
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
       const response = await fetch(
-        `/api/functions/signatures?contractAddress=${contractAddress}&chain=${chain}`
+        `${API_BASE}/api/functions/signatures?contractAddress=${encodeURIComponent(contractAddress)}&chain=${encodeURIComponent(chain)}`,
+        { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } }
       )
       
-      if (!response.ok) {
-        throw new Error('Failed to load signatures')
-      }
+      if (!response.ok) throw new Error(`Failed to load signatures (${response.status})`)
       
       const data = await response.json()
-      setSignatures(data)
+      setSignatures(Array.isArray(data) ? data : [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -81,7 +82,9 @@ export function FunctionSignatureTable({ contractAddress, chain }: FunctionSigna
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-muted-foreground text-center">No function signatures found</p>
+          <p className="text-muted-foreground text-center">
+            No function signatures found yet. Data will appear after indexing completes.
+          </p>
         </CardContent>
       </Card>
     )
