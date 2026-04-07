@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-06T23:58:18.486Z",
+  "updatedAt": "2026-04-06T23:54:00.321Z",
   "user": {
     "contractAddress": "0x4dFae3690b93c47470b03036A17B23C1Be05127C",
     "chain": "ethereum",
@@ -48,7 +48,7 @@
         "failureRate": "0.00",
         "volume": "3216778894240440"
       },
-      "lastUpdated": "2026-04-06T23:58:18.407Z"
+      "lastUpdated": "2026-04-06T23:53:56.353Z"
     },
     {
       "id": "0xb8c77482e45f1f44de1745f52c74426c631bdd52_ethereum",

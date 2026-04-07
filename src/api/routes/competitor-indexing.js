@@ -152,28 +152,30 @@ export async function indexCompetitor(userId, competitor) {
       if (seenHashes.size >= HISTORY_LIMIT) reachedGenesis = true;
 
       const newHashes = Array.from(seenHashes).filter(h => !collectedTxs.find(t => t.hash === h)).slice(0, HISTORY_LIMIT);
-      // Fetch txs in parallel batches of 5 with timeout
-      for (let i = 0; i < newHashes.length && collectedTxs.length < HISTORY_LIMIT; i += 5) {
-        const batch = newHashes.slice(i, i + 5);
-        const results = await Promise.allSettled(batch.map(async txHash => {
-          const [tx, receipt] = await Promise.race([
-            Promise.all([
-              rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
-              rpcClient._makeRpcCall('eth_getTransactionReceipt', [txHash]),
-            ]),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('tx timeout')), 8000))
-          ]);
-          if (!tx) return null;
-          return {
-            hash: tx.hash, from: tx.from, to: tx.to,
-            value: tx.value || '0', gasUsed: receipt?.gasUsed || '0',
-            gasPrice: tx.gasPrice || '0', blockNumber: parseInt(tx.blockNumber, 16),
-            blockTimestamp: receipt?.blockTimestamp ? parseInt(receipt.blockTimestamp, 16) : null,
-            status: receipt?.status === '0x1' || receipt?.status === 1,
-            input: tx.input || '0x', chain,
-          };
-        }));
-        results.forEach(r => { if (r.status === 'fulfilled' && r.value) collectedTxs.push(r.value); });
+      // Fetch txs sequentially with retry — more reliable than parallel for slow gateways
+      for (const txHash of newHashes) {
+        if (collectedTxs.length >= HISTORY_LIMIT) break;
+        let tx = null, receipt = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            [tx, receipt] = await Promise.race([
+              Promise.all([
+                rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
+                rpcClient._makeRpcCall('eth_getTransactionReceipt', [txHash]),
+              ]),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('tx timeout')), 15000))
+            ]);
+            break;
+          } catch { await new Promise(r => setTimeout(r, 1000)); }
+        }
+        if (tx) collectedTxs.push({
+          hash: tx.hash, from: tx.from, to: tx.to,
+          value: tx.value || '0', gasUsed: receipt?.gasUsed || '0',
+          gasPrice: tx.gasPrice || '0', blockNumber: parseInt(tx.blockNumber, 16),
+          blockTimestamp: receipt?.blockTimestamp ? parseInt(receipt.blockTimestamp, 16) : null,
+          status: receipt?.status === '0x1' || receipt?.status === 1,
+          input: tx.input || '0x', chain,
+        });
       }
     } catch { /* skip chunk */ }
 
