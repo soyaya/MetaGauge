@@ -8,9 +8,8 @@ export function Footer() {
   return (
     <footer className="px-6 py-12 md:py-16 max-w-7xl mx-auto">
       <div className="flex flex-col items-center text-center">
-        <Link href="/" className="flex items-center gap-2 mb-4">
-          <MetaGaugeLogo className="h-6 w-8" />
-          <span className="font-semibold text-lg">MetaGauge</span>
+        <Link href="/" className="flex items-center mb-4">
+          <MetaGaugeLogo className="h-8 w-auto" />
         </Link>
 
         <p className="text-muted-foreground max-w-md mb-8">

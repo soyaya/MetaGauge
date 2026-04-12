@@ -70,7 +70,10 @@ const fetchWithTimeout = (url: string, options: RequestInit, timeoutMs: number):
       if (error.message.includes('fetch failed') || error.message.includes('Failed to fetch')) {
         const err = new Error('Cannot connect to backend server');
         err.name = 'NetworkError';
-        console.error(`[FETCH] Converted to NetworkError`);
+        // Only log network errors in development
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`[FETCH] Network error - backend may be unavailable`);
+        }
         throw err;
       }
       
@@ -131,11 +134,32 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
           errorMessage = response.statusText || errorMessage;
         }
         
-        // Don't retry auth errors
-        if (response.status === 401 || response.status === 403) {
+        // Token expired/invalid — clear and redirect to login
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          if (typeof window !== 'undefined') {
+            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+          }
           const authError = new Error(errorMessage);
           authError.name = 'AuthError';
           throw authError;
+        }
+
+        // Permission denied — throw but don't clear token or redirect
+        if (response.status === 403) {
+          const authError = new Error(errorMessage || 'Permission denied');
+          authError.name = 'ForbiddenError';
+          throw authError;
+        }
+
+        // Insufficient balance or quota — throw error, let the page handle it
+        if (response.status === 402) {
+          let errorData: any = {};
+          try { errorData = await response.json(); } catch {}
+          const billingError = new Error(errorData.message || errorData.error || 'Free quota reached. Please top up to continue.');
+          billingError.name = 'InsufficientBalance';
+          throw billingError;
         }
         
         throw new Error(errorMessage);
@@ -155,18 +179,17 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
       console.error(`[API] Error on attempt ${attempt + 1}:`, {
         name: lastError.name,
         message: lastError.message,
+        stack: lastError.stack?.split('\n')[0],
         isRetryable: isRetryableError(lastError)
       });
       
       // Don't retry auth errors
-      if (lastError.name === 'AuthError') {
-        console.error(`[API] Auth error - not retrying`);
+      if (lastError.name === 'AuthError' || lastError.name === 'ForbiddenError') {
         throw lastError;
       }
       
       // Check if error is retryable
       if (!isRetryableError(lastError)) {
-        console.error(`[API] Non-retryable error - throwing`);
         throw lastError;
       }
 
@@ -190,6 +213,36 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 };
 
 export const api = {
+  // Generic HTTP methods
+  get: async (endpoint: string) => {
+    return apiRequest(endpoint, { method: 'GET' });
+  },
+
+  post: async (endpoint: string, data?: any) => {
+    return apiRequest(endpoint, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  },
+
+  put: async (endpoint: string, data?: any) => {
+    return apiRequest(endpoint, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  },
+
+  delete: async (endpoint: string) => {
+    return apiRequest(endpoint, { method: 'DELETE' });
+  },
+
+  patch: async (endpoint: string, data?: any) => {
+    return apiRequest(endpoint, {
+      method: 'PATCH',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  },
+
   auth: {
     register: async (data: { email: string; password: string; name: string }) => {
       const result = await apiRequest('/api/auth/register', {
@@ -301,6 +354,10 @@ export const api = {
       return apiRequest(`/api/analysis/${analysisId}/quick-insights`);
     },
 
+    getAISummary: async (analysisId: string) => {
+      return apiRequest(`/api/analysis/${analysisId}/ai-summary`);
+    },
+
     getRecommendations: async (analysisId: string, contractType: string = 'defi') => {
       return apiRequest(`/api/analysis/${analysisId}/recommendations`, {
         method: 'POST',
@@ -351,11 +408,75 @@ export const api = {
       return apiRequest('/api/users/usage');
     },
 
-    syncSubscription: async (walletAddress: string) => {
-      return apiRequest('/api/users/sync-subscription', {
+    verifyWithGoogle: async (accessToken: string) => {
+      return apiRequest('/api/auth/oauth/google', {
         method: 'POST',
-        body: JSON.stringify({ walletAddress }),
+        body: JSON.stringify({ accessToken }),
       });
+    },
+  },
+
+  billing: {
+    getUsage: async () => {
+      return apiRequest('/api/billing/usage');
+    },
+
+    getPricing: async () => {
+      return apiRequest('/api/billing/pricing');
+    },
+
+    getTransactions: async () => {
+      return apiRequest('/api/billing/transactions');
+    },
+
+    createCheckout: async (amount: number) => {
+      return apiRequest('/api/billing/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ amount })
+      });
+    }
+  },
+
+  subscription: {
+    getStatus: async () => {
+      return apiRequest('/api/subscription/status');
+    },
+
+    getUsage: async () => {
+      return apiRequest('/api/subscription/usage');
+    },
+
+    verify: async (transactionHash: string) => {
+      return apiRequest('/api/subscription/verify', {
+        method: 'POST',
+        body: JSON.stringify({ transactionHash })
+      });
+    }
+  },
+
+  indexing: {
+    getStatus: async () => {
+      return apiRequest('/api/indexing/status');
+    },
+
+    trigger: async () => {
+      return apiRequest('/api/indexing/trigger', {
+        method: 'POST'
+      });
+    }
+  },
+
+  dashboard: {
+    getContractInfo: async () => {
+      return apiRequest('/api/dashboard/contract-info');
+    },
+
+    getIndexingStatus: async () => {
+      return apiRequest('/api/dashboard/indexing-status');
+    },
+
+    getBlockMetrics: async () => {
+      return apiRequest('/api/dashboard/block-metrics');
     }
   },
 
@@ -410,14 +531,57 @@ export const api = {
     },
 
     triggerIndexing: async () => {
-      return apiRequest('/api/onboarding/trigger-indexing', {
-        method: 'POST',
-      });
+      return apiRequest('/api/onboarding/trigger-indexing', { method: 'POST' });
+    },
+
+    backfillTimestamps: async () => {
+      return apiRequest('/api/onboarding/backfill-timestamps', { method: 'POST' });
     },
 
     debugAnalysis: async () => {
       return apiRequest('/api/onboarding/debug-analysis');
     }
+  },
+
+  metrics: {
+    /** All structured sections for the Metrics tab */
+    getDashboard: async () => apiRequest('/api/metrics/dashboard'),
+    /** Metrics for a specific analysis */
+    getAnalysis: async (analysisId: string) => apiRequest(`/api/metrics/analysis/${analysisId}`),
+    /** Recalculate metrics for all analyses */
+    recalculate: async () => apiRequest('/api/metrics/recalculate', { method: 'POST' }),
+    /** Wallet + feature analytics for the Analytics tab */
+    getWalletAnalytics: async (contractAddress: string, chain: string) =>
+      apiRequest(`/api/functions/wallet-analytics?contractAddress=${encodeURIComponent(contractAddress)}&chain=${encodeURIComponent(chain)}`),
+  },
+
+  traction: {
+    getDashboard:      async () => apiRequest('/api/traction/dashboard'),
+    getTasks:          async () => apiRequest('/api/traction/tasks'),
+    getMetrics:        async () => apiRequest('/api/traction/metrics'),
+    getOPS:            async () => apiRequest('/api/traction/ops'),
+    getGrowth:         async () => apiRequest('/api/traction/growth'),
+    getHistory:        async () => apiRequest('/api/traction/history'),
+    getActivity:       async () => apiRequest('/api/traction/activity'),
+    checkTask:         async (taskId: string) => apiRequest(`/api/traction/tasks/${taskId}/check`, { method: 'POST' }),
+    getRecommendation: async (taskId: string) => apiRequest(`/api/traction/tasks/${taskId}/recommendation`),
+    sendReport:        async (body: { email: string; sections: string[] }) =>
+      apiRequest('/api/traction/send-report', { method: 'POST', body: JSON.stringify(body) }),
+  },
+
+  competitive: {
+    getDashboard:  async () => apiRequest('/api/competitive/dashboard'),
+    getList:       async () => apiRequest('/api/competitive/list'),
+    addCompetitor: async (data: { address: string; chain: string; name?: string }) =>
+      apiRequest('/api/competitive/add-competitor', { method: 'POST', body: JSON.stringify(data) }),
+    removeCompetitor: async (competitorId: string) =>
+      apiRequest(`/api/competitive/remove-competitor/${competitorId}`, { method: 'DELETE' }),
+    getInsight: async (competitorId: string) =>
+      apiRequest(`/api/competitive/insight/${competitorId}`),
+    createAlert: async (data: { competitorId: string; metric: string; condition: string; threshold: number; name?: string }) =>
+      apiRequest('/api/competitive/alert', { method: 'POST', body: JSON.stringify(data) }),
+    getAlerts: async () => apiRequest('/api/competitive/alerts'),
+    deleteAlert: async (id: string) => apiRequest(`/api/competitive/alerts/${id}`, { method: 'DELETE' }),
   },
 
   chat: {
@@ -529,18 +693,7 @@ export const alertsApi = {
   },
 };
 
-// Add to main api object
-api.alerts = alertsApi;
+// Extend api object with alerts
+(api as any).alerts = alertsApi;
 
 export { getAuthToken, setAuthToken, removeAuthToken };
-
-// Export diagnostic utilities for debugging
-if (typeof window !== 'undefined') {
-  import('./api-diagnostics.ts').then(({ runFullDiagnostics, diagnoseAPIHealth }) => {
-    (window as any).__API_DIAGNOSTICS__ = {
-      runFullDiagnostics,
-      diagnoseAPIHealth,
-      getAPIUrl: () => API_URL
-    };
-  }).catch(err => console.error('Failed to load diagnostics:', err));
-}

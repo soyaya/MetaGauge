@@ -54,7 +54,6 @@ export class EnhancedAnalyticsEngine {
       // Check for common ABIs based on chain
       const commonAbis = {
         'ethereum': ['common-defi.json', 'usdc.json', 'competitor-4-uniswap-v3.json'],
-        'lisk': ['common-defi.json', 'usdc.json'],
         'starknet': ['common-defi.json', 'trip.json']
       };
       
@@ -376,6 +375,15 @@ export class EnhancedAnalyticsEngine {
     } catch (error) {
       console.error(`   ❌ Enhanced analysis error: ${error.message}`);
       console.error(`   Stack: ${error.stack}`);
+      
+      // Log to file for debugging
+      try {
+        const fs = await import('fs');
+        const logMsg = `[${new Date().toISOString()}] Analysis error for ${contractAddress} on ${chain}: ${error.message}\n${error.stack}\n\n`;
+        fs.appendFileSync('analysis-errors.log', logMsg);
+      } catch (logError) {
+        // Ignore logging errors
+      }
       
       // Import MetricsNormalizer for error case
       const { MetricsNormalizer } = await import('./MetricsNormalizer.js');

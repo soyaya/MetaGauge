@@ -5,7 +5,6 @@
  */
 
 import { EventEmitter } from 'events';
-import { LiskRpcClient } from './LiskRpcClient.js';
 import { StarknetRpcClient } from './StarknetRpcClient.js';
 import { RpcClientService } from './RpcClientService.js';
 
@@ -16,9 +15,9 @@ export class ContractInteractionFetcher extends EventEmitter {
     this.config = {
       maxRequestsPerSecond: config.maxRequestsPerSecond || 10,
       requestWindow: config.requestWindow || 1000,
-      failoverTimeout: config.failoverTimeout || 30000,
+      failoverTimeout: config.failoverTimeout || 5 * 60 * 1000, // 5 minutes for busy contracts
       maxRetries: config.maxRetries || 3,
-      batchSize: config.batchSize || 50,
+      batchSize: config.batchSize || 10, // Reduced for rate limiting
       maxEventsPerQuery: config.maxEventsPerQuery || 10000,
       ...config
     };
@@ -27,14 +26,19 @@ export class ContractInteractionFetcher extends EventEmitter {
     this.providerConfigs = {
       ethereum: [
         {
-          name: 'publicnode',
-          url: 'https://ethereum-rpc.publicnode.com',
+          name: 'env-primary',
+          url: process.env.ETHEREUM_RPC_URL || 'https://ethereum-rpc.publicnode.com',
           priority: 1
         },
         {
-          name: 'nownodes',
-          url: process.env.ETHEREUM_RPC_URL || 'https://eth.nownodes.io/2ca1a1a6-9040-4ca9-8727-33a186414a1f',
+          name: 'env-fallback',
+          url: process.env.ETHEREUM_RPC_URL_FALLBACK || 'https://eth.llamarpc.com',
           priority: 2
+        },
+        {
+          name: 'ankr',
+          url: 'https://rpc.ankr.com/eth',
+          priority: 3
         }
       ],
       starknet: [
@@ -46,18 +50,6 @@ export class ContractInteractionFetcher extends EventEmitter {
         {
           name: 'publicnode',
           url: process.env.STARKNET_RPC_URL2 || 'https://starknet-rpc.publicnode.com',
-          priority: 2
-        }
-      ],
-      lisk: [
-        {
-          name: 'lisk-api',
-          url: process.env.LISK_RPC_URL1 || 'https://rpc.api.lisk.com',
-          priority: 1
-        },
-        {
-          name: 'drpc',
-          url: process.env.LISK_RPC_URL2 || 'https://lisk.drpc.org',
           priority: 2
         }
       ]
@@ -121,9 +113,7 @@ export class ContractInteractionFetcher extends EventEmitter {
       try {
         let rpcClient;
         
-        if (chain === 'lisk') {
-          rpcClient = new LiskRpcClient(config.url);
-        } else if (chain === 'starknet') {
+        if (chain === 'starknet') {
           rpcClient = new StarknetRpcClient(config.url);
         } else {
           rpcClient = new RpcClientService(config.url, chain);
@@ -141,7 +131,7 @@ export class ContractInteractionFetcher extends EventEmitter {
         
         console.log(`✅ Initialized ${config.name} provider for ${chain} (interaction mode)`);
       } catch (error) {
-        console.error(`❌ Failed to initialize ${config.name} provider for ${chain}:`, error.message);
+        console.info(`ℹ️ Could not initialize ${config.name} provider for ${chain}: ${error.message}`);
       }
     }
     
@@ -247,14 +237,14 @@ export class ContractInteractionFetcher extends EventEmitter {
     console.log(`🎯 Fetching contract interactions for ${contractAddress} on ${chain}`);
     console.log(`   📊 Block range: ${fromBlock} to ${toBlock} (${toBlock - fromBlock + 1} blocks)`);
     
-    const FETCH_TIMEOUT = 2 * 60 * 1000; // 2 minutes timeout
+    const FETCH_TIMEOUT = 5 * 60 * 1000; // 5 minutes timeout for busy contracts
     
     return await this._executeWithRateLimit(async () => {
       return await this._withTimeout(
         this._executeWithFailover(
           chain.toLowerCase(),
           async (client) => {
-          // Use the optimized method from LiskRpcClient if available
+          // Use the optimized method if available
           if (client.getTransactionsByAddress && typeof client.getTransactionsByAddress === 'function') {
             const result = await client.getTransactionsByAddress(contractAddress, fromBlock, toBlock);
             

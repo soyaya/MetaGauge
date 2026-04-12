@@ -20,6 +20,214 @@ export function setStreamingIndexer(indexer) {
   streamingIndexer = indexer;
 }
 
+/**
+ * Builds the fullReport shape expected by all dashboard tabs from raw analysis data.
+ * Exported so other routes (competitive, metrics) can reuse the same shape.
+ */
+export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTarget = {}) {
+  if (rawTarget?.fullReport) return rawTarget.fullReport;
+
+  const hexToNum = v => {
+    if (typeof v === 'number') return v;
+    if (typeof v === 'string' && v.startsWith('0x')) return parseInt(v, 16);
+    return Number(v) || 0;
+  };
+  const median = arr => { if (!arr.length) return 0; const s = [...arr].sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; };
+  const fmtDur = s => { if (!s) return null; if (s<60) return `${s}s`; if (s<3600) return `${Math.round(s/60)}m`; if (s<86400) return `${Math.round(s/3600)}h`; return `${Math.round(s/86400)}d`; };
+
+  const txs = rawTxs || [];
+  const now = Date.now() / 1000;
+  const DAY = 86400;
+  const ETH_PRICE = 2500;
+
+  // Per-wallet
+  const wm = {};
+  txs.forEach(tx => {
+    const w = wm[tx.from] = wm[tx.from] || { txs:[], gas:0, value:0, firstTs:Infinity, lastTs:0 };
+    w.txs.push(tx);
+    w.gas   += hexToNum(tx.gasUsed) * hexToNum(tx.gasPrice);
+    w.value += hexToNum(tx.value);
+    const ts = tx.blockTimestamp || 0;
+    if (ts < w.firstTs) w.firstTs = ts;
+    if (ts > w.lastTs)  w.lastTs  = ts;
+  });
+  const wallets      = Object.entries(wm);
+  const totalUsers   = wallets.length;
+  const newUsers     = wallets.filter(([,w]) => w.txs.length === 1).length;
+  const returning    = wallets.filter(([,w]) => w.txs.length > 1).length;
+  const whales       = wallets.filter(([,w]) => w.txs.length >= 10).length;
+  const power        = wallets.filter(([,w]) => w.txs.length > 10).length;
+  const active24h    = wallets.filter(([,w]) => (now - w.lastTs) < DAY).length;
+  const active7d     = wallets.filter(([,w]) => (now - w.lastTs) < 7*DAY).length;
+  const active30d    = wallets.filter(([,w]) => (now - w.lastTs) < 30*DAY).length;
+
+  // Success
+  const successCount = txs.filter(t => t.status === true || t.status === 1).length;
+  const failedCount  = txs.length - successCount;
+  const successRate  = txs.length ? Math.round((successCount / txs.length) * 100) : null;
+  const failureRate  = txs.length ? Math.round((failedCount  / txs.length) * 100) : 0;
+
+  // Gas
+  const gasVals  = txs.map(t => hexToNum(t.gasUsed)).filter(Boolean);
+  const gasPriceVals = txs.map(t => hexToNum(t.gasPrice)).filter(Boolean);
+  const totalGasWei  = txs.reduce((s,t) => s + hexToNum(t.gasUsed)*hexToNum(t.gasPrice), 0);
+  const avgGas       = gasVals.length ? Math.round(gasVals.reduce((a,b)=>a+b,0)/gasVals.length) : 0;
+  const avgGasPriceWei = gasPriceVals.length ? Math.round(gasPriceVals.reduce((a,b)=>a+b,0)/gasPriceVals.length) : 0;
+  const totalGasUSD  = (totalGasWei/1e18)*ETH_PRICE;
+  const avgGasCostUSD = txs.length ? Math.round((totalGasUSD/txs.length)*10000)/10000 : 0;
+
+  // Volume
+  const totalWei    = txs.reduce((s,t) => s + hexToNum(t.value), 0);
+  const totalETH    = totalWei / 1e18;
+  const avgTxSizeETH = txs.length ? (totalETH/txs.length).toFixed(6) : '0';
+
+  // Retention
+  const retRate  = totalUsers ? Math.round((returning/totalUsers)*100) : 0;
+  const churn    = 100 - retRate;
+  const bounce   = totalUsers ? Math.round((newUsers/totalUsers)*100) : 0;
+  const d1 = totalUsers ? Math.round((wallets.filter(([,w])=>w.lastTs-w.firstTs>=DAY).length/totalUsers)*100) : 0;
+  const d7 = totalUsers ? Math.round((wallets.filter(([,w])=>w.lastTs-w.firstTs>=7*DAY).length/totalUsers)*100) : 0;
+  const d30= totalUsers ? Math.round((wallets.filter(([,w])=>w.lastTs-w.firstTs>=30*DAY).length/totalUsers)*100) : 0;
+
+  // Session (median)
+  const sessionArr = wallets.filter(([,w])=>w.txs.length>1).map(([,w])=>w.lastTs-w.firstTs);
+  const medSession = median(sessionArr);
+
+  // Time to activation (median)
+  const actArr = wallets.filter(([,w])=>w.txs.length>=2).map(([,w])=>{
+    const s=[...w.txs].sort((a,b)=>(a.blockTimestamp||0)-(b.blockTimestamp||0));
+    return (s[1].blockTimestamp||0)-(s[0].blockTimestamp||0);
+  }).filter(s=>s>0);
+  const medAct = median(actArr);
+
+  // First tx timestamp
+  const timestamps = txs.map(t=>t.blockTimestamp).filter(Boolean).sort((a,b)=>a-b);
+  const firstTxTs  = timestamps[0] || 0;
+
+  // Methods
+  const METHODS = {'0xa9059cbb':'Transfer','0x095ea7b3':'Approve','0x23b872dd':'TransferFrom','0x40c10f19':'Mint','0x42966c68':'Burn','0x2e1a7d4d':'Withdraw','0xd0e30db0':'Deposit','0x3593564c':'Execute'};
+  const fc = {};
+  txs.forEach(tx => { const sig=tx.input?.length>=10?tx.input.slice(0,10):'0x'; const l=METHODS[sig]||(sig==='0x'?'ETH Transfer':'Contract Call'); fc[l]=(fc[l]||0)+1; });
+
+  // Peak hours
+  const hc = {};
+  txs.forEach(tx => { if(tx.blockTimestamp){const h=new Date(tx.blockTimestamp*1000).getUTCHours();hc[h]=(hc[h]||0)+1;} });
+  const peakHours = Object.entries(hc).sort(([,a],[,b])=>b-a).slice(0,3).map(([h,c])=>({hour:`${h}:00 UTC`,count:c}));
+
+  // Quality
+  const powerRate = totalUsers ? Math.round((power/totalUsers)*100) : 0;
+  const avgSoph   = totalUsers ? Math.round(wallets.reduce((s,[,w])=>s+new Set(w.txs.map(t=>t.input?.slice(0,10)||'0x')).size,0)/totalUsers*10)/10 : 0;
+  const walletQ   = Math.round(retRate*0.4 + powerRate*0.3 + Math.min(avgSoph*10,30));
+  const avgJourney = totalUsers ? Math.round(txs.length/totalUsers*10)/10 : 0;
+
+  // Funnel — tabs read: s.step, s.users, s.pct
+  const funnel = [
+    {step:'Wallets Seen',  users:totalUsers, pct:100},
+    {step:'Transacted',    users:totalUsers, pct:100},
+    {step:'Returned',      users:returning,  pct:Math.round(returning/Math.max(totalUsers,1)*100)},
+    {step:'Active (24h)',  users:active24h,  pct:Math.round(active24h/Math.max(totalUsers,1)*100)},
+  ];
+
+  // featureFirstUse — metrics-tab reads f.feature, f.count; ux-tab reads f.feature, f.count
+  const featureFirstUse = Object.entries(fc).sort(([,a],[,b])=>b-a)
+    .map(([feature,count])=>({feature, name:feature, count, pct:Math.round(count/Math.max(txs.length,1)*100)}));
+
+  // Users table — users-tab reads u.transactionCount, u.totalValue, u.totalGasSpent, u.userType
+  const usersTable = wallets.sort(([,a],[,b])=>b.txs.length-a.txs.length).slice(0,20).map(([addr,w])=>({
+    address:          addr,
+    transactionCount: w.txs.length,
+    txCount:          w.txs.length,
+    totalValue:       w.value/1e18,
+    valueETH:         (w.value/1e18).toFixed(6),
+    totalGasSpent:    w.gas/1e18,
+    gasSpentETH:      (w.gas/1e18).toFixed(6),
+    firstSeen:        w.firstTs,
+    lastSeen:         w.lastTs,
+    isWhale:          w.txs.length >= 10,
+    isNew:            w.txs.length === 1,
+    userType:         w.txs.length>=10?'whale':w.txs.length>3?'power':w.txs.length>1?'regular':'new',
+  }));
+
+  return {
+    summary: {
+      totalTransactions: rawMetrics.transactions ?? txs.length,
+      uniqueUsers:       rawMetrics.uniqueUsers  ?? totalUsers,
+      totalVolume:       totalWei,
+      totalValueEth:     totalETH.toFixed(6),
+      successRate,
+      failureRate,
+      avgGasUsed:        avgGas,
+    },
+    transactions: txs,
+    gasAnalysis: {
+      avgGasUsed:         avgGas,
+      averageGasUsed:     avgGas,
+      averageGasPrice:    `${(avgGasPriceWei/1e9).toFixed(2)} gwei`,
+      totalGasCostUSD:    Math.round(totalGasUSD*100)/100,
+      averageGasCostUSD:  avgGasCostUSD,
+      failedTransactions: failedCount,
+      failureRate,
+      gasEfficiencyScore: successRate,
+    },
+    defiMetrics: {
+      totalVolumeEth:            totalETH,
+      totalVolumeUSD:            Math.round(totalETH*ETH_PRICE*100)/100,
+      dau: active24h, wau: active7d, mau: active30d,
+      bounceRate: bounce,
+      activationRate: retRate,
+      txSuccessRate: successRate,
+      successRate,
+      avgSessionDuration:        fmtDur(medSession),
+      avgTimeToActivation:       fmtDur(medAct),
+      avgTimeToFirstInteraction: firstTxTs ? fmtDur(Math.round(now-firstTxTs)) : null,
+      averageTransactionSize:    avgTxSizeETH,
+      interactionComplexity:     avgSoph>2?'High':avgSoph>1?'Medium':'Low',
+      contractUtilization:       txs.length,
+      functionSuccessRate:       successRate,
+      protocolStickiness:        retRate,
+      recentTransferVolume:      totalETH > 0 ? totalETH : null,
+      recentTransferCount:       txs.filter(t=>t.input?.startsWith('0xa9059cbb')).length || null,
+      tvl: null, protocolRevenue: null, feeRateBps: null,
+    },
+    userBehavior: {
+      whaleRatio: totalUsers ? Math.round((whales/totalUsers)*100) : 0,
+      loyaltyScore: retRate, retentionRate: retRate, churnRate: churn,
+      engagementScore: retRate, botActivity: 0,
+      userClassifications: { new:newUsers, returning, whale:whales, active:active24h },
+    },
+    userLifecycle: {
+      summary: { totalUsers, newUsers, returningUsers:returning, activeUsers:active24h, retentionRate:retRate },
+    },
+    retentionMetrics: {
+      d1Retention:d1, d7Retention:d7, d30Retention:d30,
+      churnRate:churn, retentionRate:retRate, resurrectionRate:0,
+    },
+    activationMetrics: {
+      activationRate: retRate,
+      avgTimeToActivation: fmtDur(medAct),
+      avgGasToActivateETH: null,
+      avgGasToActivateUSD: null,
+      activationFunnel: funnel,
+      featureFirstUse,
+    },
+    uxAnalysis: {
+      uxGrade: {
+        grade: successRate>=95?'A':successRate>=80?'B':successRate>=60?'C':'D',
+        score: successRate,
+        completionRate: successRate!=null ? successRate/100 : null,
+        failureRate:    failureRate/100,
+      },
+      sessionDurations: { averageDuration:fmtDur(medSession), averageDurationMinutes:Math.round(medSession/60) },
+      bounceRate: bounce,
+    },
+    userJourneys: { averageJourneyLength: avgJourney },
+    userQualityMetrics: { whaleCount:whales, botCount:0, botPct:0, powerUserRate:powerRate, avgWalletQuality:walletQ, avgSophistication:avgSoph },
+    interactions: { featureCounts:fc, peakInteractionTimes:peakHours },
+    users: usersTable,
+    recommendations: rawTarget?.recommendations || [],
+    alerts:          rawTarget?.alerts          || [],
+  };
+}
 const router = express.Router();
 
 /**
@@ -172,19 +380,30 @@ router.post('/complete', async (req, res) => {
       abi,
       purpose,
       category,
-      startDate
+      startDate,
+      defaultContract // Support nested format too
     } = req.body;
 
+    // Support both flat and nested formats
+    const address = contractAddress || defaultContract?.address;
+    const contractChain = chain || defaultContract?.chain;
+    const name = contractName || defaultContract?.name;
+    const contractPurpose = purpose || defaultContract?.purpose || 'General';
+    const contractCategory = category || defaultContract?.category || 'other';
+    const contractStartDate = startDate || defaultContract?.startDate || new Date().toISOString();
+    const contractAbi = abi || defaultContract?.abi;
+
     // Validation
-    if (!contractAddress || !chain || !contractName || !purpose || !category || !startDate) {
+    if (!address || !contractChain || !name) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'Contract address, chain, name, purpose, category, and start date are required'
+        message: 'Contract address, chain, and name are required',
+        requiredFields: ['contractAddress or defaultContract.address', 'chain or defaultContract.chain', 'contractName or defaultContract.name']
       });
     }
 
     const validCategories = ['defi', 'nft', 'gaming', 'dao', 'infrastructure', 'other'];
-    if (!validCategories.includes(category)) {
+    if (!validCategories.includes(contractCategory)) {
       return res.status(400).json({
         error: 'Invalid category',
         message: `Category must be one of: ${validCategories.join(', ')}`
@@ -202,13 +421,13 @@ router.post('/complete', async (req, res) => {
       },
       logo: logo || null,
       defaultContract: {
-        address: contractAddress,
-        chain,
-        abi: abi || null,
-        name: contractName,
-        purpose,
-        category,
-        startDate: startDate || new Date().toISOString(),
+        address,
+        chain: contractChain,
+        abi: contractAbi || null,
+        name,
+        purpose: contractPurpose,
+        category: contractCategory,
+        startDate: contractStartDate,
         isIndexed: false,
         indexingProgress: 0,
         lastAnalysisId: null
@@ -424,12 +643,52 @@ router.get('/default-contract', async (req, res) => {
       ? MetricsNormalizer.normalizeUserBehavior(latestAnalysis.results.target.behavior)
       : MetricsNormalizer.getDefaultUserBehavior();
 
+    // Fetch deployment block if not yet stored (background, non-blocking)
+    if (!defaultContract.deploymentBlock && defaultContract.address && defaultContract.chain) {
+      setImmediate(async () => {
+        try {
+          // Use Etherscan API — much faster and accurate vs binary search
+          const etherscanKey = process.env.ETHERSCAN_API_KEY;
+          if (etherscanKey) {
+            const url = `https://api.etherscan.io/v2/api?chainid=1&module=contract&action=getcontractcreation&contractaddresses=${defaultContract.address}&apikey=${etherscanKey}`;
+            const resp = await fetch(url);
+            const json = await resp.json();
+            const deployBlock = json?.result?.[0]?.blockNumber;
+            if (deployBlock) {
+              const freshUser = await UserStorage.findById(req.user.id);
+              await UserStorage.update(req.user.id, {
+                onboarding: {
+                  ...freshUser.onboarding,
+                  defaultContract: { ...freshUser.onboarding.defaultContract, deploymentBlock: parseInt(deployBlock) },
+                },
+              });
+              console.log(`✅ Deployment block: ${deployBlock} for ${defaultContract.address}`);
+            }
+          }
+        } catch (e) {
+          console.warn('⚠️ Could not find deployment block:', e.message);
+        }
+      });
+    }
+
+    // Build fullReport shape that the dashboard tabs expect
+    const rawTarget = latestAnalysis?.results?.target;
+    const rawMetrics = rawTarget?.metrics || {};
+    const rawTxs = rawTarget?.transactions || [];
+
+    const builtFullReport = buildFullReportFromAnalysis(rawTxs, rawMetrics, {
+      ...rawTarget,
+      defiMetrics:  normalizedMetrics,
+      userBehavior: normalizedBehavior,
+    });
+
     res.json({
       contract: defaultContract,
       metrics: normalizedMetrics,
       // Include full analysis results for detailed metrics display
-      fullResults: latestAnalysis?.results?.target ? {
-        ...latestAnalysis.results.target,
+      fullResults: rawTarget ? {
+        ...rawTarget,
+        fullReport: builtFullReport,
         defiMetrics: normalizedMetrics,
         userBehavior: normalizedBehavior
       } : null,
@@ -444,7 +703,15 @@ router.get('/default-contract', async (req, res) => {
         historicalDays: 7,
         continuousSync: false
       },
-      blockRange: latestAnalysis?.metadata?.blockRange || null,
+      blockRange: (() => {
+        const br = latestAnalysis?.metadata?.blockRange || latestAnalysis?.results?.target?.summary?.blockRange || null;
+        if (!br) return null;
+        const start = br.start ?? br.fromBlock ?? null;
+        const end   = br.end   ?? br.toBlock   ?? null;
+        const deploymentBlock = defaultContract.deploymentBlock ?? null;
+        const total = (start != null && end != null) ? end - start : null;
+        return { start, end, deployment: deploymentBlock, total };
+      })(),
       analysisHistory: {
         total: defaultContractAnalyses.length,
         completed: defaultContractAnalyses.filter(a => a.status === 'completed').length,
@@ -1110,5 +1377,13 @@ function getDefaultAnalysisParams() {
     outputFormats: (process.env.OUTPUT_FORMATS || 'json,csv,markdown').split(',')
   };
 }
+
+/**
+ * POST /api/onboarding/backfill-timestamps
+ * Stub — timestamps are stored at index time. Returns current state.
+ */
+router.post('/backfill-timestamps', async (req, res) => {
+  res.json({ success: true, message: 'Timestamps are stored during indexing. No backfill needed.' });
+});
 
 export default router;

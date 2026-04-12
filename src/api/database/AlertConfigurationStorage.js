@@ -1,39 +1,57 @@
-/**
- * Alert Configuration Storage
- * File-based storage for user alert preferences
- */
-
-import { FileStorageManager } from '../../indexer/services/FileStorageManager.js';
+import fs from 'fs/promises';
+import path from 'path';
 import { AlertConfiguration } from '../models/AlertConfiguration.js';
 
-class AlertConfigurationStorage {
-  constructor() {
-    this.storage = new FileStorageManager('./data/alert-configs');
-  }
+const DIR = path.resolve('./data/alert-configs');
 
+async function ensureDir() {
+  await fs.mkdir(DIR, { recursive: true });
+}
+
+async function readConfig(id) {
+  try {
+    const data = await fs.readFile(path.join(DIR, `${id}.json`), 'utf8');
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
+}
+
+async function writeConfig(id, data) {
+  await ensureDir();
+  await fs.writeFile(path.join(DIR, `${id}.json`), JSON.stringify(data, null, 2), 'utf8');
+}
+
+class AlertConfigurationStorage {
   async create(configData) {
     const config = new AlertConfiguration(configData);
     config.id = `alert-config-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    await this.storage.writeJSON(`${config.id}.json`, config.toJSON());
-    return config;
+    // Preserve extra fields not in the base model (type, competitorId, metric, condition, threshold, name)
+    const raw = { ...config.toJSON(), ...Object.fromEntries(
+      ['type','competitorId','metric','condition','threshold','name']
+        .filter(k => configData[k] != null)
+        .map(k => [k, configData[k]])
+    )};
+    await writeConfig(config.id, raw);
+    return raw;
   }
 
   async findById(id) {
-    const data = await this.storage.readJSON(`${id}.json`);
+    const data = await readConfig(id);
     return data ? new AlertConfiguration(data) : null;
   }
 
   async findByUserId(userId) {
-    const files = await this.storage.listFiles();
+    await ensureDir();
+    const files = await fs.readdir(DIR);
     const configs = [];
-    
     for (const file of files) {
-      const data = await this.storage.readJSON(file);
-      if (data && data.userId === userId) {
-        configs.push(new AlertConfiguration(data));
-      }
+      if (!file.endsWith('.json')) continue;
+      try {
+        const data = JSON.parse(await fs.readFile(path.join(DIR, file), 'utf8'));
+        if (data?.userId === userId) configs.push(data); // return raw to preserve custom fields
+      } catch {}
     }
-    
     return configs;
   }
 
@@ -45,19 +63,19 @@ class AlertConfigurationStorage {
   async update(id, updates) {
     const existing = await this.findById(id);
     if (!existing) return null;
-    
     const updated = new AlertConfiguration({
       ...existing.toJSON(),
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
-    
-    await this.storage.writeJSON(`${id}.json`, updated.toJSON());
+    await writeConfig(id, updated.toJSON());
     return updated;
   }
 
   async delete(id) {
-    await this.storage.deleteFile(`${id}.json`);
+    try {
+      await fs.unlink(path.join(DIR, `${id}.json`));
+    } catch {}
   }
 }
 

@@ -1,314 +1,191 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer,
-  XAxis, YAxis, CartesianGrid, Tooltip
-} from 'recharts';
+import { Loader2 } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
-interface UsersTabProps {
-  analysisResults: any;
-}
+interface UsersTabProps { analysisResults: any }
+
+import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY } from '@/lib/chart-colors';
+const COLORS = CHART_COLORS;
 
 export function UsersTab({ analysisResults }: UsersTabProps) {
-  const results = analysisResults?.results?.target || {};
-  const fullReport = results.fullReport || {};
-  const userBehavior = fullReport.userBehavior || {};
-  const users = fullReport.users || [];
-  const userLifecycle = fullReport.userLifecycle || {};
-  const userJourneys = fullReport.userJourneys || {};
-  
-  // Create behavior chart data from real metrics
-  const behaviorData = [
-    { name: 'Whale', value: Math.round(userBehavior.whaleRatio || 0), fill: '#6B7280' },
-    { name: 'Bot', value: Math.round(userBehavior.botActivity || 0), fill: '#4B5563' },
-    { name: 'Power User', value: Math.round(userBehavior.powerUserRatio || 0), fill: '#9CA3AF' },
-    { name: 'New User', value: Math.round(userBehavior.newUserRatio || 0), fill: '#D1D5DB' },
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.metrics.getDashboard()
+      .then(setData)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Fallback to prop data
+  const fr  = data || analysisResults?.results?.target?.fullReport || {};
+  const ub  = fr.userBehavior   || {};
+  const ul  = fr.userLifecycle  || {};
+  const uj  = fr.userJourneys   || {};
+  const ret = fr.retentionMetrics || {};
+  const uq  = fr.userQualityMetrics || {};
+  const users: any[] = fr.users || [];
+
+  const pct = (v: any) => v != null ? `${v}%` : 'N/A';
+  const num = (v: any) => typeof v === 'number' ? v.toLocaleString() : '0';
+  const fmt = (v: any, fb = 'N/A') => v != null ? v : fb;
+
+  const classData = Object.entries(ub.userClassifications || {}).map(([k, v]) => ({
+    name: k.replace('_', ' '), value: Number(v) || 0,
+  }));
+
+  const engagementData = [
+    { metric: 'Loyalty',      score: ub.loyaltyScore    || 0 },
+    { metric: 'Retention 7d', score: ret.d7Retention    || 0 },
+    { metric: 'Retention 30d',score: ret.d30Retention   || 0 },
+    { metric: 'Activation',   score: fr.activationMetrics?.activationRate || 0 },
   ];
 
-  // Create engagement scores from real metrics
-  const scoresData = [
-    { metric: 'Loyalty', score: Math.round((userBehavior.loyaltyScore || 0) / 10) },
-    { metric: 'Retention 7d', score: Math.round((userBehavior.retentionRate7d || 0) / 10) },
-    { metric: 'Retention 30d', score: Math.round((userBehavior.retentionRate30d || 0) / 10) },
-    { metric: 'Growth', score: Math.round((userBehavior.userGrowthRate || 0) / 10) },
-  ];
+  const formatAddr = (a: string) => a ? `${a.slice(0,6)}...${a.slice(-4)}` : 'N/A';
+  const formatEth  = (v: number) => v > 0 ? `${v.toFixed(6)} ETH` : '0 ETH';
 
-  const formatValue = (value: any, fallback = 'N/A') => {
-    if (value === null || value === undefined) return fallback;
-    return value;
-  };
+  if (loading) return (
+    <div className="flex items-center justify-center h-48">
+      <Loader2 className="h-6 w-6 animate-spin mr-2" /><span>Loading users...</span>
+    </div>
+  );
 
-  const formatCurrency = (value: any) => {
-    if (!value || value === 0) return '$0';
-    if (typeof value === 'number') {
-      return value >= 1000000 ? `$${(value / 1000000).toFixed(1)}M` : 
-             value >= 1000 ? `$${(value / 1000).toFixed(1)}K` : 
-             `$${value.toFixed(6)}`;
-    }
-    return value;
-  };
-
-  const formatAddress = (address: string) => {
-    if (!address) return 'N/A';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
-  
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-800 border-gray-600/30">
-          <CardHeader>
-            <CardTitle className="text-white">User Behavior Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={behaviorData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {behaviorData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {error && (
+        <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+          ⚠ Using cached data. ({error})
+        </p>
+      )}
 
-        <Card className="bg-gray-800 border-gray-600/30">
-          <CardHeader>
-            <CardTitle className="text-white">User Engagement Scores</CardTitle>
-          </CardHeader>
+      {/* ── Summary cards ─────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Users',      value: num(ul.summary?.totalUsers),     sub: 'Distinct wallets' },
+          { label: 'New Users',        value: num(ul.summary?.newUsers),        sub: 'Single interaction' },
+          { label: 'Returning Users',  value: num(ul.summary?.returningUsers),  sub: '2+ interactions' },
+          { label: 'Active Users',     value: num(ul.summary?.activeUsers),     sub: 'Last 24 h' },
+        ].map(({ label, value, sub }) => (
+          <Card key={label}>
+            <CardHeader className="pb-1"><CardTitle className="text-xs text-muted-foreground">{label}</CardTitle></CardHeader>
+            <CardContent><p className="text-2xl font-bold">{value}</p><p className="text-xs text-muted-foreground mt-1">{sub}</p></CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* ── Retention & quality ───────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Retention Rate',    value: pct(ul.summary?.retentionRate),  sub: 'Returning users',       warn: (ul.summary?.retentionRate||0) < 20 },
+          { label: 'Churn Rate',        value: pct(ret.churnRate),              sub: 'Users lost',            warn: (ret.churnRate||0) > 50 },
+          { label: 'Avg Journey Length',value: fmt(uj.averageJourneyLength,'0'),sub: 'Avg txs per user' },
+          { label: 'Wallet Quality',    value: `${fmt(uq.avgWalletQuality,'0')}/100`, sub: 'Composite score' },
+        ].map(({ label, value, sub, warn = false }) => (
+          <Card key={label} className={warn ? 'border-red-200' : ''}>
+            <CardHeader className="pb-1"><CardTitle className="text-xs text-muted-foreground">{label}</CardTitle></CardHeader>
+            <CardContent>
+              <p className={`text-2xl font-bold ${warn ? 'text-red-600' : ''}`}>{value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* ── Charts ────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {classData.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle className="text-sm">User Distribution</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie data={classData} cx="50%" cy="50%" outerRadius={80} dataKey="value"
+                    label={({ name, value }) => `${name}: ${value}%`} labelLine={false}>
+                    {classData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Engagement Scores</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={scoresData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis dataKey="metric" stroke="#888" />
-                <YAxis stroke="#888" domain={[0, 10]} />
-                <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #3B82F6' }} />
-                <Bar dataKey="score" fill="#3B82F6" radius={[8, 8, 0, 0]} />
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={engagementData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="metric" tick={{ fontSize: 11 }} />
+                <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} />
+                <Tooltip formatter={(v: any) => `${v}%`} />
+                <Bar dataKey="score" fill={CHART_PRIMARY} radius={[4,4,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      {/* User behavior metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border-blue-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-blue-400 text-sm">Avg Session Duration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {Math.round((userBehavior.averageSessionDuration || 0) / 60)}m
-            </p>
-            <p className="text-blue-300 text-xs mt-1">Minutes per session</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-900/20 to-green-800/20 border-green-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-green-400 text-sm">Transactions/User</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {(userBehavior.transactionsPerUser || 0).toFixed(1)}
-            </p>
-            <p className="text-green-300 text-xs mt-1">Average activity</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border-purple-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-purple-400 text-sm">Cross-Chain Users</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userBehavior.crossChainUsers ?? 0}
-            </p>
-            <p className="text-purple-300 text-xs mt-1">Multi-chain active</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-900/20 to-orange-800/20 border-orange-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-orange-400 text-sm">Churn Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userBehavior.churRate ?? 0}%
-            </p>
-            <p className="text-orange-300 text-xs mt-1">User attrition</p>
-          </CardContent>
-        </Card>
+      {/* ── User quality metrics ──────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Power User Rate',     value: pct(uq.powerUserRate),       sub: 'Users with >10 txs' },
+          { label: 'Bot %',               value: pct(uq.botPct),              sub: 'Sybil risk', warn: (uq.botPct||0) > 10 },
+          { label: 'User Sophistication', value: fmt(uq.avgSophistication,'0'), sub: 'Avg distinct functions/user' },
+          { label: 'Whale Ratio',         value: pct(ub.whaleRatio),          sub: 'Users with ≥10 txs' },
+        ].map(({ label, value, sub, warn = false }) => (
+          <Card key={label} className={warn ? 'border-red-200' : ''}>
+            <CardHeader className="pb-1"><CardTitle className="text-xs text-muted-foreground">{label}</CardTitle></CardHeader>
+            <CardContent>
+              <p className={`text-2xl font-bold ${warn ? 'text-red-600' : ''}`}>{value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* User Lifecycle Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-violet-900/20 to-violet-800/20 border-violet-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-violet-400 text-sm">Activation Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userLifecycle.activationMetrics?.activationRate ? 
-                `${userLifecycle.activationMetrics.activationRate.toFixed(1)}%` : 
-                'N/A'}
-            </p>
-            <p className="text-violet-300 text-xs mt-1">User activation success</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-teal-900/20 to-teal-800/20 border-teal-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-teal-400 text-sm">Retention Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userLifecycle.summary?.retentionRate ? 
-                `${userLifecycle.summary.retentionRate.toFixed(1)}%` : 
-                'N/A'}
-            </p>
-            <p className="text-teal-300 text-xs mt-1">User retention</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-amber-900/20 to-amber-800/20 border-amber-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-amber-400 text-sm">Journey Length</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userJourneys.averageJourneyLength ? 
-                userJourneys.averageJourneyLength.toFixed(1) : 
-                'N/A'}
-            </p>
-            <p className="text-amber-300 text-xs mt-1">Avg steps per user</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-pink-900/20 to-pink-800/20 border-pink-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-pink-400 text-sm">Lifecycle Stage</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userLifecycle.summary?.activeUsers || 0}
-            </p>
-            <p className="text-pink-300 text-xs mt-1">Active users</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Enhanced User Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/20 border-cyan-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-cyan-400 text-sm">Multi-Protocol Users</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userBehavior.multiProtocolUsers ?? 0}
-            </p>
-            <p className="text-cyan-300 text-xs mt-1">Using multiple protocols</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-emerald-900/20 to-emerald-800/20 border-emerald-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-emerald-400 text-sm">Early Adopter Potential</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userBehavior.earlyAdopterPotential || 'Medium'}
-            </p>
-            <p className="text-emerald-300 text-xs mt-1">Innovation adoption</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-rose-900/20 to-rose-800/20 border-rose-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-rose-400 text-sm">User Growth Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userBehavior.growthRate ?? 0}%
-            </p>
-            <p className="text-rose-300 text-xs mt-1">Monthly growth</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-indigo-900/20 to-indigo-800/20 border-indigo-500/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-indigo-400 text-sm">Risk Tolerance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">
-              {userBehavior.riskToleranceLevel ?? 0}
-            </p>
-            <p className="text-indigo-300 text-xs mt-1">Risk appetite score</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Top users table */}
-      <Card className="bg-gray-800 border-green-500/30">
-        <CardHeader>
-          <CardTitle className="text-white">Top Users</CardTitle>
-        </CardHeader>
+      {/* ── Top users table ───────────────────────────────────────────── */}
+      <Card>
+        <CardHeader><CardTitle className="text-sm">Top Users by Activity</CardTitle></CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left py-2 px-4 text-gray-400 font-semibold">Address</th>
-                  <th className="text-right py-2 px-4 text-gray-400 font-semibold">Transactions</th>
-                  <th className="text-right py-2 px-4 text-gray-400 font-semibold">Total Value</th>
-                  <th className="text-right py-2 px-4 text-gray-400 font-semibold">Gas Spent</th>
-                  <th className="text-center py-2 px-4 text-gray-400 font-semibold">Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.slice(0, 10).map((user: any, i: number) => (
-                  <tr key={i} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                    <td className="py-3 px-4 text-white font-mono">
-                      {formatAddress(user.address)}
-                    </td>
-                    <td className="text-right py-3 px-4 text-white">
-                      {user.transactionCount ?? 0}
-                    </td>
-                    <td className="text-right py-3 px-4 text-gray-300">
-                      {formatCurrency(user.totalValue)}
-                    </td>
-                    <td className="text-right py-3 px-4 text-gray-300">
-                      {formatCurrency(user.totalGasSpent)}
-                    </td>
-                    <td className="text-center py-3 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        user.userType === 'whale' ? 'bg-purple-500/20 text-purple-400' :
-                        user.userType === 'power' ? 'bg-blue-500/20 text-blue-400' :
-                        'bg-gray-500/20 text-gray-400'
-                      }`}>
-                        {user.userType || 'casual'}
-                      </span>
-                    </td>
+          {users.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">No user data available.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">Address</th>
+                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Txs</th>
+                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Total Value</th>
+                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Gas Spent</th>
+                    <th className="text-center py-2 px-3 text-muted-foreground font-medium">Type</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {users.length === 0 && (
-            <div className="text-center py-8 text-gray-400">
-              <p>No user data available for this analysis period.</p>
+                </thead>
+                <tbody>
+                  {users.map((u: any, i: number) => (
+                    <tr key={i} className="border-b hover:bg-muted/30 transition-colors">
+                      <td className="py-2 px-3 font-mono text-xs">{formatAddr(u.address)}</td>
+                      <td className="text-right py-2 px-3 font-semibold">{u.transactionCount}</td>
+                      <td className="text-right py-2 px-3 text-muted-foreground">{formatEth(u.totalValue)}</td>
+                      <td className="text-right py-2 px-3 text-muted-foreground">{formatEth(u.totalGasSpent)}</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          u.userType === 'whale'   ? 'bg-purple-100 text-purple-700' :
+                          u.userType === 'power'   ? 'bg-blue-100 text-blue-700'    :
+                          u.userType === 'regular' ? 'bg-green-100 text-green-700'  :
+                          'bg-gray-100 text-gray-600'
+                        }`}>{u.userType}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>

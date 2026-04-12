@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Mail, EyeOff, Eye, Loader2, User } from "lucide-react"
 import { api } from "@/lib/api"
 import { useAuth } from "@/components/auth/auth-provider"
+import { OAuthButtons } from "@/components/auth/oauth-buttons"
+import { AuthDivider } from "@/components/auth/divider"
 
 function SignupForm() {
   const router = useRouter()
@@ -28,61 +30,125 @@ function SignupForm() {
     setError("")
     setLoading(true)
     
-    if (!name || !email || !password) {
-      setError('Please fill in all fields')
+    // Client-side validation with specific messages
+    if (!name.trim()) {
+      setError('Please enter your full name')
       setLoading(false)
       return
     }
 
+    if (!email.trim()) {
+      setError('Please enter your email address')
+      setLoading(false)
+      return
+    }
+
+    if (!password) {
+      setError('Please enter a password')
+      setLoading(false)
+      return
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address')
+      setLoading(false)
+      return
+    }
+
+    // Password strength validation
     if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+      setError('Password must be at least 6 characters long')
+      setLoading(false)
+      return
+    }
+
+    if (password.length > 128) {
+      setError('Password is too long (maximum 128 characters)')
+      setLoading(false)
+      return
+    }
+
+    // Name validation
+    if (name.trim().length < 2) {
+      setError('Name must be at least 2 characters long')
+      setLoading(false)
+      return
+    }
+
+    if (name.length > 100) {
+      setError('Name is too long (maximum 100 characters)')
       setLoading(false)
       return
     }
 
     try {
-      // Use real API registration
-      const result = await api.auth.register({ name, email, password })
-      
-      // Auto-login after successful registration
-      login(result.token, result.user)
+      const result = await api.auth.register({ 
+        name: name.trim(), 
+        email: email.toLowerCase().trim(), 
+        password 
+      })
 
-      // Redirect to analyzer or default page
-      if (redirectTo === 'analyzer') {
-        router.push("/analyzer")
-      } else {
-        router.push("/analyzer")
-      }
-      
+      // Send OTP — use the registration token just for this call, don't persist it
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/send-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${result.token}`,
+        },
+      })
+
+      // Store token temporarily so verify page can call resend — but don't login() yet
+      // Full login happens after OTP is verified
+      localStorage.setItem('pending_token', result.token)
+
+      const params = new URLSearchParams({ email: email.toLowerCase().trim() })
+      if (redirectTo) params.set('redirect', redirectTo)
+      router.push(`/verify?${params.toString()}`)
+
     } catch (error: any) {
       console.error('Registration error:', error)
-      setError(error.message || 'Registration failed. Please try again.')
+      
+      // Handle specific error types from backend
+      let errorMessage = 'Registration failed. Please try again.'
+      
+      if (error.message) {
+        errorMessage = error.message
+        
+        // Add helpful suggestions for common errors
+        if (error.message.includes('already exists')) {
+          errorMessage += ' Try signing in instead.'
+        } else if (error.message.includes('invalid email')) {
+          errorMessage = 'Please enter a valid email address'
+        } else if (error.message.includes('password')) {
+          // Keep the specific password error message
+          errorMessage = error.message
+        }
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <AuthCard>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">Sign Up</h1>
-        <p className="text-muted-foreground mt-1">Unlock Your Meta-experience</p>
-      </div>
-
+    <AuthCard heading="Create your account" subheading="Start analyzing your smart contracts for free">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
+          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
             {error}
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Full name</Label>
           <div className="relative">
             <Input
               id="name"
               type="text"
-              placeholder="Enter your full name"
+              placeholder="Jane Smith"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="pr-10"
@@ -92,13 +158,13 @@ function SignupForm() {
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
             <Input
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="pr-10"
@@ -108,13 +174,13 @@ function SignupForm() {
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
           <div className="relative">
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="••••••••••"
+              placeholder="Min. 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pr-10"
@@ -129,32 +195,31 @@ function SignupForm() {
               {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Password must be at least 6 characters
-          </p>
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating Account...
-            </>
-          ) : (
-            'Create Account'
-          )}
+        <Button type="submit" className="w-full gradient-brand text-white" disabled={loading}>
+          {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : 'Create account'}
         </Button>
+
+        <p className="text-xs text-center text-muted-foreground">
+          By signing up you agree to our{' '}
+          <span className="underline cursor-pointer hover:text-foreground">Terms</span> and{' '}
+          <span className="underline cursor-pointer hover:text-foreground">Privacy Policy</span>
+        </p>
       </form>
 
-      <p className="text-center text-sm mt-6">
+      <p className="text-center text-sm mt-6 text-muted-foreground">
         Already have an account?{" "}
-        <Link 
-          href={redirectTo ? `/login?redirect=${redirectTo}` : "/login"} 
-          className="font-semibold hover:underline"
+        <Link
+          href={redirectTo ? `/login?redirect=${redirectTo}` : "/login"}
+          className="font-semibold text-foreground hover:underline"
         >
           Sign in
         </Link>
       </p>
+
+      <AuthDivider />
+      <OAuthButtons mode="signup" redirectTo={redirectTo || undefined} />
     </AuthCard>
   )
 }
@@ -162,10 +227,9 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <Suspense fallback={
-      <AuthCard>
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold">Sign Up</h1>
-          <p className="text-muted-foreground mt-1">Loading...</p>
+      <AuthCard heading="Create your account" subheading="Start analyzing your smart contracts for free">
+        <div className="h-48 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </AuthCard>
     }>

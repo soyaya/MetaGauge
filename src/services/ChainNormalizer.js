@@ -13,7 +13,7 @@ import { AbiDecoderService } from './AbiDecoderService.js';
 
 export class ChainNormalizer {
   constructor(contractAbi = null, chain = 'ethereum') {
-    this.supportedChains = ['ethereum', 'starknet', 'lisk'];
+    this.supportedChains = ['ethereum', 'starknet'];
     this.abiDecoder = null;
     
     // Initialize ABI decoder if ABI is provided
@@ -37,12 +37,6 @@ export class ChainNormalizer {
         decimals: 18,
         chainId: 'SN_MAIN',
         blockTimeMs: 30000
-      },
-      lisk: {
-        nativeCurrency: 'ETH',
-        decimals: 18,
-        chainId: 1135,
-        blockTimeMs: 12000
       }
     };
   }
@@ -151,8 +145,6 @@ export class ChainNormalizer {
     // Chain-specific normalization
     if (chain === 'starknet') {
       this._normalizeStarknetSpecific(normalized, transaction);
-    } else if (chain === 'lisk') {
-      this._normalizeLiskSpecific(normalized, transaction);
     } else {
       this._normalizeEthereumLikeSpecific(normalized, transaction, chain);
     }

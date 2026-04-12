@@ -16,7 +16,8 @@ export function generateToken(user) {
   const payload = {
     userId: user.id,
     email: user.email,
-    tier: user.tier
+    tier: user.tier,
+    role: user.role || 'admin'
   };
   
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });

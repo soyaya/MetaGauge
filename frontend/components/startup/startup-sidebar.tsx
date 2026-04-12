@@ -24,9 +24,8 @@ export function StartupSidebar() {
   return (
     <aside className="w-64 border-r bg-card h-screen flex flex-col">
       <div className="p-4 border-b">
-        <Link href="/" className="flex items-center gap-2">
-          <MetaGaugeLogo className="h-5 w-7" />
-          <span className="font-semibold">MetaGauge</span>
+        <Link href="/" className="flex items-center">
+          <MetaGaugeLogo className="h-8 w-auto" />
         </Link>
       </div>
 

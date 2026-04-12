@@ -80,7 +80,6 @@ export const SUBSCRIPTION_TIERS = {
 
 export const BLOCKS_PER_DAY = {
   ethereum: 7200,  // ~12 second blocks
-  lisk: 7200,      // ~12 second blocks
   starknet: 14400  // ~6 second blocks
 };
 

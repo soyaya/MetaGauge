@@ -5,21 +5,20 @@
  */
 
 import { RpcClientService } from './RpcClientService.js';
-import { LiskRpcClient } from './LiskRpcClient.js';
 import { StarknetRpcClient } from './StarknetRpcClient.js';
 import { SmartRpcManager } from './SmartRpcManager.js';
 import { EventEmitter } from 'events';
 
 /**
  * Smart Contract Fetcher with multi-provider failover support
- * Supports Starknet, Ethereum, and Lisk with automatic failover between multiple RPC providers
+ * Supports Ethereum and Starknet with automatic failover between multiple RPC providers
  */
 export class SmartContractFetcher extends EventEmitter {
   constructor(config = {}) {
     super();
     
     this.config = {
-      targetChain: config.targetChain || null, // Only initialize this chain
+      targetChain: config.targetChain || null,
       maxRequestsPerSecond: config.maxRequestsPerSecond || 10,
       requestWindow: config.requestWindow || 1000,
       failoverTimeout: config.failoverTimeout || 60000,
@@ -30,69 +29,47 @@ export class SmartContractFetcher extends EventEmitter {
       ...config
     };
     
-    // Smart RPC Manager
     this.rpcManager = null;
     
-    // Provider configurations by chain
+    // Provider configurations — Ethereum and Starknet only
     this.providerConfigs = {
       ethereum: [
         {
           name: 'publicnode',
-          url: process.env.ETHEREUM_RPC_URL || 'https://ethereum-rpc.publicnode.com',
+          url: process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com',
           priority: 1,
           type: 'http'
         },
         {
-          name: 'nownodes',
-          url: process.env.ETHEREUM_RPC_URL_FALLBACK || 'https://eth.nownodes.io/2ca1a1a6-9040-4ca9-8727-33a186414a1f',
+          name: 'llamarpc',
+          url: process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com',
           priority: 2,
+          type: 'http'
+        },
+        {
+          name: 'ankr',
+          url: process.env.ETHEREUM_RPC_URL3 || 'https://rpc.ankr.com/eth',
+          priority: 3,
           type: 'http'
         }
       ],
       starknet: [
         {
-          name: 'lava',
-          url: process.env.STARKNET_RPC_URL1 || 'https://rpc.starknet.lava.build',
-          priority: 1,
-          type: 'http'
-        },
-        {
           name: 'publicnode',
-          url: process.env.STARKNET_RPC_URL2 || 'https://starknet-rpc.publicnode.com',
-          priority: 2,
-          type: 'http'
-        },
-        {
-          name: 'infura',
-          url: process.env.STARKNET_RPC_URL3 || 'https://starknet-mainnet.infura.io/v3/52be4d01250949baa85cad00e7b955ab',
-          priority: 3,
-          type: 'http'
-        }
-      ],
-      lisk: [
-        {
-          name: 'lisk-api',
-          url: process.env.LISK_RPC_URL1 || 'https://rpc.api.lisk.com',
+          url: process.env.STARKNET_RPC_URL1 || 'https://starknet-rpc.publicnode.com',
           priority: 1,
           type: 'http'
         },
         {
-          name: 'drpc',
-          url: process.env.LISK_RPC_URL2 || 'https://lisk.drpc.org',
+          name: 'lava',
+          url: process.env.STARKNET_RPC_URL2 || 'https://rpc.starknet.lava.build',
           priority: 2,
           type: 'http'
         },
         {
-          name: 'tenderly',
-          url: process.env.LISK_RPC_URL3 || 'https://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye',
+          name: 'nethermind',
+          url: process.env.STARKNET_RPC_URL3 || 'https://free-rpc.nethermind.io/mainnet-juno',
           priority: 3,
-          type: 'http',
-          wsUrl: process.env.LISK_TENDERLY_WS || 'wss://lisk.gateway.tenderly.co/2o3VKjmisQNOJIPlLrt6Ye'
-        },
-        {
-          name: 'moralis',
-          url: process.env.LISK_RPC_URL4 || 'https://site1.moralis-nodes.com/lisk/7f6b7ac6edf2456fa240535cc2d8fc6e',
-          priority: 4,
           type: 'http'
         }
       ]
@@ -180,9 +157,7 @@ export class SmartContractFetcher extends EventEmitter {
         let rpcClient;
         
         // Use specialized client based on chain
-        if (chain === 'lisk') {
-          rpcClient = new LiskRpcClient(config.url);
-        } else if (chain === 'starknet') {
+        if (chain === 'starknet') {
           rpcClient = new StarknetRpcClient(config.url);
         } else {
           // Use standard Ethereum-compatible client for other chains
@@ -209,7 +184,8 @@ export class SmartContractFetcher extends EventEmitter {
         
         console.log(`✅ Initialized ${config.name} provider for ${chain}`);
       } catch (error) {
-        console.error(`❌ Failed to initialize ${config.name} provider for ${chain}:`, error.message);
+        // Log initialization errors as info instead of error
+        console.info(`ℹ️ Could not initialize ${config.name} provider for ${chain}: ${error.message}`);
       }
     }
     
@@ -258,7 +234,7 @@ export class SmartContractFetcher extends EventEmitter {
           };
           
           if (!isHealthy) {
-            console.warn(`⚠️  Provider ${provider.name} for ${chain} is unhealthy`);
+            console.info(`ℹ️ Provider ${provider.name} for ${chain} is temporarily unavailable`);
             this.emit('providerUnhealthy', { chain, provider: provider.name });
           }
         } catch (error) {
@@ -266,7 +242,7 @@ export class SmartContractFetcher extends EventEmitter {
           provider.lastError = error.message;
           this.providerHealth[chain][provider.name].errorCount++;
           
-          console.error(`❌ Health check failed for ${provider.name} (${chain}):`, error.message);
+          console.info(`ℹ️ Health check issue for ${provider.name} (${chain}): ${error.message}`);
         }
       }
     }
@@ -367,8 +343,6 @@ export class SmartContractFetcher extends EventEmitter {
     const url = provider.config.url.toLowerCase();
     
     switch (expectedChain) {
-      case 'lisk':
-        return url.includes('lisk');
       case 'starknet':
         return url.includes('starknet');
       case 'ethereum':

@@ -151,8 +151,7 @@ export class MarketLandscapeAnalyzer {
   async _analyzeCrossChainMarket() {
     const chainAnalysis = {
       ethereum: this._analyzeChainMetrics('ethereum'),
-      starknet: this._analyzeChainMetrics('starknet'),
-      lisk: this._analyzeChainMetrics('lisk')
+      starknet: this._analyzeChainMetrics('starknet')
     };
 
     return {

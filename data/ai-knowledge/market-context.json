@@ -1,0 +1,2235 @@
+{
+  "lastUpdated": "2026-04-05T12:28:05.898Z",
+  "protocols": {
+    "binance-cex": {
+      "name": "Binance CEX",
+      "tvl": 145109117572.24908,
+      "tvl1dChange": -0.025337274367117857,
+      "tvl7dChange": 0.2958056006300751,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "aave-v3": {
+      "name": "Aave V3",
+      "tvl": 23591229267.96672,
+      "tvl1dChange": -0.34953749296590786,
+      "tvl7dChange": 0.6821980820882203,
+      "chain": "Multi-Chain",
+      "category": "Lending",
+      "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9"
+    },
+    "lido": {
+      "name": "Lido",
+      "tvl": 19016395643.427547,
+      "tvl1dChange": 0.0216273051034932,
+      "tvl7dChange": 3.8034124619020844,
+      "chain": "Multi-Chain",
+      "category": "Liquid Staking",
+      "address": "0x5a98fcbea516cf06857215779fd812ca3bef1b32"
+    },
+    "bitfinex": {
+      "name": "Bitfinex",
+      "tvl": 17109339125.44246,
+      "tvl1dChange": -0.04661342723584028,
+      "tvl7dChange": 2.9471801832101363,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "ssv-network": {
+      "name": "SSV Network",
+      "tvl": 15038568803.689138,
+      "tvl1dChange": 0.03366199032434736,
+      "tvl7dChange": 5.020076183147836,
+      "chain": "Ethereum",
+      "category": "Staking Pool",
+      "address": "0x9D65fF81a3c488d585bBfb0Bfe3c7707c7917f54"
+    },
+    "bybit": {
+      "name": "Bybit",
+      "tvl": 14851327114.831417,
+      "tvl1dChange": -0.3902733784977812,
+      "tvl7dChange": -0.7449407349041621,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "okx": {
+      "name": "OKX",
+      "tvl": 12772521331.111332,
+      "tvl1dChange": -1.500782932153328,
+      "tvl7dChange": -0.7440616820416324,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "robinhood": {
+      "name": "Robinhood",
+      "tvl": 12190355865.191223,
+      "tvl1dChange": 0.04468186126554485,
+      "tvl7dChange": 1.201084698142111,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "eigencloud": {
+      "name": "EigenCloud",
+      "tvl": 8329337152.320463,
+      "tvl1dChange": -0.232183581208119,
+      "tvl7dChange": -1.5773622278791777,
+      "chain": "Ethereum",
+      "category": "Restaking",
+      "address": "0xec53bf9167f50cdeb3ae105f56099aaab9061f83"
+    },
+    "wbtc": {
+      "name": "WBTC",
+      "tvl": 7823314824.963797,
+      "tvl1dChange": -0.22328809697167173,
+      "tvl7dChange": 0.8274410221592206,
+      "chain": "Bitcoin",
+      "category": "Bridge",
+      "address": null
+    },
+    "binance-staked-eth": {
+      "name": "Binance staked ETH",
+      "tvl": 7519001547.95688,
+      "tvl1dChange": -0.3613380379665614,
+      "tvl7dChange": 2.5588631641051194,
+      "chain": "Multi-Chain",
+      "category": "Liquid Staking",
+      "address": null
+    },
+    "morpho-v1": {
+      "name": "Morpho V1",
+      "tvl": 6849893514.777581,
+      "tvl1dChange": -0.016969249510083273,
+      "tvl7dChange": 1.1642370631735872,
+      "chain": "Multi-Chain",
+      "category": "Lending",
+      "address": "0x58D97B57BB95320F9a05dC918Aef65434969c2B2"
+    },
+    "sky-lending": {
+      "name": "Sky Lending",
+      "tvl": 6586746362.407634,
+      "tvl1dChange": 0.06660721138023007,
+      "tvl7dChange": -0.914100795377621,
+      "chain": "Ethereum",
+      "category": "CDP",
+      "address": "0x56072c95faa701256059aa122697b133aded9279"
+    },
+    "ethena-usde": {
+      "name": "Ethena USDe",
+      "tvl": 5885903436.488546,
+      "tvl1dChange": -0.02002749645252777,
+      "tvl7dChange": 0.003457908471631299,
+      "chain": "Ethereum",
+      "category": "Basis Trading",
+      "address": "0x57e114b691db790c35207b2e685d4a43181e6061"
+    },
+    "htx": {
+      "name": "HTX",
+      "tvl": 5104308337.305887,
+      "tvl1dChange": 0.14169177474343542,
+      "tvl7dChange": -1.5466045442435643,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "gemini": {
+      "name": "Gemini",
+      "tvl": 4938285589.133722,
+      "tvl1dChange": 0.010437865753388564,
+      "tvl7dChange": 0.9120054621006659,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "coinbase-bridge": {
+      "name": "Coinbase Bridge",
+      "tvl": 4915580047.51788,
+      "tvl1dChange": 0.1378137679516982,
+      "tvl7dChange": 0.824748486118736,
+      "chain": "Multi-Chain",
+      "category": "Bridge",
+      "address": null
+    },
+    "ether.fi-stake": {
+      "name": "ether.fi Stake",
+      "tvl": 4852114274.053034,
+      "tvl1dChange": 0.4710841928140326,
+      "tvl7dChange": -1.65032091347382,
+      "chain": "Multi-Chain",
+      "category": "Liquid Restaking",
+      "address": "0xfe0c30065b384f05761f15d0cc899d4f9f9cc0eb"
+    },
+    "bitget": {
+      "name": "Bitget",
+      "tvl": 4843999931.060263,
+      "tvl1dChange": 0.2856604800214768,
+      "tvl7dChange": 1.369866197466024,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "hyperliquid-bridge": {
+      "name": "Hyperliquid Bridge",
+      "tvl": 4769145732.686399,
+      "tvl1dChange": -0.3247340833128902,
+      "tvl7dChange": 1.129409271058364,
+      "chain": "Multi-Chain",
+      "category": "Bridge",
+      "address": "0x0d01dc56dcaaca66ad901c959b4011ec"
+    },
+    "gate": {
+      "name": "Gate",
+      "tvl": 4755311751.413677,
+      "tvl1dChange": 0.7549699593266297,
+      "tvl7dChange": 2.900734656952821,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": "0xe66747a101bff2dba3697199dcce5b743b454759"
+    },
+    "mexc": {
+      "name": "MEXC",
+      "tvl": 4583610427.272728,
+      "tvl1dChange": 0.007294140477242195,
+      "tvl7dChange": 1.1680056847945366,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "binance-bitcoin": {
+      "name": "Binance Bitcoin",
+      "tvl": 4570434127.298223,
+      "tvl1dChange": 0.13896568315215063,
+      "tvl7dChange": 0.8274410221592206,
+      "chain": "Bitcoin",
+      "category": "Bridge",
+      "address": null
+    },
+    "usdt0": {
+      "name": "USDT0",
+      "tvl": 4069301841.98009,
+      "tvl1dChange": -0.8290598915743175,
+      "tvl7dChange": -3.045286425727099,
+      "chain": "Ethereum",
+      "category": "Bridge",
+      "address": null
+    },
+    "deribit": {
+      "name": "Deribit",
+      "tvl": 3885054037.0821285,
+      "tvl1dChange": -0.04658695062029494,
+      "tvl7dChange": -2.307847719092152,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "babylon-protocol": {
+      "name": "Babylon Protocol",
+      "tvl": 3492985848.153224,
+      "tvl1dChange": 0.1385814386692772,
+      "tvl7dChange": 0.9127225170517903,
+      "chain": "Bitcoin",
+      "category": "Restaking",
+      "address": null
+    },
+    "justlend": {
+      "name": "JustLend",
+      "tvl": 3344795400.1945496,
+      "tvl1dChange": -0.06186427042614184,
+      "tvl7dChange": 2.3146171211139546,
+      "chain": "Tron",
+      "category": "Lending",
+      "address": "tron:TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9"
+    },
+    "tether-gold": {
+      "name": "Tether Gold",
+      "tvl": 3299624668.904218,
+      "tvl1dChange": -0.33872787094021817,
+      "tvl7dChange": 2.868345640313038,
+      "chain": "Multi-Chain",
+      "category": "RWA",
+      "address": "0x68749665ff8d2d112fa859aa293f07a622782f38"
+    },
+    "kucoin": {
+      "name": "KuCoin",
+      "tvl": 3281893388.4365177,
+      "tvl1dChange": -0.2240304330829872,
+      "tvl7dChange": 0.5343947327142757,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "arbitrum-bridge": {
+      "name": "Arbitrum Bridge",
+      "tvl": 3163834263.0264664,
+      "tvl1dChange": -0.29216137968386136,
+      "tvl7dChange": 0.7226143341391804,
+      "chain": "Ethereum",
+      "category": "Canonical Bridge",
+      "address": "arbitrum:0x912ce59144191c1204e64559fe8253a0e49e6548"
+    },
+    "grove-finance": {
+      "name": "Grove Finance",
+      "tvl": 2868449269.98568,
+      "tvl1dChange": 0.002739404053158978,
+      "tvl7dChange": 16.76421166652679,
+      "chain": "Multi-Chain",
+      "category": "Onchain Capital Allocator",
+      "address": null
+    },
+    "blackrock-buidl": {
+      "name": "BlackRock BUIDL",
+      "tvl": 2833488942.250449,
+      "tvl1dChange": 0,
+      "tvl7dChange": 4.975762373659222,
+      "chain": "Multi-Chain",
+      "category": "RWA",
+      "address": "0x7712c34205737192402172409a8f7ccef8aa2aec"
+    },
+    "ondo-yield-assets": {
+      "name": "Ondo Yield Assets",
+      "tvl": 2785921997.602765,
+      "tvl1dChange": -0.29516274919554064,
+      "tvl7dChange": 24.796818942621073,
+      "chain": "Multi-Chain",
+      "category": "RWA",
+      "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3"
+    },
+    "circle-usyc": {
+      "name": "Circle USYC",
+      "tvl": 2684646102.3212137,
+      "tvl1dChange": -0.0003340723483233887,
+      "tvl7dChange": 2.8038953214854843,
+      "chain": "Multi-Chain",
+      "category": "RWA",
+      "address": null
+    },
+    "base-bridge": {
+      "name": "Base Bridge",
+      "tvl": 2557520267.0447946,
+      "tvl1dChange": -0.5369295877422928,
+      "tvl7dChange": -0.2831383064478672,
+      "chain": "Ethereum",
+      "category": "Canonical Bridge",
+      "address": null
+    },
+    "polygon-bridge-&-staking": {
+      "name": "Polygon Bridge & Staking",
+      "tvl": 2501088364.193697,
+      "tvl1dChange": -0.9502340659023503,
+      "tvl7dChange": 4.5666593173437064,
+      "chain": "Polygon",
+      "category": "Chain",
+      "address": "0x455e53cbb86018ac2b8092fdcd39d8444affc3f6"
+    },
+    "paxos-gold": {
+      "name": "Paxos Gold",
+      "tvl": 2386083552.267837,
+      "tvl1dChange": -0.24190729576751835,
+      "tvl7dChange": 3.3515891592642078,
+      "chain": "Ethereum",
+      "category": "RWA",
+      "address": "0x45804880de22913dafe09f4980848ece6ecbaf78"
+    },
+    "justcryptos": {
+      "name": "JustCryptos",
+      "tvl": 2179581055.08,
+      "tvl1dChange": -0.06962546190719365,
+      "tvl7dChange": 1.5286670061557714,
+      "chain": "Tron",
+      "category": "Bridge",
+      "address": "tron:TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9"
+    },
+    "spark-liquidity-layer": {
+      "name": "Spark Liquidity Layer",
+      "tvl": 2130937849.037886,
+      "tvl1dChange": 0.5590730763256744,
+      "tvl7dChange": 16.649475648450746,
+      "chain": "Multi-Chain",
+      "category": "Onchain Capital Allocator",
+      "address": "0xc20059e0317de91738d13af027dfc4a50781b066"
+    },
+    "maple": {
+      "name": "Maple",
+      "tvl": 2087108380.3933024,
+      "tvl1dChange": 0.2923625070566658,
+      "tvl7dChange": -16.284773625317783,
+      "chain": "Multi-Chain",
+      "category": "Lending",
+      "address": "0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66"
+    },
+    "crypto-com": {
+      "name": "Crypto-com",
+      "tvl": 2069174714.154636,
+      "tvl1dChange": 0.13958510435010396,
+      "tvl7dChange": -1.5546360438658127,
+      "chain": "Multi-Chain",
+      "category": "CEX",
+      "address": null
+    },
+    "pendle": {
+      "name": "Pendle",
+      "tvl": 1929567682.5477507,
+      "tvl1dChange": 0.17938143843446142,
+      "tvl7dChange": -7.343216828307149,
+      "chain": "Multi-Chain",
+      "category": "Yield",
+      "address": "0x808507121b80c02388fad14726482e061b8da827"
+    },
+    "sparklend": {
+      "name": "SparkLend",
+      "tvl": 1929213988.2647812,
+      "tvl1dChange": -0.1528102865265879,
+      "tvl7dChange": 3.158640510344199,
+      "chain": "Multi-Chain",
+      "category": "Lending",
+      "address": "0xc20059e0317de91738d13af027dfc4a50781b066"
+    },
+    "sentora": {
+      "name": "Sentora",
+      "tvl": 1839585335.692226,
+      "tvl1dChange": 0.19702789567146795,
+      "tvl7dChange": 5.802390872936101,
+      "chain": "Multi-Chain",
+      "category": "Risk Curators",
+      "address": null
+    },
+    "steakhouse-financial": {
+      "name": "Steakhouse Financial",
+      "tvl": 1779124678.864957,
+      "tvl1dChange": -0.2646413104704237,
+      "tvl7dChange": -0.3849030461294092,
+      "chain": "Multi-Chain",
+      "category": "Risk Curators",
+      "address": null
+    },
+    "spark-savings": {
+      "name": "Spark Savings",
+      "tvl": 1778670690.591801,
+      "tvl1dChange": 0.4794204323916347,
+      "tvl7dChange": 13.50880547346118,
+      "chain": "Multi-Chain",
+      "category": "Yield",
+      "address": "0xc20059e0317de91738d13af027dfc4a50781b066"
+    },
+    "curve-dex": {
+      "name": "Curve DEX",
+      "tvl": 1770270582.8058012,
+      "tvl1dChange": -0.18682019753228474,
+      "tvl7dChange": 0.26584216564361896,
+      "chain": "Multi-Chain",
+      "category": "Dexs",
+      "address": "0xD533a949740bb3306d119CC777fa900bA034cd52"
+    },
+    "centrifuge-protocol": {
+      "name": "Centrifuge Protocol",
+      "tvl": 1705376010.4702883,
+      "tvl1dChange": -0.016682810873888343,
+      "tvl7dChange": 9.770536060346814,
+      "chain": "Multi-Chain",
+      "category": "RWA",
+      "address": "0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94"
+    },
+    "pancakeswap-amm": {
+      "name": "PancakeSwap AMM",
+      "tvl": 1642206702.9294598,
+      "tvl1dChange": 0.01567087757203467,
+      "tvl7dChange": -0.7036356209497541,
+      "chain": "Multi-Chain",
+      "category": "Dexs",
+      "address": "bsc:0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82"
+    },
+    "falcon-finance": {
+      "name": "Falcon Finance",
+      "tvl": 1627168614.7588866,
+      "tvl1dChange": -0.169465975186327,
+      "tvl7dChange": -0.29928896917240877,
+      "chain": "Ethereum",
+      "category": "Basis Trading",
+      "address": "0xfa1c09fc8b491b6a4d3ff53a10cad29381b3f949"
+    }
+  },
+  "tokens": {
+    "eth": {
+      "price": 2038.06,
+      "change24h": "-0.64",
+      "marketCap": 246022815570.9608
+    },
+    "lsk": {
+      "price": 0.122786,
+      "change24h": "-2.16",
+      "marketCap": 27830488.36179062
+    }
+  },
+  "chainStats": {
+    "harmony": {
+      "tvl": 295367.07005875313,
+      "name": "Harmony"
+    },
+    "aurora": {
+      "tvl": 2896805.6928035286,
+      "name": "Aurora"
+    },
+    "stable": {
+      "tvl": 5503126.17214841,
+      "name": "Stable"
+    },
+    "etherlink": {
+      "tvl": 23862292.387940615,
+      "name": "Etherlink"
+    },
+    "tac": {
+      "tvl": 2699916.8678830434,
+      "name": "TAC"
+    },
+    "mantle": {
+      "tvl": 676611091.8582269,
+      "name": "Mantle"
+    },
+    "plasma": {
+      "tvl": 1548470322.639993,
+      "name": "Plasma"
+    },
+    "x layer": {
+      "tvl": 24755483.56853162,
+      "name": "X Layer"
+    },
+    "corn": {
+      "tvl": 56126.560998844536,
+      "name": "Corn"
+    },
+    "ink": {
+      "tvl": 456053222.61950225,
+      "name": "Ink"
+    },
+    "hyperliquid l1": {
+      "tvl": 1589069404.4431531,
+      "name": "Hyperliquid L1"
+    },
+    "unichain": {
+      "tvl": 35680030.93009179,
+      "name": "Unichain"
+    },
+    "fraxtal": {
+      "tvl": 26109773.681329638,
+      "name": "Fraxtal"
+    },
+    "xdc": {
+      "tvl": 4549034.327096934,
+      "name": "XDC"
+    },
+    "celo": {
+      "tvl": 26474066.478563137,
+      "name": "Celo"
+    },
+    "kava": {
+      "tvl": 68227065.02639197,
+      "name": "Kava"
+    },
+    "sonic": {
+      "tvl": 32305130.90541586,
+      "name": "Sonic"
+    },
+    "monad": {
+      "tvl": 377770808.3052807,
+      "name": "Monad"
+    },
+    "plume mainnet": {
+      "tvl": 14111263.476774735,
+      "name": "Plume Mainnet"
+    },
+    "base": {
+      "tvl": 4045204418.906435,
+      "name": "Base"
+    },
+    "fantom": {
+      "tvl": 4652484.094388134,
+      "name": "Fantom"
+    },
+    "taiko": {
+      "tvl": 6967215.02347724,
+      "name": "Taiko"
+    },
+    "avalanche": {
+      "tvl": 716990303.2397586,
+      "name": "Avalanche"
+    },
+    "op mainnet": {
+      "tvl": 196841100.7034117,
+      "name": "OP Mainnet"
+    },
+    "ethereum": {
+      "tvl": 52795260867.74917,
+      "name": "Ethereum"
+    },
+    "arbitrum": {
+      "tvl": 1884005032.8886204,
+      "name": "Arbitrum"
+    },
+    "bsc": {
+      "tvl": 5303931643.913938,
+      "name": "BSC"
+    },
+    "polygon": {
+      "tvl": 1238657128.8108053,
+      "name": "Polygon"
+    },
+    "gnosis": {
+      "tvl": 86903842.62597263,
+      "name": "Gnosis"
+    },
+    "moonbeam": {
+      "tvl": 1804771.9150413312,
+      "name": "Moonbeam"
+    },
+    "heco": {
+      "tvl": 97572.69871296972,
+      "name": "Heco"
+    },
+    "boba_bnb": {
+      "tvl": 0,
+      "name": "Boba_Bnb"
+    },
+    "telos": {
+      "tvl": 1802931.3265967437,
+      "name": "Telos"
+    },
+    "polygon zkevm": {
+      "tvl": 485293.4479605342,
+      "name": "Polygon zkEVM"
+    },
+    "skale europa": {
+      "tvl": 144524.5819638135,
+      "name": "SKALE Europa"
+    },
+    "fuse": {
+      "tvl": 241067.29381593817,
+      "name": "Fuse"
+    },
+    "hemi": {
+      "tvl": 7212507.678290656,
+      "name": "Hemi"
+    },
+    "haqq": {
+      "tvl": 11.310722346175485,
+      "name": "HAQQ"
+    },
+    "bittorrent": {
+      "tvl": 198341.2353925412,
+      "name": "Bittorrent"
+    },
+    "rootstock": {
+      "tvl": 96620892.68015115,
+      "name": "Rootstock"
+    },
+    "zetachain": {
+      "tvl": 886008.5769764109,
+      "name": "ZetaChain"
+    },
+    "linea": {
+      "tvl": 89286849.91021018,
+      "name": "Linea"
+    },
+    "core": {
+      "tvl": 5967618.7505198,
+      "name": "CORE"
+    },
+    "metis": {
+      "tvl": 6451758.781373706,
+      "name": "Metis"
+    },
+    "thundercore": {
+      "tvl": 259745.02924736403,
+      "name": "ThunderCore"
+    },
+    "moonriver": {
+      "tvl": 1717630.3905916447,
+      "name": "Moonriver"
+    },
+    "boba": {
+      "tvl": 2252913.8998988904,
+      "name": "Boba"
+    },
+    "katana": {
+      "tvl": 345080903.07242155,
+      "name": "Katana"
+    },
+    "blast": {
+      "tvl": 34496828.32540319,
+      "name": "Blast"
+    },
+    "scroll": {
+      "tvl": 230248023.08608136,
+      "name": "Scroll"
+    },
+    "palm": {
+      "tvl": 528.0113236016742,
+      "name": "Palm"
+    },
+    "oktchain": {
+      "tvl": 1462696.2682158367,
+      "name": "OKTChain"
+    },
+    "arbitrum nova": {
+      "tvl": 428262.78693395026,
+      "name": "Arbitrum Nova"
+    },
+    "filecoin": {
+      "tvl": 3296139.598630828,
+      "name": "Filecoin"
+    },
+    "conflux": {
+      "tvl": 7289272.051229848,
+      "name": "Conflux"
+    },
+    "velas": {
+      "tvl": 204545.0243765322,
+      "name": "Velas"
+    },
+    "oasis emerald": {
+      "tvl": 204184.81132895587,
+      "name": "Oasis Emerald"
+    },
+    "cronos": {
+      "tvl": 300972226.8282177,
+      "name": "Cronos"
+    },
+    "zksync era": {
+      "tvl": 21796392.021362502,
+      "name": "ZKsync Era"
+    },
+    "binance": {
+      "tvl": 0,
+      "name": "Binance"
+    },
+    "solana": {
+      "tvl": 5460079412.09899,
+      "name": "Solana"
+    },
+    "manta": {
+      "tvl": 8064005.246489055,
+      "name": "Manta"
+    },
+    "zircuit": {
+      "tvl": 473161.3452361791,
+      "name": "Zircuit"
+    },
+    "hashkey chain": {
+      "tvl": 1644999.7953430703,
+      "name": "HashKey Chain"
+    },
+    "ethereumclassic": {
+      "tvl": 137181.3448357253,
+      "name": "EthereumClassic"
+    },
+    "doge": {
+      "tvl": 9753003.85868535,
+      "name": "Doge"
+    },
+    "litecoin": {
+      "tvl": 2036843.266209159,
+      "name": "Litecoin"
+    },
+    "iotex": {
+      "tvl": 1738906.2313998374,
+      "name": "IoTeX"
+    },
+    "kcc": {
+      "tvl": 836704.0514984478,
+      "name": "KCC"
+    },
+    "bitcoin": {
+      "tvl": 4541883917.739787,
+      "name": "Bitcoin"
+    },
+    "wanchain": {
+      "tvl": 3308818.268227796,
+      "name": "Wanchain"
+    },
+    "ontology": {
+      "tvl": 4922713.124409998,
+      "name": "Ontology"
+    },
+    "ontologyevm": {
+      "tvl": 3778.4343518083556,
+      "name": "OntologyEVM"
+    },
+    "aptos": {
+      "tvl": 268395074.51488993,
+      "name": "Aptos"
+    },
+    "opbnb": {
+      "tvl": 1726235.0032542113,
+      "name": "opBNB"
+    },
+    "ronin": {
+      "tvl": 12727546.855850684,
+      "name": "Ronin"
+    },
+    "evmos": {
+      "tvl": 166515.15869859778,
+      "name": "Evmos"
+    },
+    "energi": {
+      "tvl": 145295.82885609544,
+      "name": "Energi"
+    },
+    "hedera": {
+      "tvl": 58156612.63828253,
+      "name": "Hedera"
+    },
+    "flare": {
+      "tvl": 157678630.21365455,
+      "name": "Flare"
+    },
+    "songbird": {
+      "tvl": 201346.5285017797,
+      "name": "Songbird"
+    },
+    "kaia": {
+      "tvl": 11727344.863120891,
+      "name": "Kaia"
+    },
+    "bifrost network": {
+      "tvl": 12879317.745168904,
+      "name": "Bifrost Network"
+    },
+    "terra classic": {
+      "tvl": 656679.6994820787,
+      "name": "Terra Classic"
+    },
+    "eclipse": {
+      "tvl": 1349787.461343258,
+      "name": "Eclipse"
+    },
+    "horizen eon": {
+      "tvl": 0,
+      "name": "Horizen EON"
+    },
+    "zilliqa": {
+      "tvl": 504525.64486446255,
+      "name": "Zilliqa"
+    },
+    "neo": {
+      "tvl": 3754574.8657765267,
+      "name": "NEO"
+    },
+    "secret": {
+      "tvl": 2263182.4800923476,
+      "name": "Secret"
+    },
+    "bob": {
+      "tvl": 10210247.956902478,
+      "name": "BOB"
+    },
+    "cube": {
+      "tvl": 0,
+      "name": "Cube"
+    },
+    "astar": {
+      "tvl": 1903833.3327081122,
+      "name": "Astar"
+    },
+    "bitgert": {
+      "tvl": 0.00004161524541287795,
+      "name": "Bitgert"
+    },
+    "sifchain": {
+      "tvl": 0,
+      "name": "Sifchain"
+    },
+    "canto": {
+      "tvl": 3549422.673753268,
+      "name": "Canto"
+    },
+    "rei": {
+      "tvl": 1563.5768894225134,
+      "name": "REI"
+    },
+    "elastos": {
+      "tvl": 246763.6242027631,
+      "name": "Elastos"
+    },
+    "nuls": {
+      "tvl": 1880316,
+      "name": "Nuls"
+    },
+    "osmosis": {
+      "tvl": 16392052.92549859,
+      "name": "Osmosis"
+    },
+    "shibarium": {
+      "tvl": 187608.90531142853,
+      "name": "Shibarium"
+    },
+    "xrpl": {
+      "tvl": 44911255.67574548,
+      "name": "XRPL"
+    },
+    "cosmoshub": {
+      "tvl": 127226.56625175248,
+      "name": "CosmosHub"
+    },
+    "bitcoincash": {
+      "tvl": 6764005.463897653,
+      "name": "Bitcoincash"
+    },
+    "thorchain": {
+      "tvl": 32813147.876160335,
+      "name": "Thorchain"
+    },
+    "tron": {
+      "tvl": 4799584527.037498,
+      "name": "Tron"
+    },
+    "hoo": {
+      "tvl": 0,
+      "name": "Hoo"
+    },
+    "q protocol": {
+      "tvl": 53764.220748151325,
+      "name": "Q Protocol"
+    },
+    "neon": {
+      "tvl": 82236.25137509631,
+      "name": "Neon"
+    },
+    "archway": {
+      "tvl": 238335.48023994075,
+      "name": "Archway"
+    },
+    "injective": {
+      "tvl": 12632552.284603769,
+      "name": "Injective"
+    },
+    "sui": {
+      "tvl": 548682821.8714871,
+      "name": "Sui"
+    },
+    "stellar": {
+      "tvl": 170917658.76833746,
+      "name": "Stellar"
+    },
+    "icon": {
+      "tvl": 2116925.360391993,
+      "name": "Icon"
+    },
+    "karura": {
+      "tvl": 36255.05614085574,
+      "name": "Karura"
+    },
+    "tezos": {
+      "tvl": 27542827.74802009,
+      "name": "Tezos"
+    },
+    "terra2": {
+      "tvl": 5208771.653490398,
+      "name": "Terra2"
+    },
+    "wax": {
+      "tvl": 406094.50410734786,
+      "name": "Wax"
+    },
+    "vaulta": {
+      "tvl": 38636988.93903406,
+      "name": "Vaulta"
+    },
+    "meter": {
+      "tvl": 161102.69279869253,
+      "name": "Meter"
+    },
+    "near": {
+      "tvl": 112457436.0222558,
+      "name": "Near"
+    },
+    "dfs network": {
+      "tvl": 0,
+      "name": "DFS Network"
+    },
+    "genshiro": {
+      "tvl": 0,
+      "name": "Genshiro"
+    },
+    "rollux": {
+      "tvl": 11456752.818731774,
+      "name": "Rollux"
+    },
+    "lamden": {
+      "tvl": 0,
+      "name": "Lamden"
+    },
+    "waves": {
+      "tvl": 7961399.058356929,
+      "name": "Waves"
+    },
+    "unit zero": {
+      "tvl": 515242.87080518296,
+      "name": "Unit Zero"
+    },
+    "clv": {
+      "tvl": 0,
+      "name": "CLV"
+    },
+    "shiden": {
+      "tvl": 24319.01965288707,
+      "name": "Shiden"
+    },
+    "energyweb": {
+      "tvl": 80368.96093613855,
+      "name": "EnergyWeb"
+    },
+    "algorand": {
+      "tvl": 42882520.10371298,
+      "name": "Algorand"
+    },
+    "gochain": {
+      "tvl": 4467.329672304242,
+      "name": "GoChain"
+    },
+    "hpb": {
+      "tvl": 0,
+      "name": "HPB"
+    },
+    "fusion": {
+      "tvl": 0,
+      "name": "Fusion"
+    },
+    "viction": {
+      "tvl": 314649.2989310155,
+      "name": "Viction"
+    },
+    "kardia": {
+      "tvl": 0,
+      "name": "Kardia"
+    },
+    "sora": {
+      "tvl": 16412.450000000004,
+      "name": "Sora"
+    },
+    "radix": {
+      "tvl": 1914238.574368152,
+      "name": "Radix"
+    },
+    "dogechain": {
+      "tvl": 993609.9239682136,
+      "name": "Dogechain"
+    },
+    "milkomeda c1 (deprecated)": {
+      "tvl": 0.02142208805858668,
+      "name": "Milkomeda C1 (Deprecated)"
+    },
+    "cardano": {
+      "tvl": 131502652.14600904,
+      "name": "Cardano"
+    },
+    "smartbch": {
+      "tvl": 46041.949877817875,
+      "name": "smartBCH"
+    },
+    "zksync lite": {
+      "tvl": 0,
+      "name": "ZKsync Lite"
+    },
+    "empire": {
+      "tvl": 0,
+      "name": "Empire"
+    },
+    "juno": {
+      "tvl": 85358.0736444029,
+      "name": "Juno"
+    },
+    "polis": {
+      "tvl": 0,
+      "name": "Polis"
+    },
+    "zyx": {
+      "tvl": 0,
+      "name": "ZYX"
+    },
+    "multiversx": {
+      "tvl": 12394253.103951529,
+      "name": "MultiversX"
+    },
+    "step": {
+      "tvl": 27780.591166303122,
+      "name": "Step"
+    },
+    "ubiq": {
+      "tvl": 0,
+      "name": "Ubiq"
+    },
+    "mixin": {
+      "tvl": 79510765.57672153,
+      "name": "Mixin"
+    },
+    "everscale": {
+      "tvl": 149908,
+      "name": "Everscale"
+    },
+    "vechain": {
+      "tvl": 1226096.7292156692,
+      "name": "VeChain"
+    },
+    "godwokenv1": {
+      "tvl": 872162.7735796305,
+      "name": "GodwokenV1"
+    },
+    "godwoken": {
+      "tvl": 54665.224683683686,
+      "name": "Godwoken"
+    },
+    "callisto": {
+      "tvl": 4181.348893336134,
+      "name": "Callisto"
+    },
+    "apechain": {
+      "tvl": 2104116.779635963,
+      "name": "ApeChain"
+    },
+    "megaeth": {
+      "tvl": 105599974.54878071,
+      "name": "MegaETH"
+    },
+    "stacks": {
+      "tvl": 117515172.54501653,
+      "name": "Stacks"
+    },
+    "echelon": {
+      "tvl": 0,
+      "name": "Echelon"
+    },
+    "csc": {
+      "tvl": 306950.5244716026,
+      "name": "CSC"
+    },
+    "ergo": {
+      "tvl": 1212130.6378592472,
+      "name": "Ergo"
+    },
+    "somnia": {
+      "tvl": 1353421.937087996,
+      "name": "Somnia"
+    },
+    "lisk": {
+      "tvl": 893001.7536021306,
+      "name": "Lisk"
+    },
+    "nahmii": {
+      "tvl": 52662.771302291585,
+      "name": "Nahmii"
+    },
+    "defichain": {
+      "tvl": 1058095.9367635574,
+      "name": "DefiChain"
+    },
+    "theta": {
+      "tvl": 365115.5045203353,
+      "name": "Theta"
+    },
+    "curio": {
+      "tvl": 0,
+      "name": "Curio"
+    },
+    "syscoin": {
+      "tvl": 0,
+      "name": "Syscoin"
+    },
+    "equilibrium": {
+      "tvl": 1134428.7005913283,
+      "name": "Equilibrium"
+    },
+    "berachain": {
+      "tvl": 92221541.38271691,
+      "name": "Berachain"
+    },
+    "acala": {
+      "tvl": 121571.24842563202,
+      "name": "Acala"
+    },
+    "neutron": {
+      "tvl": 5858665.119066618,
+      "name": "Neutron"
+    },
+    "xpr network": {
+      "tvl": 40854489.85401034,
+      "name": "XPR Network"
+    },
+    "kadena": {
+      "tvl": 0,
+      "name": "Kadena"
+    },
+    "kujira": {
+      "tvl": 795632.431929841,
+      "name": "Kujira"
+    },
+    "goerli": {
+      "tvl": 0,
+      "name": "Goerli"
+    },
+    "vite": {
+      "tvl": 4949487.653459508,
+      "name": "Vite"
+    },
+    "boba_avax": {
+      "tvl": 0,
+      "name": "Boba_Avax"
+    },
+    "citrea": {
+      "tvl": 1802890.7301993715,
+      "name": "Citrea"
+    },
+    "sei": {
+      "tvl": 41225458.11959171,
+      "name": "Sei"
+    },
+    "gravity by galxe": {
+      "tvl": 2445982.0327747017,
+      "name": "Gravity by Galxe"
+    },
+    "soneium": {
+      "tvl": 10912646.804522984,
+      "name": "Soneium"
+    },
+    "cronos zkevm": {
+      "tvl": 6647765.252392766,
+      "name": "Cronos zkEVM"
+    },
+    "mode": {
+      "tvl": 1953424.8234279174,
+      "name": "Mode"
+    },
+    "goat": {
+      "tvl": 531998.907825553,
+      "name": "GOAT"
+    },
+    "bsquared": {
+      "tvl": 39920676.94300359,
+      "name": "BSquared"
+    },
+    "bahamut": {
+      "tvl": 53467.36533040459,
+      "name": "Bahamut"
+    },
+    "abstract": {
+      "tvl": 17442323.414586917,
+      "name": "Abstract"
+    },
+    "merlin": {
+      "tvl": 14338351.660303311,
+      "name": "Merlin"
+    },
+    "zklink nova": {
+      "tvl": 68790.76166536816,
+      "name": "zkLink Nova"
+    },
+    "ton": {
+      "tvl": 56148960.6885751,
+      "name": "TON"
+    },
+    "morph": {
+      "tvl": 7538988.8641783865,
+      "name": "Morph"
+    },
+    "dfk": {
+      "tvl": 744292.5175516603,
+      "name": "DFK"
+    },
+    "voi network": {
+      "tvl": 100003.80209580588,
+      "name": "Voi Network"
+    },
+    "zora": {
+      "tvl": 39675.30894420595,
+      "name": "Zora"
+    },
+    "milkomeda a1": {
+      "tvl": 1145.6817721721031,
+      "name": "Milkomeda A1"
+    },
+    "findora": {
+      "tvl": 40588.75314723078,
+      "name": "Findora"
+    },
+    "hydra": {
+      "tvl": 19247.790503329375,
+      "name": "Hydra"
+    },
+    "obyte": {
+      "tvl": 842164.2666841018,
+      "name": "Obyte"
+    },
+    "lachain": {
+      "tvl": 16594.941282288648,
+      "name": "Lachain"
+    },
+    "reichain": {
+      "tvl": 1563.576785740828,
+      "name": "REIchain"
+    },
+    "sx network": {
+      "tvl": 825.2570225457392,
+      "name": "SX Network"
+    },
+    "sx rollup": {
+      "tvl": 846221.5315696787,
+      "name": "SX Rollup"
+    },
+    "multivac": {
+      "tvl": 5314.505565446693,
+      "name": "MultiVAC"
+    },
+    "lukso": {
+      "tvl": 12123.728563959765,
+      "name": "LUKSO"
+    },
+    "odyssey": {
+      "tvl": 234886.42459803188,
+      "name": "Odyssey"
+    },
+    "pulsechain": {
+      "tvl": 50162232.51002669,
+      "name": "PulseChain"
+    },
+    "icp": {
+      "tvl": 10955754.98395387,
+      "name": "ICP"
+    },
+    "nova network": {
+      "tvl": 0,
+      "name": "Nova Network"
+    },
+    "kroma": {
+      "tvl": 0,
+      "name": "Kroma"
+    },
+    "ultron": {
+      "tvl": 196250.89695947227,
+      "name": "Ultron"
+    },
+    "zkfair": {
+      "tvl": 80930.57375979924,
+      "name": "Zkfair"
+    },
+    "oxfun": {
+      "tvl": 0,
+      "name": "OXFUN"
+    },
+    "wemix3.0": {
+      "tvl": 5790758.429260275,
+      "name": "WEMIX3.0"
+    },
+    "kintsugi": {
+      "tvl": 37794.15922479564,
+      "name": "Kintsugi"
+    },
+    "chiliz": {
+      "tvl": 4919052.367728998,
+      "name": "Chiliz"
+    },
+    "dexit": {
+      "tvl": 0,
+      "name": "Dexit"
+    },
+    "omax": {
+      "tvl": 13512.722328170013,
+      "name": "Omax"
+    },
+    "flow": {
+      "tvl": 16979273.781787563,
+      "name": "Flow"
+    },
+    "dchain": {
+      "tvl": 20381.341557399264,
+      "name": "DChain"
+    },
+    "kub": {
+      "tvl": 1784448.4389404773,
+      "name": "KUB"
+    },
+    "ancient8": {
+      "tvl": 36821.45323379639,
+      "name": "Ancient8"
+    },
+    "heiko": {
+      "tvl": 0,
+      "name": "Heiko"
+    },
+    "parallel": {
+      "tvl": 0,
+      "name": "Parallel"
+    },
+    "shimmerevm": {
+      "tvl": 634746.7495627408,
+      "name": "ShimmerEVM"
+    },
+    "lightlink": {
+      "tvl": 371609.0153663994,
+      "name": "LightLink"
+    },
+    "loop": {
+      "tvl": 24968.3124900317,
+      "name": "Loop"
+    },
+    "carbon": {
+      "tvl": 542146.4670122481,
+      "name": "Carbon"
+    },
+    "starcoin": {
+      "tvl": 672390.625318737,
+      "name": "Starcoin"
+    },
+    "bifrost": {
+      "tvl": 4940494.03087686,
+      "name": "Bifrost"
+    },
+    "tombchain": {
+      "tvl": 18501.338358750152,
+      "name": "Tombchain"
+    },
+    "crescent": {
+      "tvl": 55579.77213905445,
+      "name": "Crescent"
+    },
+    "vision": {
+      "tvl": 0,
+      "name": "Vision"
+    },
+    "interlay": {
+      "tvl": 154449.25081687534,
+      "name": "Interlay"
+    },
+    "pego": {
+      "tvl": 47690.19904164177,
+      "name": "Pego"
+    },
+    "ethereumpow": {
+      "tvl": 11814.829077735074,
+      "name": "EthereumPoW"
+    },
+    "functionx": {
+      "tvl": 3176.9528014921,
+      "name": "FunctionX"
+    },
+    "botanix": {
+      "tvl": 3519414.60288896,
+      "name": "Botanix"
+    },
+    "tempo": {
+      "tvl": 1556087.8549890677,
+      "name": "Tempo"
+    },
+    "saga": {
+      "tvl": 0,
+      "name": "Saga"
+    },
+    "nibiru": {
+      "tvl": 5031274.437890159,
+      "name": "Nibiru"
+    },
+    "lens": {
+      "tvl": 134214.15900838564,
+      "name": "Lens"
+    },
+    "world chain": {
+      "tvl": 24752125.47252112,
+      "name": "World Chain"
+    },
+    "redbelly": {
+      "tvl": 167323.27872668213,
+      "name": "Redbelly"
+    },
+    "movement": {
+      "tvl": 150393031.84226307,
+      "name": "Movement"
+    },
+    "kekchain": {
+      "tvl": 0,
+      "name": "Kekchain"
+    },
+    "astar zkevm": {
+      "tvl": 19758.457123036438,
+      "name": "Astar zkEVM"
+    },
+    "immutable zkevm": {
+      "tvl": 11115348.171777807,
+      "name": "Immutable zkEVM"
+    },
+    "muuchain": {
+      "tvl": 0,
+      "name": "MUUCHAIN"
+    },
+    "reyachain": {
+      "tvl": 19658247.16341537,
+      "name": "ReyaChain"
+    },
+    "superposition": {
+      "tvl": 86367.85751892133,
+      "name": "Superposition"
+    },
+    "rari": {
+      "tvl": 8364.909139635443,
+      "name": "Rari"
+    },
+    "xai": {
+      "tvl": 43607.63853797942,
+      "name": "Xai"
+    },
+    "edu chain": {
+      "tvl": 1273485.3763682053,
+      "name": "EDU Chain"
+    },
+    "duckchain": {
+      "tvl": 7463.325321622616,
+      "name": "DuckChain"
+    },
+    "starknet": {
+      "tvl": 242951683.0315971,
+      "name": "Starknet"
+    },
+    "map protocol": {
+      "tvl": 5570500.348417834,
+      "name": "MAP Protocol"
+    },
+    "dsc": {
+      "tvl": 0,
+      "name": "DSC"
+    },
+    "alv": {
+      "tvl": 0,
+      "name": "ALV"
+    },
+    "comdex": {
+      "tvl": 15648.000987417912,
+      "name": "Comdex"
+    },
+    "tlchain": {
+      "tvl": 0,
+      "name": "Tlchain"
+    },
+    "zeniq": {
+      "tvl": 0,
+      "name": "Zeniq"
+    },
+    "bitindi": {
+      "tvl": 0,
+      "name": "Bitindi"
+    },
+    "stargaze": {
+      "tvl": 157779.883743943,
+      "name": "Stargaze"
+    },
+    "libre": {
+      "tvl": 125087.76068784026,
+      "name": "Libre"
+    },
+    "ux": {
+      "tvl": 250638.80814430906,
+      "name": "UX"
+    },
+    "optimism": {
+      "tvl": 0,
+      "name": "Optimism"
+    },
+    "oraichain": {
+      "tvl": 200520.04105424433,
+      "name": "Oraichain"
+    },
+    "inevm": {
+      "tvl": 0,
+      "name": "inEVM"
+    },
+    "dexalot": {
+      "tvl": 1684766.8113436063,
+      "name": "Dexalot"
+    },
+    "darwinia": {
+      "tvl": 4236.270701460599,
+      "name": "Darwinia"
+    },
+    "crab": {
+      "tvl": 2301.104300104165,
+      "name": "Crab"
+    },
+    "rangers": {
+      "tvl": 0,
+      "name": "Rangers"
+    },
+    "lung": {
+      "tvl": 0,
+      "name": "Lung"
+    },
+    "bone": {
+      "tvl": 0,
+      "name": "Bone"
+    },
+    "sophon": {
+      "tvl": 1261702.599133754,
+      "name": "Sophon"
+    },
+    "babylon genesis": {
+      "tvl": 221018.63172763513,
+      "name": "Babylon Genesis"
+    },
+    "persistence one": {
+      "tvl": 23516.94277184944,
+      "name": "Persistence One"
+    },
+    "winr": {
+      "tvl": 743033.0902094106,
+      "name": "WINR"
+    },
+    "iota evm": {
+      "tvl": 1565510.4397032363,
+      "name": "IOTA EVM"
+    },
+    "polynomial": {
+      "tvl": 594044.373910852,
+      "name": "Polynomial"
+    },
+    "eos evm": {
+      "tvl": 440.3473304768799,
+      "name": "EOS EVM"
+    },
+    "oasys": {
+      "tvl": 282342.65648902755,
+      "name": "Oasys"
+    },
+    "coti": {
+      "tvl": 881619.0367770018,
+      "name": "Coti"
+    },
+    "enuls": {
+      "tvl": 0,
+      "name": "ENULS"
+    },
+    "hydra chain": {
+      "tvl": 41241.58400969485,
+      "name": "Hydra Chain"
+    },
+    "plume (deprecated)": {
+      "tvl": 0,
+      "name": "Plume (Deprecated)"
+    },
+    "story": {
+      "tvl": 406781.97107679286,
+      "name": "Story"
+    },
+    "xpla": {
+      "tvl": 227450.37841136183,
+      "name": "XPLA"
+    },
+    "onus": {
+      "tvl": 284924.6288379899,
+      "name": "Onus"
+    },
+    "swellchain": {
+      "tvl": 748199.8489267619,
+      "name": "Swellchain"
+    },
+    "concordium": {
+      "tvl": 1454.9542121835188,
+      "name": "Concordium"
+    },
+    "migaloo": {
+      "tvl": 0,
+      "name": "Migaloo"
+    },
+    "chihuahua": {
+      "tvl": 10264.977342894044,
+      "name": "Chihuahua"
+    },
+    "tenet": {
+      "tvl": 0,
+      "name": "Tenet"
+    },
+    "bitlayer": {
+      "tvl": 1875662.340853394,
+      "name": "Bitlayer"
+    },
+    "mint": {
+      "tvl": 4387.425808347518,
+      "name": "Mint"
+    },
+    "superseed": {
+      "tvl": 80501.72141449357,
+      "name": "Superseed"
+    },
+    "form network": {
+      "tvl": 5936.929392705905,
+      "name": "Form Network"
+    },
+    "artela": {
+      "tvl": 0,
+      "name": "Artela"
+    },
+    "taraxa": {
+      "tvl": 3018.965948696302,
+      "name": "Taraxa"
+    },
+    "aura network": {
+      "tvl": 17611.100485708976,
+      "name": "Aura Network"
+    },
+    "hydration": {
+      "tvl": 73338129.75229533,
+      "name": "Hydration"
+    },
+    "mvc": {
+      "tvl": 102258.96950902243,
+      "name": "MVC"
+    },
+    "perennial": {
+      "tvl": 0,
+      "name": "Perennial"
+    },
+    "beam": {
+      "tvl": 1072678.5942276237,
+      "name": "Beam"
+    },
+    "nos": {
+      "tvl": 0,
+      "name": "NOS"
+    },
+    "renec": {
+      "tvl": 69741.1997557917,
+      "name": "RENEC"
+    },
+    "nolus": {
+      "tvl": 255780.84497266464,
+      "name": "Nolus"
+    },
+    "ethf": {
+      "tvl": 0,
+      "name": "ETHF"
+    },
+    "meer": {
+      "tvl": 0,
+      "name": "MEER"
+    },
+    "elysium": {
+      "tvl": 282922.73052033444,
+      "name": "Elysium"
+    },
+    "mayachain": {
+      "tvl": 4247473.120835504,
+      "name": "Mayachain"
+    },
+    "zcash": {
+      "tvl": 1169402.6692338802,
+      "name": "Zcash"
+    },
+    "dash": {
+      "tvl": 212689.69497128105,
+      "name": "Dash"
+    },
+    "bostrom": {
+      "tvl": 1430.0669751599694,
+      "name": "Bostrom"
+    },
+    "alephium": {
+      "tvl": 1868823.6613889425,
+      "name": "Alephium"
+    },
+    "degen": {
+      "tvl": 54.2876141633523,
+      "name": "Degen"
+    },
+    "chainflip": {
+      "tvl": 10388218.389762027,
+      "name": "Chainflip"
+    },
+    "fsc": {
+      "tvl": 0,
+      "name": "FSC"
+    },
+    "supra": {
+      "tvl": 1686313.9524130598,
+      "name": "Supra"
+    },
+    "ab": {
+      "tvl": 417223.7337467727,
+      "name": "AB"
+    },
+    "jbc": {
+      "tvl": 6549.853730631485,
+      "name": "JBC"
+    },
+    "bouncebit": {
+      "tvl": 623253.0352949495,
+      "name": "BounceBit"
+    },
+    "cyber": {
+      "tvl": 14711.278059783874,
+      "name": "Cyber"
+    },
+    "swan": {
+      "tvl": 2265.655516932687,
+      "name": "Swan"
+    },
+    "fluence": {
+      "tvl": 236537.2752148089,
+      "name": "Fluence"
+    },
+    "cmp": {
+      "tvl": 0,
+      "name": "CMP"
+    },
+    "bevm": {
+      "tvl": 33661.84383216456,
+      "name": "BEVM"
+    },
+    "airdao": {
+      "tvl": 0,
+      "name": "AirDAO"
+    },
+    "dydx": {
+      "tvl": 117762810.28268878,
+      "name": "dYdX"
+    },
+    "bitnet": {
+      "tvl": 0,
+      "name": "Bitnet"
+    },
+    "areon network": {
+      "tvl": 18001.496564100722,
+      "name": "Areon Network"
+    },
+    "manta atlantic": {
+      "tvl": 1575.6494803915525,
+      "name": "Manta Atlantic"
+    },
+    "bitrock": {
+      "tvl": 0,
+      "name": "Bitrock"
+    },
+    "naka": {
+      "tvl": 88295.30869125023,
+      "name": "Naka"
+    },
+    "defiverse": {
+      "tvl": 0,
+      "name": "DeFiVerse"
+    },
+    "oasis sapphire": {
+      "tvl": 262380.2331596778,
+      "name": "Oasis Sapphire"
+    },
+    "k2": {
+      "tvl": 802450.1495550514,
+      "name": "K2"
+    },
+    "defichain evm": {
+      "tvl": 713024.8863399562,
+      "name": "DeFiChain EVM"
+    },
+    "echelon initia": {
+      "tvl": 2417100.520863653,
+      "name": "Echelon Initia"
+    },
+    "rss3": {
+      "tvl": 0,
+      "name": "RSS3"
+    },
+    "prom": {
+      "tvl": 499699.31329053896,
+      "name": "Prom"
+    },
+    "satoshivm": {
+      "tvl": 245173.47523773316,
+      "name": "SatoshiVM"
+    },
+    "venom": {
+      "tvl": 1134018,
+      "name": "Venom"
+    },
+    "planq": {
+      "tvl": 5258.679298924269,
+      "name": "Planq"
+    },
+    "lachain network": {
+      "tvl": 44618.65384497823,
+      "name": "LaChain Network"
+    },
+    "endurance": {
+      "tvl": 26.421863903119203,
+      "name": "Endurance"
+    },
+    "re.al": {
+      "tvl": 0,
+      "name": "re.al"
+    },
+    "genesys": {
+      "tvl": 0,
+      "name": "Genesys"
+    },
+    "ailayer": {
+      "tvl": 54018.48488268188,
+      "name": "AILayer"
+    },
+    "polkadex": {
+      "tvl": 72043.04942898818,
+      "name": "Polkadex"
+    },
+    "aelf": {
+      "tvl": 5340144.95685923,
+      "name": "aelf"
+    },
+    "joltify": {
+      "tvl": 5653.6873534430815,
+      "name": "Joltify"
+    },
+    "ham": {
+      "tvl": 2929.1674665482674,
+      "name": "Ham"
+    },
+    "massa": {
+      "tvl": 33112.258295759544,
+      "name": "Massa"
+    },
+    "mind network": {
+      "tvl": 0,
+      "name": "Mind Network"
+    },
+    "aeternity": {
+      "tvl": 208.7598923457552,
+      "name": "Aeternity"
+    },
+    "saakuru": {
+      "tvl": 84456.8110912712,
+      "name": "Saakuru"
+    },
+    "iota": {
+      "tvl": 6863924.244856816,
+      "name": "IOTA"
+    },
+    "neo x mainnet": {
+      "tvl": 8583.617330171533,
+      "name": "Neo X Mainnet"
+    },
+    "dymension": {
+      "tvl": 129332.536684474,
+      "name": "Dymension"
+    },
+    "xchain": {
+      "tvl": 11442.765490910964,
+      "name": "XCHAIN"
+    },
+    "electroneum": {
+      "tvl": 145575.31704671792,
+      "name": "Electroneum"
+    },
+    "hela": {
+      "tvl": 117163.80583525915,
+      "name": "HeLa"
+    },
+    "matchain": {
+      "tvl": 17907.757647357004,
+      "name": "Matchain"
+    },
+    "shape": {
+      "tvl": 62565.36288302025,
+      "name": "Shape"
+    },
+    "fuel ignition": {
+      "tvl": 4416941.265536026,
+      "name": "Fuel Ignition"
+    },
+    "asset chain": {
+      "tvl": 213424.91225842357,
+      "name": "Asset Chain"
+    },
+    "shido": {
+      "tvl": 1032824.1589050553,
+      "name": "Shido"
+    },
+    "vinuchain": {
+      "tvl": 9225.96214567428,
+      "name": "VinuChain"
+    },
+    "ql1": {
+      "tvl": 0,
+      "name": "QL1"
+    },
+    "vana": {
+      "tvl": 695477.369844435,
+      "name": "Vana"
+    },
+    "agoric": {
+      "tvl": 80843.03486369217,
+      "name": "Agoric"
+    },
+    "elys": {
+      "tvl": 1238.3696689201824,
+      "name": "Elys"
+    },
+    "kopi": {
+      "tvl": 0.08299751107056484,
+      "name": "Kopi"
+    },
+    "crossfi": {
+      "tvl": 38336.53090497588,
+      "name": "CrossFi"
+    },
+    "waterfall": {
+      "tvl": 0.8643270713782136,
+      "name": "Waterfall"
+    },
+    "mantra": {
+      "tvl": 1341629.364434513,
+      "name": "MANTRA"
+    },
+    "verus": {
+      "tvl": 20330043.63427502,
+      "name": "Verus"
+    },
+    "zero network": {
+      "tvl": 152356.67270035038,
+      "name": "Zero Network"
+    },
+    "redstone": {
+      "tvl": 26678.026685155044,
+      "name": "Redstone"
+    },
+    "parex": {
+      "tvl": 14897.512659937636,
+      "name": "Parex"
+    },
+    "penumbra": {
+      "tvl": 10999.3843775574,
+      "name": "Penumbra"
+    },
+    "stratis": {
+      "tvl": 22830.019868146224,
+      "name": "Stratis"
+    },
+    "silicon zkevm": {
+      "tvl": 5972.556514894656,
+      "name": "Silicon zkEVM"
+    },
+    "xphere": {
+      "tvl": 4.935605459110775,
+      "name": "Xphere"
+    },
+    "mtt network": {
+      "tvl": 6.526093660380117,
+      "name": "MTT Network"
+    },
+    "qubic": {
+      "tvl": 184898.13039228093,
+      "name": "Qubic"
+    },
+    "ao": {
+      "tvl": 26499.90222845804,
+      "name": "AO"
+    },
+    "moonchain": {
+      "tvl": 8037.25624488065,
+      "name": "Moonchain"
+    },
+    "haven1": {
+      "tvl": 6888.449633635075,
+      "name": "Haven1"
+    },
+    "aleph zero evm": {
+      "tvl": 0,
+      "name": "Aleph Zero EVM"
+    },
+    "initia": {
+      "tvl": 4103156.290204261,
+      "name": "Initia"
+    },
+    "opengpu": {
+      "tvl": 70863.41642735898,
+      "name": "OpenGPU"
+    },
+    "0g": {
+      "tvl": 1192878.0483076086,
+      "name": "0G"
+    },
+    "namada": {
+      "tvl": 1474804.0443940256,
+      "name": "Namada"
+    },
+    "civitia": {
+      "tvl": 54718.74388090296,
+      "name": "Civitia"
+    },
+    "inertia": {
+      "tvl": 161478.98841173682,
+      "name": "Inertia"
+    },
+    "yominet": {
+      "tvl": 733083.9293590724,
+      "name": "Yominet"
+    },
+    "xrpl evm": {
+      "tvl": 30330.57203647931,
+      "name": "XRPL EVM"
+    },
+    "titan": {
+      "tvl": 748982.4264099053,
+      "name": "Titan"
+    },
+    "xion": {
+      "tvl": 3691.270229989013,
+      "name": "XION"
+    },
+    "soon network": {
+      "tvl": 19922.07614829309,
+      "name": "Soon Network"
+    },
+    "svmbnb": {
+      "tvl": 16139.902348764837,
+      "name": "svmBNB"
+    },
+    "soonbase": {
+      "tvl": 260.7275195530759,
+      "name": "soonBase"
+    },
+    "provenance": {
+      "tvl": 1601868668.4123516,
+      "name": "Provenance"
+    },
+    "eventum": {
+      "tvl": 1020128.4057373235,
+      "name": "Eventum"
+    },
+    "bitcichain": {
+      "tvl": 777.8179751556429,
+      "name": "Bitcichain"
+    },
+    "eni": {
+      "tvl": 101146339.182505,
+      "name": "ENI"
+    },
+    "camp network": {
+      "tvl": 143.097773478942,
+      "name": "Camp Network"
+    },
+    "gala": {
+      "tvl": 6992561.72879169,
+      "name": "Gala"
+    },
+    "chromia": {
+      "tvl": 271750.68733960064,
+      "name": "Chromia"
+    },
+    "peaq": {
+      "tvl": 528155.7513402144,
+      "name": "Peaq"
+    },
+    "eteria": {
+      "tvl": 0,
+      "name": "Eteria"
+    },
+    "mezo": {
+      "tvl": 22685681.834098294,
+      "name": "Mezo"
+    },
+    "gatelayer": {
+      "tvl": 2448253.523616466,
+      "name": "GateLayer"
+    },
+    "xone chain": {
+      "tvl": 7941.435695979017,
+      "name": "Xone Chain"
+    },
+    "kasplex": {
+      "tvl": 365471.33821192244,
+      "name": "Kasplex"
+    },
+    "ethereal": {
+      "tvl": 51720481.65595115,
+      "name": "Ethereal"
+    },
+    "bittensor evm": {
+      "tvl": 224332.6441994835,
+      "name": "Bittensor EVM"
+    },
+    "besc hyperchain": {
+      "tvl": 300236.66911088093,
+      "name": "BESC Hyperchain"
+    },
+    "zigchain": {
+      "tvl": 5271818.414223195,
+      "name": "ZIGChain"
+    },
+    "capx chain": {
+      "tvl": 2341434.134270138,
+      "name": "Capx Chain"
+    },
+    "fogo": {
+      "tvl": 1043206.896069753,
+      "name": "Fogo"
+    },
+    "ganchain": {
+      "tvl": 18614.711162493608,
+      "name": "GANchain"
+    },
+    "joc": {
+      "tvl": 264.40509957409455,
+      "name": "JOC"
+    },
+    "grx chain": {
+      "tvl": 2036202.9473717674,
+      "name": "GRX Chain"
+    },
+    "virbicoin": {
+      "tvl": 16371.075606472192,
+      "name": "VirBiCoin"
+    },
+    "open": {
+      "tvl": 0,
+      "name": "Open"
+    },
+    "althea": {
+      "tvl": 14886.433286201229,
+      "name": "Althea"
+    },
+    "pepu": {
+      "tvl": 34529.86089490437,
+      "name": "Pepu"
+    },
+    "bittensor": {
+      "tvl": 0,
+      "name": "Bittensor"
+    },
+    "keeta": {
+      "tvl": 158252.34657638823,
+      "name": "Keeta"
+    },
+    "doma": {
+      "tvl": 536672.5531032368,
+      "name": "Doma"
+    },
+    "qie": {
+      "tvl": 101725.71875117917,
+      "name": "QIE"
+    },
+    "chia": {
+      "tvl": 163671.01905468144,
+      "name": "Chia"
+    }
+  },
+  "categoryTVL": {
+    "CEX": 235494299184.68506,
+    "Lending": 37802240551.59693,
+    "Liquid Staking": 26535397191.384426,
+    "Staking Pool": 15038568803.689138,
+    "Restaking": 11822323000.473686,
+    "Bridge": 28327357629.52639,
+    "CDP": 6586746362.407634,
+    "Basis Trading": 7513072051.247433,
+    "Liquid Restaking": 4852114274.053034,
+    "RWA": 15695141273.816769,
+    "Canonical Bridge": 5721354530.07126,
+    "Onchain Capital Allocator": 4999387119.023566,
+    "Chain": 2501088364.193697,
+    "Yield": 3708238373.1395516,
+    "Risk Curators": 3618710014.5571833,
+    "Dexs": 3412477285.735261
+  }
+}

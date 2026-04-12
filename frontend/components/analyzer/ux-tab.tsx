@@ -1,282 +1,238 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Award, Clock, AlertTriangle, TrendingUp, Target, Users } from 'lucide-react';
 import {
-  BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip,
-  PieChart, Pie, Cell, LineChart, Line, Area, AreaChart
+  BarChart, Bar, PieChart, Pie, Cell,
+  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
-import { AlertTriangle, TrendingUp, Users, Clock, Target, Award } from 'lucide-react';
 
-interface UxTabProps {
-  analysisResults: any;
-}
+interface UxTabProps { analysisResults: any }
+
+import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY } from '@/lib/chart-colors';
+const COLORS = CHART_COLORS;
 
 export function UxTab({ analysisResults }: UxTabProps) {
-  const results = analysisResults?.results?.target || {};
-  const fullReport = results.fullReport || {};
-  const uxAnalysis = fullReport.uxAnalysis || {};
-  const userJourneys = fullReport.userJourneys || {};
-  const userLifecycle = fullReport.userLifecycle || {};
-  
-  // Format values safely
-  const formatValue = (value: any, fallback: any = 'N/A') => {
-    if (value === null || value === undefined) return fallback;
-    return value;
-  };
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const formatNumber = (value: any, fallback = 0) => {
-    if (value === null || value === undefined) return fallback;
-    return typeof value === 'number' ? value : fallback;
-  };
+  useEffect(() => {
+    api.metrics.getDashboard()
+      .then(setData)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const formatPercentage = (value: any) => {
-    const num = formatNumber(value);
-    return `${num.toFixed(1)}%`;
-  };
+  const fr  = data || analysisResults?.results?.target?.fullReport || {};
+  const ux  = fr.uxAnalysis        || {};
+  const act = fr.activationMetrics || {};
+  const ret = fr.retentionMetrics  || {};
+  const ul  = fr.userLifecycle     || {};
+  const dm  = fr.defiMetrics       || {};
+  const uj  = fr.userJourneys      || {};
 
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes.toFixed(1)}m`;
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hours}h ${mins}m`;
-  };
+  const grade     = ux.uxGrade || {};
+  const gradeColor =
+    grade.grade === 'A' ? 'text-green-600 bg-green-100 border-green-300' :
+    grade.grade === 'B' ? 'text-blue-600 bg-blue-100 border-blue-300'   :
+    grade.grade === 'C' ? 'text-yellow-600 bg-yellow-100 border-yellow-300' :
+    grade.grade === 'D' ? 'text-orange-600 bg-orange-100 border-orange-300' :
+    'text-red-600 bg-red-100 border-red-300';
 
-  // Get UX grade color
-  const getUxGradeColor = (grade: string) => {
-    switch (grade) {
-      case 'A': return 'text-green-600 bg-green-100 border-green-300';
-      case 'B': return 'text-blue-600 bg-blue-100 border-blue-300';
-      case 'C': return 'text-yellow-600 bg-yellow-100 border-yellow-300';
-      case 'D': return 'text-orange-600 bg-orange-100 border-orange-300';
-      case 'F': return 'text-red-600 bg-red-100 border-red-300';
-      default: return 'text-gray-600 bg-gray-100 border-gray-300';
-    }
-  };
+  const pct = (v: any) => v != null ? `${v}%` : 'N/A';
+  const val = (v: any, fb = 'N/A') => (v != null && v !== '') ? v : fb;
 
-  // Prepare bottleneck chart data
-  const bottleneckData = (uxAnalysis.bottlenecks || []).slice(0, 5).map((bottleneck: any) => ({
-    name: `${bottleneck.fromFunction} → ${bottleneck.toFunction}`,
-    abandonmentRate: (bottleneck.abandonmentRate * 100).toFixed(1),
-    affected: bottleneck.affectedUsers
-  }));
+  const funnelData = (act.activationFunnel || []);
+  const featureData = (act.featureFirstUse || []).slice(0, 6);
 
-  // Prepare journey length distribution
-  const journeyDistribution = Object.entries(userJourneys.journeyDistribution || {}).map(([length, count]) => ({
-    length: `${length} steps`,
-    users: count
-  }));
+  const lifecycleData = [
+    { name: 'New',       value: ul.summary?.newUsers       || 0, fill: CHART_PRIMARY },
+    { name: 'Returning', value: ul.summary?.returningUsers || 0, fill: CHART_SECONDARY },
+  ].filter(d => d.value > 0);
 
-  // Prepare lifecycle distribution
-  const lifecycleData = Object.entries(userLifecycle.lifecycleDistribution || {}).map(([stage, count]) => ({
-    name: stage.charAt(0).toUpperCase() + stage.slice(1),
-    value: count,
-    fill: stage === 'active' ? '#10B981' : 
-          stage === 'new' ? '#3B82F6' :
-          stage === 'inactive' ? '#F59E0B' :
-          stage === 'dormant' ? '#EF4444' :
-          '#6B7280'
-  }));
+  const retentionBars = [
+    { name: 'D1',  value: ret.d1Retention  || 0 },
+    { name: 'D7',  value: ret.d7Retention  || 0 },
+    { name: 'D30', value: ret.d30Retention || 0 },
+  ];
 
-  // Prepare wallet classification data
-const walletClassData = Object.entries(
-  userLifecycle.walletClassification?.distribution || {}
-).map(([type, data]: [string, any]) => {
-  const raw = Number(data?.percentage);
-
-  return {
-    name: type.charAt(0).toUpperCase() + type.slice(1),
-    count: Number(data?.count ?? 0),
-    percentage: Number.isFinite(raw) ? Number(raw.toFixed(1)) : 0
-  };
-});
-
+  if (loading) return (
+    <div className="flex items-center justify-center h-48">
+      <Loader2 className="h-6 w-6 animate-spin mr-2" /><span>Loading UX analysis...</span>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
-      {/* UX Overview Cards */}
+      {error && (
+        <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+          ⚠ Using cached data. ({error})
+        </p>
+      )}
+
+      {/* ── UX Grade + key metrics ────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-lg transition-shadow border-purple-200">
+        <Card className="border-purple-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              UX Grade
+            <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+              <Award className="h-3 w-3" /> UX Grade
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-3">
-              <div className={`text-4xl font-bold px-3 py-1 rounded-lg border ${getUxGradeColor(uxAnalysis.uxGrade?.grade || 'F')}`}>
-                {uxAnalysis.uxGrade?.grade || 'F'}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <div>Completion: {formatPercentage(uxAnalysis.uxGrade?.completionRate * 100)}</div>
-                <div>Failure: {formatPercentage(uxAnalysis.uxGrade?.failureRate * 100)}</div>
+              <span className={`text-4xl font-bold px-3 py-1 rounded-lg border ${gradeColor}`}>
+                {grade.grade || 'N/A'}
+              </span>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div>Success: {grade.completionRate != null ? `${(grade.completionRate*100).toFixed(1)}%` : 'N/A'}</div>
+                <div>Failure: {grade.failureRate != null ? `${(grade.failureRate*100).toFixed(1)}%` : 'N/A'}</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow border-blue-200">
+        <Card className="border-cyan-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Session Duration
+            <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" /> Session Duration
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {formatDuration(uxAnalysis.sessionDurations?.averageDuration || 0)}
-            </p>
-            <p className="text-blue-600 text-xs mt-1">
-              {formatValue(uxAnalysis.sessionDurations?.sessions?.length, 0)} sessions
-            </p>
+            <p className="text-2xl font-bold">{val(ux.sessionDurations?.averageDuration)}</p>
+            <p className="text-xs text-muted-foreground mt-1">First → last tx per wallet</p>
+            {ux.sessionDurations?.averageDurationMinutes === 0 && (
+              <p className="text-xs text-amber-600 mt-1">0m = no timestamps in dataset</p>
+            )}
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow border-orange-200">
+        <Card className={`border-orange-200 ${(dm.bounceRate||0) > 70 ? 'border-red-300' : ''}`}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Bottlenecks
+            <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" /> Bounce Rate
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-orange-600">
-              {formatValue(uxAnalysis.bottlenecks?.length, 0)}
+            <p className={`text-2xl font-bold ${(dm.bounceRate||0) > 70 ? 'text-red-600' : ''}`}>
+              {pct(dm.bounceRate)}
             </p>
-            <p className="text-orange-600 text-xs mt-1">
-              Friction points detected
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Users with 1 interaction only</p>
+            {(dm.bounceRate||0) > 70 && <p className="text-xs text-red-600 mt-1">⚠ High — improve first experience</p>}
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow border-green-200">
+        <Card className="border-green-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Activation Rate
+            <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" /> Activation Rate
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-green-600">
-              {formatPercentage(userLifecycle.activationMetrics?.activationRate)}
+            <p className={`text-2xl font-bold ${(dm.activationRate||0) < 30 ? 'text-red-600' : 'text-green-600'}`}>
+              {pct(dm.activationRate)}
             </p>
-            <p className="text-green-600 text-xs mt-1">
-              User activation success
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Users who return after first tx</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* User Journey Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-lg transition-shadow border-cyan-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Journey Length</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {formatNumber(userJourneys.averageJourneyLength, 0).toFixed(1)}
-            </p>
-            <p className="text-cyan-600 text-xs mt-1">Average steps</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow border-indigo-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Entry Points</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {formatValue(userJourneys.entryPoints?.length, 0)}
-            </p>
-            <p className="text-indigo-600 text-xs mt-1">Unique entry functions</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow border-emerald-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Retention Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {formatPercentage(userLifecycle.summary?.retentionRate)}
-            </p>
-            <p className="text-emerald-600 text-xs mt-1">User retention</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow border-rose-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Time to Success</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {formatDuration(uxAnalysis.timeToFirstSuccess?.averageTimeToSuccessMinutes || 0)}
-            </p>
-            <p className="text-rose-600 text-xs mt-1">First success time</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bottlenecks Chart */}
-        {bottleneckData.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
-                Top UX Bottlenecks
-              </CardTitle>
+      {/* ── Journey metrics ───────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Avg Journey Length', value: val(uj.averageJourneyLength, '0'), sub: 'Avg txs per user', icon: <Users className="h-3 w-3" /> },
+          { label: 'Time to Activation',  value: val(act.avgTimeToActivation),     sub: 'First → second tx', icon: <Clock className="h-3 w-3" /> },
+          { label: 'Retention Rate',      value: pct(ul.summary?.retentionRate),   sub: 'Returning users', icon: <TrendingUp className="h-3 w-3" /> },
+          { label: 'Time to First Tx',    value: val(dm.avgTimeToFirstInteraction),sub: 'Avg onboarding time', icon: <Target className="h-3 w-3" /> },
+        ].map(({ label, value, sub, icon }) => (
+          <Card key={label}>
+            <CardHeader className="pb-1">
+              <CardTitle className="text-xs text-muted-foreground flex items-center gap-1">{icon}{label}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={bottleneckData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" domain={[0, 100]} />
-                  <YAxis dataKey="name" type="category" width={120} />
-                  <Tooltip 
-                    formatter={(value: any, name?: string) => [
-                      `${value}%`, 
-                      name === 'abandonmentRate' ? 'Abandonment Rate' : (name || 'Value')
-                    ]}
-                  />
-                  <Bar dataKey="abandonmentRate" fill="#F59E0B" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <p className="text-xl font-bold">{value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{sub}</p>
             </CardContent>
           </Card>
-        )}
+        ))}
       </div>
 
-      {/* Journey Distribution and Wallet Classification */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* ── Activation Funnel ─────────────────────────────────────────── */}
+      {funnelData.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Target className="h-4 w-4" />Activation Funnel — Drop-off Points</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {funnelData.map((s: any, i: number) => (
+                <div key={i}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>{s.step}</span>
+                    <span className="font-semibold">{s.users} users ({s.pct}%)</span>
+                  </div>
+                  <Progress value={s.pct} className="h-2" />
+                  {i > 0 && funnelData[i-1].pct - s.pct > 20 && (
+                    <p className="text-xs text-red-600 mt-0.5">
+                      ⚠ {(funnelData[i-1].pct - s.pct).toFixed(0)}% drop-off here — fix this step
+                    </p>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-        {/* User Lifecycle Distribution */}
+          {/* Feature First Use */}
+          {featureData.length > 0 && (
+            <Card>
+              <CardHeader><CardTitle className="text-sm">Feature First Use — Entry Points</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={featureData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="feature" type="category" width={90} tick={{ fontSize: 11 }} />
+                    <Tooltip formatter={(v: any) => [`${v} users`, 'Count']} />
+                    <Bar dataKey="count" fill={CHART_PRIMARY} radius={[0,4,4,0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+                <p className="text-xs text-muted-foreground mt-2">Which feature users try first — optimize the top entry point</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* ── Retention curve + lifecycle ───────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Retention Curve</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={retentionBars}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} />
+                <Tooltip formatter={(v:any)=>`${v}%`} />
+                <Bar dataKey="value" fill={CHART_SECONDARY} radius={[4,4,0,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            {ret.d1Retention === 0 && ret.d7Retention === 0 && (
+              <p className="text-xs text-amber-600 mt-2">0% = no block timestamps in dataset. Will populate with live monitoring.</p>
+            )}
+          </CardContent>
+        </Card>
+
         {lifecycleData.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-500" />
-                User Lifecycle Stages
-              </CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm">User Lifecycle Stages</CardTitle></CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
-                  <Pie
-                    data={lifecycleData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {lifecycleData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
+                  <Pie data={lifecycleData} cx="50%" cy="50%" outerRadius={70} dataKey="value"
+                    label={({ name, value }) => `${name}: ${value}`} labelLine={false}>
+                    {lifecycleData.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
                   </Pie>
                   <Tooltip />
                 </PieChart>
@@ -284,201 +240,34 @@ const walletClassData = Object.entries(
             </CardContent>
           </Card>
         )}
-        
-        {/* Journey Length Distribution */}
-        {journeyDistribution.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>User Journey Length Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={journeyDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="length" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="users" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Wallet Classification */}
-        {walletClassData.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Wallet Classification</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {walletClassData.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                      <span className="font-medium">{item.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold">{item.count}</div>
-                      <div className="text-sm text-muted-foreground">{item.percentage}%</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
-      {/* Entry Points and Drop-off Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Entry Points */}
-        {userJourneys.entryPoints && userJourneys.entryPoints.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-green-500" />
-                Top Entry Points
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {userJourneys.entryPoints.slice(0, 5).map((entry: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">{entry.functionName}</div>
-                      <div className="text-sm text-muted-foreground">{entry.userCount} users</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-green-600">{entry.percentage.toFixed(1)}%</div>
-                      <Progress value={entry.percentage} className="w-20 h-2" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Drop-off Points */}
-        {userJourneys.dropoffPoints && userJourneys.dropoffPoints.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                Top Drop-off Points
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {userJourneys.dropoffPoints.slice(0, 5).map((dropoff: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">{dropoff.functionName}</div>
-                      <div className="text-sm text-muted-foreground">{dropoff.dropoffCount} drop-offs</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-red-600">{dropoff.dropoffPercentage.toFixed(1)}%</div>
-                      <Progress value={dropoff.dropoffPercentage} className="w-20 h-2" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Common User Paths */}
-      {userJourneys.commonPaths && userJourneys.commonPaths.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Most Common User Paths</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {userJourneys.commonPaths.slice(0, 5).map((path: any, index: number) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">{path.userCount} users</Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {formatDuration(path.averageCompletionTime / (1000 * 60))} avg time
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    {path.sequence.map((step: string, stepIndex: number) => (
-                      <div key={stepIndex} className="flex items-center gap-2">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                          {step}
-                        </span>
-                        {stepIndex < path.sequence.length - 1 && (
-                          <span className="text-muted-foreground">→</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+      {/* ── Bottlenecks / recommendations ────────────────────────────── */}
+      <Card className="border-amber-200">
+        <CardHeader>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            UX Recommendations
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {[
+            (dm.bounceRate||0) > 70  && { severity: 'high',   msg: `Bounce rate is ${dm.bounceRate}% — ${ul.summary?.newUsers} users never returned. Improve the first-interaction experience.` },
+            (dm.activationRate||0) < 30 && { severity: 'high', msg: `Activation rate is ${dm.activationRate}% — only ${ul.summary?.returningUsers} of ${ul.summary?.totalUsers} users came back. Add re-engagement hooks.` },
+            (ret.d7Retention||0) < 10 && { severity: 'medium', msg: `7-day retention is ${ret.d7Retention}% — users aren't forming habits. Consider notifications or incentives.` },
+            (ux.bottlenecks||[]).length > 0 && { severity: 'medium', msg: `${ux.bottlenecks.length} transaction bottleneck(s) detected — investigate failed tx patterns.` },
+            grade.grade === 'A' && { severity: 'good', msg: `UX Grade A — ${(grade.completionRate*100).toFixed(0)}% transaction success rate. Maintain this standard.` },
+          ].filter(Boolean).map((r: any, i: number) => (
+            <div key={i} className={`p-3 rounded-lg border text-sm ${
+              r.severity === 'high'   ? 'bg-red-50 border-red-200 text-red-800' :
+              r.severity === 'medium' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+              'bg-green-50 border-green-200 text-green-800'
+            }`}>
+              {r.severity === 'high' ? '🔴' : r.severity === 'medium' ? '🟡' : '🟢'} {r.msg}
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* UX Recommendations */}
-      {uxAnalysis.bottlenecks && uxAnalysis.bottlenecks.length > 0 && (
-        <Card className="border-amber-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              💡 UX Improvement Recommendations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {uxAnalysis.bottlenecks.slice(0, 3).map((bottleneck: any, index: number) => (
-                <div key={index} className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="font-medium text-amber-800">
-                    Optimize {bottleneck.fromFunction} → {bottleneck.toFunction} transition
-                  </div>
-                  <div className="text-sm text-amber-700 mt-1">
-                    {bottleneck.abandonmentRate > 0.5 ? 'Critical' : 'High'} abandonment rate of {(bottleneck.abandonmentRate * 100).toFixed(1)}% 
-                    affecting {bottleneck.affectedUsers} users. Consider improving UX flow or reducing friction.
-                  </div>
-                </div>
-              ))}
-              
-              {uxAnalysis.uxGrade?.grade === 'D' || uxAnalysis.uxGrade?.grade === 'F' && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="font-medium text-red-800">
-                    Overall UX Grade Needs Improvement
-                  </div>
-                  <div className="text-sm text-red-700 mt-1">
-                    Current grade: {uxAnalysis.uxGrade.grade}. Focus on reducing failure rate 
-                    ({(uxAnalysis.uxGrade.failureRate * 100).toFixed(1)}%) and improving completion times.
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Show message if no UX data available */}
-      {!uxAnalysis.uxGrade && !userJourneys.totalUsers && !userLifecycle.totalWallets && (
-        <Card className="border-blue-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              📊 UX Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              UX metrics will be available once sufficient transaction data is collected. 
-              Wait for more user interactions to generate comprehensive UX insights.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 }

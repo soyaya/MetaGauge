@@ -50,34 +50,54 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
   }
 
   const getChainColor = (chain: string) => {
-    const colors = {
+    const colors: Record<string, string> = {
       ethereum: 'bg-blue-100 text-blue-800 border-blue-200',
-      lisk: 'bg-green-100 text-green-800 border-green-200',
       starknet: 'bg-purple-100 text-purple-800 border-purple-200',
     };
-    return colors[chain as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
+    return colors[chain] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
   const getExplorerUrl = (chain: string, address: string) => {
-    const explorers = {
+    const explorers: Record<string, string> = {
       ethereum: `https://etherscan.io/address/${address}`,
-      lisk: `https://blockscout.lisk.com/address/${address}`,
       starknet: `https://starkscan.co/contract/${address}`,
     };
-    return explorers[chain as keyof typeof explorers];
+    return explorers[chain] || null;
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString([], {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   };
 
   const analysisData = contractContext?.analysisData?.results?.target;
+  const fr = analysisData?.fullReport || {};
+
+  // ── Real health score from analysis data ──────────────────────────────────
+  const computeHealth = () => {
+    if (!analysisData) return null;
+    const m = analysisData.metrics || fr.summary || {};
+    const successRate   = Number(m.successRate   ?? fr.summary?.successRate   ?? 0);
+    const retentionRate = Number(fr.retentionMetrics?.retentionRate            ?? 0);
+    const botPct        = Number(fr.userQualityMetrics?.botPct                 ?? 0);
+    const churnRate     = Number(fr.retentionMetrics?.churnRate                ?? 0);
+
+    // Weighted score: success 40%, retention 30%, low-bot 20%, low-churn 10%
+    const score = Math.round(
+      successRate   * 0.40 +
+      retentionRate * 0.30 +
+      (100 - botPct)* 0.20 +
+      Math.max(0, 100 - churnRate) * 0.10
+    );
+    const label = score >= 75 ? 'Good' : score >= 50 ? 'Fair' : 'Poor';
+    const color = score >= 75 ? 'bg-green-500' : score >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+    const textColor = score >= 75 ? 'text-green-700' : score >= 50 ? 'text-yellow-700' : 'text-red-700';
+    return { score, label, color, textColor };
+  };
+
+  const health = computeHealth();
 
   return (
     <div className="w-80 xl:w-96 border-l border-border bg-card flex flex-col h-full">
@@ -100,25 +120,18 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
                   {session.contractAddress}
                 </code>
               </div>
-              
               <div className="flex gap-2">
                 {getExplorerUrl(session.contractChain, session.contractAddress) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(getExplorerUrl(session.contractChain, session.contractAddress), '_blank')}
-                    className="flex-1 text-xs"
-                  >
+                  <Button variant="outline" size="sm"
+                    onClick={() => window.open(getExplorerUrl(session.contractChain, session.contractAddress)!, '_blank')}
+                    className="flex-1 text-xs">
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    Explorer
+                    {session.contractChain === 'starknet' ? 'Starkscan' : 'Etherscan'}
                   </Button>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
+                <Button variant="outline" size="sm"
                   onClick={() => window.open('/analyzer', '_blank')}
-                  className="flex-1 text-xs"
-                >
+                  className="flex-1 text-xs">
                   <BarChart3 className="h-3 w-3 mr-1" />
                   Analyze
                 </Button>
@@ -138,7 +151,7 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
               {contractContext?.hasRecentAnalysis ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
                     <span className="text-sm font-medium text-green-700">Data Available</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -148,12 +161,10 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
               ) : (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
                     <span className="text-sm font-medium text-yellow-700">No Recent Data</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Run an analysis to get detailed insights
-                  </p>
+                  <p className="text-xs text-muted-foreground">Run an analysis to get detailed insights</p>
                 </div>
               )}
             </CardContent>
@@ -174,37 +185,46 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
                     <BarChart3 className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Transactions</p>
                     <p className="font-semibold text-sm">
-                      {analysisData.transactions?.toLocaleString() || '0'}
+                      {(typeof analysisData.transactions === 'number'
+                        ? analysisData.transactions
+                        : fr.summary?.totalTransactions ?? 0
+                      ).toLocaleString()}
                     </p>
                   </div>
-                  
                   <div className="text-center p-2 bg-muted/50 rounded">
                     <Users className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Users</p>
                     <p className="font-semibold text-sm">
-                      {analysisData.behavior?.userCount?.toLocaleString() || '0'}
+                      {(analysisData.metrics?.uniqueUsers
+                        ?? fr.userBehavior?.uniqueUsers
+                        ?? analysisData.behavior?.userCount
+                        ?? 0
+                      ).toLocaleString()}
                     </p>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">Total Value</span>
+                    <span className="text-xs text-muted-foreground">Success Rate</span>
                     <span className="text-sm font-medium">
-                      {analysisData.metrics?.totalValue 
-                        ? `${(analysisData.metrics.totalValue / 1e18).toFixed(2)} ETH`
-                        : 'N/A'
-                      }
+                      {analysisData.metrics?.successRate ?? fr.summary?.successRate ?? 'N/A'}
+                      {(analysisData.metrics?.successRate ?? fr.summary?.successRate) != null ? '%' : ''}
                     </span>
                   </div>
-                  
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">Avg. Transaction</span>
+                    <span className="text-xs text-muted-foreground">Retention Rate</span>
                     <span className="text-sm font-medium">
-                      {analysisData.metrics?.avgTransactionValue 
-                        ? `${(analysisData.metrics.avgTransactionValue / 1e18).toFixed(4)} ETH`
-                        : 'N/A'
-                      }
+                      {fr.retentionMetrics?.retentionRate != null
+                        ? `${fr.retentionMetrics.retentionRate}%`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Avg Gas Used</span>
+                    <span className="text-sm font-medium">
+                      {fr.gasAnalysis?.avgGasUsed != null
+                        ? fr.gasAnalysis.avgGasUsed.toLocaleString()
+                        : 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -212,8 +232,8 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
             </Card>
           )}
 
-          {/* Security & Health */}
-          {contractContext?.hasRecentAnalysis && analysisData && (
+          {/* Health Score — computed from real data */}
+          {contractContext?.hasRecentAnalysis && health && (
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -227,17 +247,19 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
                     <span className="text-xs text-muted-foreground">Overall Health</span>
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-green-500 transition-all duration-300"
-                          style={{ width: '75%' }}
-                        ></div>
+                        <div className={`h-full ${health.color} transition-all duration-300`}
+                          style={{ width: `${health.score}%` }} />
                       </div>
-                      <span className="text-sm font-medium">Good</span>
+                      <span className={`text-sm font-medium ${health.textColor}`}>
+                        {health.score}% · {health.label}
+                      </span>
                     </div>
                   </div>
-                  
-                  <div className="text-xs text-muted-foreground">
-                    Based on transaction patterns, user behavior, and contract activity
+                  <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
+                    <span>Success: {fr.summary?.successRate ?? analysisData.metrics?.successRate ?? '?'}%</span>
+                    <span>Retention: {fr.retentionMetrics?.retentionRate ?? '?'}%</span>
+                    <span>Bot %: {fr.userQualityMetrics?.botPct ?? '?'}%</span>
+                    <span>Churn: {fr.retentionMetrics?.churnRate ?? '?'}%</span>
                   </div>
                 </div>
               </CardContent>
@@ -257,7 +279,6 @@ export function ContractDetailsSidebar({ session, contractContext }: ContractDet
                 <span className="text-xs text-muted-foreground">Messages</span>
                 <span className="text-sm font-medium">{session.messageCount}</span>
               </div>
-              
               <div className="flex justify-between items-center">
                 <span className="text-xs text-muted-foreground">Last Activity</span>
                 <span className="text-xs font-medium">

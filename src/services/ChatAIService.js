@@ -6,6 +6,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { ComponentTypes, ChartTypes } from '../api/models/ChatSession.js';
 import { AnalysisStorage } from '../api/database/fileStorage.js';
+import MetricsContextService from './MetricsContextService.js';
 
 // Rate limiting store (in production, use Redis or similar)
 const chatRateLimitStore = new Map();
@@ -139,6 +140,10 @@ class ChatAIService {
   buildChatPrompt(userMessage, sessionContext) {
     const { contractData, analysisData, chatHistory, contractAddress, contractChain } = sessionContext;
 
+    // Get metrics context for AI
+    const metrics = analysisData?.results?.target?.metrics || {};
+    const metricsContext = MetricsContextService.getContextForAI(metrics);
+
     return `
 You are an expert blockchain analyst AI assistant specializing in smart contract analysis and onchain data interpretation. You're having a conversation about the contract ${contractAddress} on ${contractChain}.
 
@@ -155,6 +160,14 @@ ${JSON.stringify({
   transactions: analysisData?.results?.target?.transactions || 0,
   competitors: analysisData?.results?.competitors?.length || 0
 }, null, 2)}
+${metricsContext}
+
+IMPORTANT INSTRUCTIONS FOR METRICS:
+- When discussing any metric, ALWAYS explain what it means using the definitions provided above
+- Reference the "Good" and "Bad" ranges to provide context
+- Relate the metric values to the user's specific data
+- Provide actionable insights based on the interpretation guidelines
+- If a metric is not in the glossary, explain it in simple terms
 
 RECENT CONVERSATION:
 ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
@@ -285,28 +298,18 @@ GUIDELINES:
           : targetContract.address;
         const contractChainName = analysis.results?.target?.chain || targetContract.chain;
         
-        return contractAddr?.toLowerCase() === contractAddress.toLowerCase() &&
-               contractChainName === contractChain;
+        return contractAddr?.toLowerCase() === contractAddress?.toLowerCase() &&
+               (!contractChainName || !contractChain || contractChainName === contractChain);
       });
 
-      // If no analyses found for this user, try to find any analysis for this contract
+      // If no analyses found for this user, return empty context — don't search other users
       if (contractAnalyses.length === 0) {
-        console.log(`No analyses found for user ${userId}, searching all analyses for contract ${contractAddress}`);
-        const allAnalyses = await AnalysisStorage.findAll();
-        contractAnalyses = allAnalyses.filter(analysis => {
-          if (analysis.status !== 'completed') return false;
-          
-          const targetContract = analysis.results?.target?.contract;
-          if (!targetContract) return false;
-          
-          const contractAddr = typeof targetContract === 'string' 
-            ? targetContract 
-            : targetContract.address;
-          const contractChainName = analysis.results?.target?.chain || targetContract.chain;
-          
-          return contractAddr?.toLowerCase() === contractAddress.toLowerCase() &&
-                 contractChainName === contractChain;
-        });
+        return {
+          contractData: { address: contractAddress, chain: contractChain, name: 'Unknown Contract' },
+          analysisData: null,
+          hasRecentAnalysis: false,
+          lastAnalyzed: null
+        };
       }
 
       const latestAnalysis = contractAnalyses.sort((a, b) => 

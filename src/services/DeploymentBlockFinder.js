@@ -17,7 +17,7 @@ export class DeploymentBlockFinder {
    * @param {string} chain - Chain name (lisk, ethereum, etc.)
    * @returns {Promise<number>} - Block number where contract was deployed
    */
-  async findDeploymentBlock(contractAddress, currentBlock, chain = 'lisk') {
+  async findDeploymentBlock(contractAddress, currentBlock, chain = 'ethereum') {
     console.log(`🔍 Finding deployment block for ${contractAddress} on ${chain}`);
     console.log(`📊 Searching from block 0 to ${currentBlock}`);
 
@@ -46,12 +46,11 @@ export class DeploymentBlockFinder {
    * Find deployment block using block explorer API
    * Faster but requires external API
    */
-  async findViaBlockExplorer(contractAddress, chain = 'lisk') {
-    // For Lisk, use Blockscout API
-    if (chain === 'lisk') {
+  async findViaBlockExplorer(contractAddress, chain = 'ethereum') {
+    if (chain === 'ethereum') {
       try {
         const response = await fetch(
-          `https://blockscout.lisk.com/api/v2/addresses/${contractAddress}/transactions?filter=to&limit=1`
+          `https://api.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses=${contractAddress}&apikey=${process.env.ETHERSCAN_API_KEY || ''}`
         );
         
         if (!response.ok) {
@@ -61,26 +60,20 @@ export class DeploymentBlockFinder {
         const data = await response.json();
         
         if (data.items && data.items.length > 0) {
-          // Get the oldest transaction (last in the list when sorted by newest first)
-          // We need to fetch all pages or use a different approach
-          // For now, we'll use the creation transaction if available
-          
-          // Try to get contract creation info
+          // Use Etherscan API for contract creation info
           const creationResponse = await fetch(
-            `https://blockscout.lisk.com/api/v2/addresses/${contractAddress}`
+            `https://api.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses=${contractAddress}&apikey=${process.env.ETHERSCAN_API_KEY || ''}`
           );
           
           if (creationResponse.ok) {
-            const addressData = await creationResponse.json();
-            if (addressData.creation_tx_hash) {
-              // Get the transaction details
+            const creationData = await creationResponse.json();
+            if (creationData.result && creationData.result[0]?.txHash) {
               const txResponse = await fetch(
-                `https://blockscout.lisk.com/api/v2/transactions/${addressData.creation_tx_hash}`
+                `https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${creationData.result[0].txHash}&apikey=${process.env.ETHERSCAN_API_KEY || ''}`
               );
-              
               if (txResponse.ok) {
                 const txData = await txResponse.json();
-                return parseInt(txData.block);
+                return parseInt(txData.result?.blockNumber, 16);
               }
             }
           }

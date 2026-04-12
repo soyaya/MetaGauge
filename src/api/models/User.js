@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   },
   tier: {
     type: String,
-    enum: ['free', 'pro', 'enterprise'],
+    enum: ['free', 'starter', 'pro', 'enterprise'],
     default: 'free'
   },
   apiKey: {

@@ -1,0 +1,19 @@
+{
+  "fingerprints": {
+    "c94bab2474244993": [
+      1775507653209
+    ],
+    "fe16a939acbaee32": [
+      1775507750088
+    ]
+  },
+  "emailDomains": {
+    "test.com": [
+      1775507653209
+    ],
+    "gmail.com": [
+      1775507750088
+    ]
+  },
+  "contractAddresses": {}
+}

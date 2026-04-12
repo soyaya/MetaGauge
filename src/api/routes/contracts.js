@@ -8,10 +8,54 @@ import express from 'express';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import path from 'path';
-import { ContractStorage } from '../database/index.js';
+import { ethers } from 'ethers';
+import { ContractStorage, UserStorage } from '../database/index.js';
+import * as CompetitorStorage from '../database/CompetitorStorage.js';
+import { indexCompetitor, resumeCompetitorPolls, getCompetitorMetrics } from './competitor-indexing.js';
+import { suggest as suggestCompetitors } from '../../services/CompetitorSuggestionEngine.js';
 import { requireTier } from '../middleware/auth.js';
+import { requireRole } from '../middleware/requireRole.js';
 
 dotenv.config();
+
+/**
+ * Validate contract exists on chain via RPC
+ */
+async function validateContractOnChain(address, chain, rpcUrls) {
+  const urls = rpcUrls?.filter(Boolean) || [];
+  if (!urls.length) return { valid: true, note: 'No RPC configured, skipping validation' };
+
+  for (const url of urls) {
+    try {
+      const provider = new ethers.JsonRpcProvider(url);
+      const code = await provider.getCode(address);
+      if (code && code !== '0x') {
+        return { valid: true };
+      }
+      return { valid: false, error: `Contract not found on ${chain}` };
+    } catch {
+      continue;
+    }
+  }
+  return { valid: true, note: 'RPC validation failed, proceeding anyway' };
+}
+
+/**
+ * Extract function signatures from ABI JSON string
+ */
+function extractFunctionSignatures(abiJson) {
+  try {
+    const abi = typeof abiJson === 'string' ? JSON.parse(abiJson) : abiJson;
+    return abi
+      .filter(item => item.type === 'function')
+      .map(item => {
+        const inputs = (item.inputs || []).map(i => i.type).join(',');
+        return { name: item.name, signature: `${item.name}(${inputs})` };
+      });
+  } catch {
+    return [];
+  }
+}
 
 const router = express.Router();
 
@@ -40,12 +84,6 @@ function getDefaultConfigFromEnv() {
     ethereum: [
       process.env.ETHEREUM_RPC_URL,
       process.env.ETHEREUM_RPC_URL_FALLBACK
-    ].filter(Boolean),
-    lisk: [
-      process.env.LISK_RPC_URL1,
-      process.env.LISK_RPC_URL2,
-      process.env.LISK_RPC_URL3,
-      process.env.LISK_RPC_URL4
     ].filter(Boolean),
     starknet: [
       process.env.STARKNET_RPC_URL1,
@@ -215,7 +253,7 @@ router.get('/', async (req, res) => {
  *       400:
  *         description: Invalid input data or missing required fields
  */
-router.post('/', async (req, res) => {
+router.post('/', requireRole('analyst'), async (req, res) => {
   try {
     const {
       name,
@@ -227,20 +265,6 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     const userId = req.user.id;
-
-    // Check project limit
-    const user = await UserStorage.findById(userId);
-    const existingContracts = await ContractStorage.findByUserId(userId);
-    const maxProjects = user.subscription?.features?.maxProjects || 1;
-    
-    if (existingContracts.length >= maxProjects) {
-      return res.status(403).json({
-        error: 'Project limit reached',
-        message: `You have reached your limit of ${maxProjects} projects. Upgrade your plan to add more.`,
-        currentCount: existingContracts.length,
-        limit: maxProjects
-      });
-    }
 
     // Validation - name and targetContract are always required
     if (!name || !targetContract) {
@@ -256,12 +280,6 @@ router.post('/', async (req, res) => {
         process.env.ETHEREUM_RPC_URL,
         process.env.ETHEREUM_RPC_URL_FALLBACK
       ].filter(Boolean),
-      lisk: [
-        process.env.LISK_RPC_URL1,
-        process.env.LISK_RPC_URL2,
-        process.env.LISK_RPC_URL3,
-        process.env.LISK_RPC_URL4
-      ].filter(Boolean),
       starknet: [
         process.env.STARKNET_RPC_URL1,
         process.env.STARKNET_RPC_URL2,
@@ -271,17 +289,31 @@ router.post('/', async (req, res) => {
 
     // Save ABI if provided
     let abiPath = targetContract.abi;
+    let functionSignatures = [];
+
     if (targetContract.abi && targetContract.abi.startsWith('{')) {
-      // If ABI is provided as JSON string, save it to file
+      // Validate ABI format and extract function signatures
+      try {
+        functionSignatures = extractFunctionSignatures(targetContract.abi);
+      } catch {
+        return res.status(400).json({ error: 'Invalid ABI format', message: 'Could not parse ABI JSON' });
+      }
+
       const abiFileName = `${targetContract.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.json`;
       abiPath = `./abis/${abiFileName}`;
-      
       try {
         await fs.writeFile(abiPath, targetContract.abi, 'utf8');
-        console.log(`✅ ABI saved to ${abiPath}`);
       } catch (error) {
         console.error('Failed to save ABI:', error);
-        // Continue with provided ABI path
+      }
+    }
+
+    // Validate contract exists on chain
+    if (targetContract.address && targetContract.chain) {
+      const rpcUrls = envRpcConfig[targetContract.chain] || [];
+      const validation = await validateContractOnChain(targetContract.address, targetContract.chain, rpcUrls);
+      if (!validation.valid) {
+        return res.status(400).json({ error: 'Contract not found', message: validation.error });
       }
     }
 
@@ -314,7 +346,8 @@ router.post('/', async (req, res) => {
       description,
       targetContract: {
         ...targetContract,
-        abi: abiPath
+        abi: abiPath,
+        functionSignatures
       },
       competitors: processedCompetitors,
       rpcConfig: envRpcConfig, // Always use environment RPC config
@@ -332,15 +365,11 @@ router.post('/', async (req, res) => {
       tags
     };
 
-    // Check if name already exists for this user
+    // If a config with this name already exists, reuse it
     const existingConfigs = await ContractStorage.findByUserId(userId);
     const existingConfig = existingConfigs.find(config => config.name === configData.name);
-
     if (existingConfig) {
-      return res.status(400).json({
-        error: 'Configuration exists',
-        message: 'A configuration with this name already exists'
-      });
+      return res.status(200).json({ id: existingConfig.id, ...existingConfig, reused: true });
     }
 
     // Create configuration
@@ -349,9 +378,27 @@ router.post('/', async (req, res) => {
       ...configData
     });
 
+    // Kick off per-user competitor indexing for each competitor (non-blocking)
+    if (processedCompetitors.length > 0) {
+      const crypto = await import('crypto');
+      for (const comp of processedCompetitors) {
+        if (!comp.address || !comp.chain) continue;
+        const competitorId = crypto.randomUUID();
+        setImmediate(() =>
+          indexCompetitor(userId, {
+            id: competitorId,
+            address: comp.address,
+            chain: comp.chain,
+            name: comp.name || comp.address,
+          }).catch(err => console.warn(`⚠️ Competitor indexing failed: ${err.message}`))
+        );
+      }
+    }
+
     res.status(201).json({
       message: 'Contract configuration created successfully',
-      config
+      id: config.id,
+      ...config
     });
 
   } catch (error) {
@@ -429,15 +476,11 @@ router.get('/:id', async (req, res) => {
  *       404:
  *         description: Configuration not found
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireRole('analyst'), async (req, res) => {
   try {
-    const config = await ContractConfig.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      isActive: true
-    });
+    const config = await ContractStorage.findById(req.params.id);
 
-    if (!config) {
+    if (!config || config.userId !== req.user.id || config.isActive === false) {
       return res.status(404).json({
         error: 'Configuration not found',
         message: 'Contract configuration not found or access denied'
@@ -450,17 +493,18 @@ router.put('/:id', async (req, res) => {
       'rpcConfig', 'analysisParams', 'tags'
     ];
 
+    const updates = {};
     allowedUpdates.forEach(field => {
       if (req.body[field] !== undefined) {
-        config[field] = req.body[field];
+        updates[field] = req.body[field];
       }
     });
 
-    await config.save();
+    const updatedConfig = await ContractStorage.update(req.params.id, updates);
 
     res.json({
       message: 'Configuration updated successfully',
-      config
+      config: updatedConfig
     });
 
   } catch (error) {
@@ -491,15 +535,11 @@ router.put('/:id', async (req, res) => {
  *       404:
  *         description: Configuration not found
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('admin'), async (req, res) => {
   try {
-    const config = await ContractConfig.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      isActive: true
-    });
+    const config = await ContractStorage.findById(req.params.id);
 
-    if (!config) {
+    if (!config || config.userId !== req.user.id || config.isActive === false) {
       return res.status(404).json({
         error: 'Configuration not found',
         message: 'Contract configuration not found or access denied'
@@ -507,8 +547,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     // Soft delete
-    config.isActive = false;
-    await config.save();
+    await ContractStorage.delete(req.params.id);
 
     res.json({
       message: 'Configuration deleted successfully'
@@ -551,13 +590,9 @@ router.delete('/:id', async (req, res) => {
  */
 router.post('/:id/duplicate', async (req, res) => {
   try {
-    const originalConfig = await ContractConfig.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      isActive: true
-    });
+    const originalConfig = await ContractStorage.findById(req.params.id);
 
-    if (!originalConfig) {
+    if (!originalConfig || originalConfig.userId !== req.user.id || originalConfig.isActive === false) {
       return res.status(404).json({
         error: 'Configuration not found',
         message: 'Contract configuration not found or access denied'
@@ -573,11 +608,8 @@ router.post('/:id/duplicate', async (req, res) => {
     }
 
     // Check if name already exists
-    const existingConfig = await ContractConfig.findOne({
-      userId: req.user._id,
-      name: name,
-      isActive: true
-    });
+    const userConfigs = await ContractStorage.findByUserId(req.user.id);
+    const existingConfig = userConfigs.find(c => c.name === name && c.isActive !== false);
 
     if (existingConfig) {
       return res.status(400).json({
@@ -587,18 +619,16 @@ router.post('/:id/duplicate', async (req, res) => {
     }
 
     // Create duplicate
-    const duplicateConfig = new ContractConfig({
-      userId: req.user._id,
+    const duplicateConfig = await ContractStorage.create({
+      userId: req.user.id,
       name,
       description: `Copy of ${originalConfig.description || originalConfig.name}`,
       targetContract: originalConfig.targetContract,
       competitors: originalConfig.competitors,
       rpcConfig: originalConfig.rpcConfig,
       analysisParams: originalConfig.analysisParams,
-      tags: [...originalConfig.tags, 'duplicate']
+      tags: [...(originalConfig.tags || []), 'duplicate']
     });
-
-    await duplicateConfig.save();
 
     res.status(201).json({
       message: 'Configuration duplicated successfully',
@@ -611,6 +641,60 @@ router.post('/:id/duplicate', async (req, res) => {
       message: error.message
     });
   }
+});
+
+// Competitor comparison metrics for the current user
+router.get('/my/competitor-metrics', async (req, res) => {
+  try {
+    const data = await getCompetitorMetrics(req.user.id);
+    if (!data) return res.json({ competitors: [], user: null, updatedAt: null });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/:id/competitor-suggestions', requireRole('viewer'), async (req, res) => {
+  try {
+    const contract = await ContractStorage.findById(req.params.id);
+    if (!contract) return res.status(404).json({ error: 'Contract not found' });
+    const allContracts = await ContractStorage.findByUserId(req.user.id);
+    res.json({ suggestions: suggestCompetitors(contract, allContracts) });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Task 7.1: Competitor CRUD
+router.get('/:id/competitors', requireRole('viewer'), async (req, res) => {
+  res.json({ competitors: CompetitorStorage.findByContractId(req.params.id) });
+});
+
+router.post('/:id/competitors', requireRole('analyst'), async (req, res) => {
+  const { address, chain, name, group } = req.body;
+  if (!address || !chain) return res.status(400).json({ error: 'address and chain required' });
+
+  // Validate address format
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address) && chain !== 'starknet') {
+    return res.status(400).json({ error: 'Invalid contract address format' });
+  }
+
+  const competitor = CompetitorStorage.create({ contractId: req.params.id, address, chain, name: name || address, group: group || null, addedBy: req.user.id });
+  // Index this competitor per-user (non-blocking)
+  const crypto = await import('crypto');
+  setImmediate(() =>
+    indexCompetitor(req.user.id, {
+      id: crypto.randomUUID(),
+      address, chain, name: name || address,
+    }).catch(err => console.warn(`⚠️ Competitor indexing failed: ${err.message}`))
+  );
+  res.status(201).json({ competitor });
+});
+
+router.delete('/:id/competitors/:competitorId', requireRole('analyst'), async (req, res) => {
+  const removed = CompetitorStorage.remove(req.params.competitorId, req.params.id);
+  if (!removed) return res.status(404).json({ error: 'Competitor not found' });
+  res.json({ message: 'Competitor removed' });
 });
 
 export default router;

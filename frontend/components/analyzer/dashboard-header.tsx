@@ -1,10 +1,6 @@
 const chainLogos = {
   ethereum: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg',
-  polygon: 'https://cryptologos.cc/logos/polygon-matic-logo.svg',
-  lisk: 'https://cryptologos.cc/logos/lisk-lsk-logo.svg',
-  solana: 'https://cryptologos.cc/logos/solana-sol-logo.svg',
-  binance: 'https://cryptologos.cc/logos/binancecoin-bnb-logo.svg',
-  arbitrum: 'https://cryptologos.cc/logos/arbitrum-arb-logo.svg',
+  starknet: 'https://cryptologos.cc/logos/starknet-token-strk-logo.svg',
 };
 
 interface DashboardHeaderProps {

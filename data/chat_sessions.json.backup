@@ -1,0 +1,57 @@
+[
+  {
+    "id": "0ad25536-2346-48b2-9096-c6821dc0b745",
+    "userId": "07673f19-222a-4dae-97e1-7b871e7dfabc",
+    "contractAddress": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "contractChain": "ethereum",
+    "contractName": "Wrapped Ether",
+    "title": "Chat: Wrapped Ether...",
+    "isActive": true,
+    "messageCount": 3,
+    "metadata": {},
+    "createdAt": "2026-03-01T16:47:54.809Z",
+    "updatedAt": "2026-03-01T16:47:58.825Z",
+    "lastMessageAt": "2026-03-01T16:47:58.815Z"
+  },
+  {
+    "id": "f7007a8c-d40a-4b53-b602-24901239ab17",
+    "userId": "36d8f689-b6d9-44d7-b06b-8002b0bcc220",
+    "contractAddress": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "contractChain": "ethereum",
+    "contractName": "Wrapped Ether",
+    "title": "Chat: Wrapped Ether...",
+    "isActive": true,
+    "messageCount": 3,
+    "metadata": {},
+    "createdAt": "2026-03-02T11:52:12.062Z",
+    "updatedAt": "2026-03-02T11:52:29.084Z",
+    "lastMessageAt": "2026-03-02T11:52:29.077Z"
+  },
+  {
+    "id": "4e0a8f6c-4ebe-49d7-98c6-cf29294ebb06",
+    "userId": "faa6d970-a43e-4666-8a2c-60b3cee4614b",
+    "contractAddress": "0xyourcontractaddress",
+    "contractChain": "ethereum",
+    "contractName": "Unknown Contract",
+    "title": "Chat: 0xYourCo...",
+    "isActive": true,
+    "messageCount": 1,
+    "metadata": {},
+    "createdAt": "2026-03-02T12:20:34.343Z",
+    "updatedAt": "2026-03-02T12:20:34.391Z",
+    "lastMessageAt": "2026-03-02T12:20:34.386Z"
+  },
+  {
+    "id": "dcd49693-7e78-4acc-8e05-3cd0863d4634",
+    "userId": "240d6370-d180-4ce9-90f6-3d679ba2d19c",
+    "contractAddress": "0xyourcontractaddress",
+    "contractChain": "ethereum",
+    "contractName": "Unknown Contract",
+    "title": "Chat: 0xYourCo...",
+    "isActive": true,
+    "messageCount": 0,
+    "metadata": {},
+    "createdAt": "2026-03-02T12:21:02.325Z",
+    "updatedAt": "2026-03-02T12:21:02.325Z"
+  }
+]

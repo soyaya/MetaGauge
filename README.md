@@ -1,7 +1,7 @@
 # 🚀 MetaGauge
 
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com/soyaya/MetaGauge)
-[![Chains](https://img.shields.io/badge/Chains-Ethereum%20%7C%20Lisk%20%7C%20Starknet-blue)](https://github.com/soyaya/MetaGauge)
+[![Chains](https://img.shields.io/badge/Chains-Ethereum%20%7C%20Starknet-blue)](https://github.com/soyaya/MetaGauge)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)

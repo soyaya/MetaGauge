@@ -14,8 +14,7 @@ export class AdvancedMarketShareCalculator {
     this.config = {
       normalizationWeights: {
         ethereum: 1.0,
-        starknet: 0.3,
-        lisk: 0.1
+        starknet: 0.3
       },
       benchmarkMetrics: ['tvl', 'volume', 'users', 'transactions'],
       ...config

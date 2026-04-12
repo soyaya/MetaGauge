@@ -1,22 +1,42 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/auth/auth-provider';
 import { Header } from '@/components/ui/header';
 import { AlertConfigurationPanel } from '@/components/alerts/alert-configuration-panel';
+import { AlertList } from '@/components/alerts/alert-list';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function AlertSettingsPage() {
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Alert Settings</h1>
-          <p className="text-muted-foreground">
-            Configure your alert preferences and set custom thresholds for AI-powered monitoring
-          </p>
-        </div>
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
-        <AlertConfigurationPanel />
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) router.push('/login?redirect=/alerts');
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading || !isAuthenticated) return null;
+  return (
+    <div className="page-shell">
+      <Header />
+      <div className="page-container max-w-4xl">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-1">Alerts</h1>
+          <p className="text-muted-foreground text-sm">Monitor anomalies and configure thresholds</p>
+        </div>
+        <Tabs defaultValue="alerts">
+          <TabsList>
+            <TabsTrigger value="alerts">Active Alerts</TabsTrigger>
+            <TabsTrigger value="config">Configuration</TabsTrigger>
+          </TabsList>
+          <TabsContent value="alerts" className="mt-4">
+            <AlertList />
+          </TabsContent>
+          <TabsContent value="config" className="mt-4">
+            <AlertConfigurationPanel />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

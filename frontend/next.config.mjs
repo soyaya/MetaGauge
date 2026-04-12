@@ -27,7 +27,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' http://localhost:5000 https://*.infura.io https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://*.lisk.com https://eth.merkle.io https://*.alchemy.com https://*.quicknode.pro https://*.publicnode.com",
+              "connect-src 'self' http://localhost:5000 https://*.infura.io https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://*.lisk.com https://eth.merkle.io https://*.alchemy.com https://*.quicknode.pro https://*.publicnode.com https://api.web3modal.org https://*.reown.com https://pulse.walletconnect.com https://pulse.walletconnect.org",
               "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org",
             ].join('; '),
           },

@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Header } from '@/components/ui/header';
-import { Progress } from '@/components/ui/progress';
 import { Loader2, CheckCircle, Globe, Twitter, MessageCircle, Send, Upload } from 'lucide-react';
 
 const OnboardingSchema = z.object({
@@ -40,9 +39,8 @@ const OnboardingSchema = z.object({
 type OnboardingFormData = z.infer<typeof OnboardingSchema>;
 
 const CHAINS = [
-  { value: 'ethereum', label: 'Ethereum', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg' },
-  { value: 'lisk', label: 'Lisk', logo: 'https://cryptologos.cc/logos/lisk-lsk-logo.svg' },
-  { value: 'starknet', label: 'Starknet', logo: 'https://cryptologos.cc/logos/starknet-token-strk-logo.svg' },
+  { value: 'ethereum', label: 'Ethereum', logo: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
+  { value: 'starknet', label: 'Starknet', logo: 'https://assets.coingecko.com/coins/images/26433/small/starknet.png' },
 ];
 
 const CATEGORIES = [
@@ -122,22 +120,31 @@ export default function OnboardingPage() {
         abi: data.abi || null,
         purpose: data.purpose,
         category: data.category,
-        startDate: data.startDate,
+        startDate: data.startDate || '',
       };
 
       const response = await api.onboarding.complete(onboardingData);
-      
-      // Redirect immediately - indexing happens in background
       router.push('/dashboard');
 
     } catch (error: any) {
-      setError(error.message || 'Failed to complete onboarding');
+      const msg: string = error.message || '';
+      if (msg.toLowerCase().includes('verify your email') || msg.includes('EMAIL_NOT_VERIFIED')) {
+        setError('Your email is not verified. Redirecting you to verify...');
+        setTimeout(() => router.push(`/verify?email=${encodeURIComponent(user?.email || '')}`), 1500);
+      } else {
+        setError(msg || 'Failed to complete onboarding');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    if (step === 2) {
+      // Validate required contract fields before advancing to review
+      const valid = await form.trigger(['contractName', 'chain', 'contractAddress', 'category', 'purpose']);
+      if (!valid) return;
+    }
     if (step < 3) setStep(step + 1);
   };
 
@@ -147,8 +154,8 @@ export default function OnboardingPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="page-shell flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -158,10 +165,10 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-shell">
       <Header />
       
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="page-container max-w-2xl">
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to Contract Analytics</h1>
           <p className="text-muted-foreground">
@@ -169,17 +176,26 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        {/* Progress indicator */}
+        {/* Step indicator */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">Step {step} of 3</span>
-            <span className="text-sm text-muted-foreground">
-              {step === 1 && 'Project Information'}
-              {step === 2 && 'Contract Details'}
-              {step === 3 && 'Review & Submit'}
-            </span>
+          <div className="flex items-center justify-between mb-3">
+            {[['1','Project Info'],['2','Contract'],['3','Review']].map(([n, label], i) => {
+              const num = i + 1;
+              const done = step > num;
+              const active = step === num;
+              return (
+                <div key={n} className="flex items-center gap-2 flex-1">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all ${
+                    done ? 'gradient-brand text-white' : active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {done ? <CheckCircle className="w-4 h-4" /> : n}
+                  </div>
+                  <span className={`text-xs font-medium hidden sm:block ${active ? 'text-foreground' : 'text-muted-foreground'}`}>{label}</span>
+                  {i < 2 && <div className={`flex-1 h-px mx-2 ${step > num ? 'bg-primary' : 'bg-border'}`} />}
+                </div>
+              );
+            })}
           </div>
-          <Progress value={(step / 3) * 100} className="h-2" />
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -190,6 +206,7 @@ export default function OnboardingPage() {
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
                   Project Information
+                  <span className="ml-auto text-xs font-normal text-muted-foreground">All optional — skip if you want</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">

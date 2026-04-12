@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/components/auth/auth-provider"
+import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,335 +11,354 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/ui/header"
 import { Separator } from "@/components/ui/separator"
-import { User, Mail, Shield, Activity, Save, AlertCircle } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { User, Mail, Shield, Activity, Save, CheckCircle, AlertCircle, Loader2, KeyRound } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
 
-interface UserProfile {
-  id: string
-  email: string
-  name?: string
-  roles: string[]
-  is_verified: boolean
-  onboarding_completed: boolean
-  created_at: string
-  last_login?: string
-}
-
-interface UserUsage {
-  analysesThisMonth: number
-  analysesLimit: number
-  totalAnalyses: number
-}
-
-interface SubscriptionData {
-  tier: number
-  tierName: string
-  isActive: boolean
-  features: any
-  limits: any
-}
-
-export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuth()
+function ChangePasswordForm() {
   const { toast } = useToast()
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [usage, setUsage] = useState<UserUsage | null>(null)
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [current, setCurrent] = useState("")
+  const [next, setNext] = useState("")
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  // Form state
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
+  const [error, setError] = useState("")
+  const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadProfileData()
-    }
-  }, [isAuthenticated])
-
-  const loadProfileData = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    if (next.length < 6) { setError("New password must be at least 6 characters"); return }
+    setSaving(true)
     try {
-      setLoading(true)
-      const [profileResponse, metricsResponse] = await Promise.all([
-        api.users.getProfile(),
-        api.onboarding.getUserMetrics()
-      ])
-      
-      setProfile(profileResponse)
-      setUsage({
-        analysesThisMonth: metricsResponse.usage?.monthlyAnalysisCount || 0,
-        analysesLimit: metricsResponse.limits?.monthly || 10,
-        totalAnalyses: metricsResponse.overview?.totalAnalyses || 0
-      })
-      setSubscription(metricsResponse.subscription)
-      setName(profileResponse.name || "")
-      setEmail(profileResponse.email || "")
-    } catch (err) {
-      console.error('Failed to load profile data:', err)
-      setError('Failed to load profile data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSaveProfile = async () => {
-    try {
-      setSaving(true)
-      await api.users.updateProfile({
-        name: name.trim(),
-        email: email.trim()
-      })
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      })
-      
-      // Reload profile data
-      await loadProfileData()
-    } catch (err) {
-      console.error('Failed to update profile:', err)
-      toast({
-        title: "Update failed",
-        description: "Failed to update your profile. Please try again.",
-        variant: "destructive",
-      })
+      await api.post('/api/users/change-password', { currentPassword: current, newPassword: next })
+      toast({ title: "Password changed successfully" })
+      setCurrent(""); setNext(""); setOpen(false)
+    } catch (err: any) {
+      setError(err.message || "Failed to change password")
     } finally {
       setSaving(false)
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-red-600">{error}</p>
-            <Button onClick={loadProfileData} className="mt-4">
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (!open) return (
+    <Button variant="outline" className="w-full" onClick={() => setOpen(true)}>
+      <KeyRound className="h-4 w-4 mr-2" />
+      Change Password
+    </Button>
+  )
 
   return (
-    <div className="min-h-screen bg-background">
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {error && <p className="text-xs text-red-600 bg-red-50 p-2 rounded">{error}</p>}
+      <div className="space-y-1">
+        <Label htmlFor="current-pw" className="text-xs">Current Password</Label>
+        <Input id="current-pw" type="password" value={current}
+          onChange={e => setCurrent(e.target.value)} required disabled={saving} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="new-pw" className="text-xs">New Password</Label>
+        <Input id="new-pw" type="password" value={next}
+          onChange={e => setNext(e.target.value)} required disabled={saving} />
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" disabled={saving} className="flex-1">
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => { setOpen(false); setError("") }}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+export default function ProfilePage() {
+  const { user, login, isAuthenticated, isLoading: authLoading } = useAuth()
+  const router = useRouter()
+  const { toast } = useToast()
+  const [profile, setProfile] = useState<any>(null)
+  const [usage, setUsage] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
+  const [otp, setOtp] = useState("")
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) router.push('/login?redirect=/profile')
+  }, [authLoading, isAuthenticated, router])
+
+  const loadProfile = useCallback(async () => {
+    try {
+      setLoading(true)
+      const profileRes = await api.users.getProfile()
+      setProfile(profileRes)
+      setName(profileRes.name || "")
+      setEmail(profileRes.email || "")
+      setUsage({
+        thisMonth: profileRes.usage?.monthlyAnalysisCount || 0,
+        limit: 10, // free tier default; subscription page shows upgrade
+        total: profileRes.usage?.analysisCount || 0,
+        tier: String(profileRes.tier || user?.tier || 'free'),
+      })
+    } catch {
+      toast({ title: "Failed to load profile", variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { loadProfile() }, [loadProfile])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await api.users.updateProfile({ name: name.trim(), email: email.trim() })
+      toast({ title: "Profile updated" })
+      await loadProfile()
+    } catch {
+      toast({ title: "Update failed", variant: "destructive" })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleGoogleVerify = () => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    if (!clientId) { toast({ title: 'Google Client ID not configured', variant: 'destructive' }); return }
+    setVerifying(true)
+    const run = () => {
+      // @ts-ignore
+      window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId, scope: 'email profile',
+        callback: async (tr: any) => {
+          if (tr.error) { setVerifying(false); return }
+          try {
+            const result = await api.users.verifyWithGoogle(tr.access_token)
+            login(result.token, { ...user, ...result.user })
+            toast({ title: '✅ Email verified via Google!' })
+            await loadProfile()
+          } catch (err: any) {
+            toast({ title: err.message || 'Google verification failed', variant: 'destructive' })
+          } finally { setVerifying(false) }
+        },
+      }).requestAccessToken()
+    }
+    // @ts-ignore
+    if (window.google?.accounts) { run() } else {
+      const s = document.createElement('script')
+      s.src = 'https://accounts.google.com/gsi/client'
+      s.onload = run
+      s.onerror = () => { toast({ title: 'Failed to load Google', variant: 'destructive' }); setVerifying(false) }
+      document.head.appendChild(s)
+    }
+  }
+
+  const handleSendOtp = async () => {
+    setVerifying(true)
+    try {
+      const result = await api.post('/api/auth/send-verification')
+      setOtpSent(true)
+      if (result.devOtp) {
+        // Dev mode — auto-fill the OTP and show it in toast
+        setOtp(result.devOtp)
+        toast({ title: `Dev mode OTP: ${result.devOtp}`, description: 'Auto-filled for you' })
+      } else {
+        toast({ title: 'Verification code sent to your email' })
+      }
+    } catch (err: any) {
+      toast({ title: err.message || 'Failed to send code', variant: 'destructive' })
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    setVerifying(true)
+    try {
+      const result = await api.post('/api/auth/verify-otp', { email: profile.email, otp })
+      login(result.token, { ...user, ...result.user })
+      toast({ title: '✅ Email verified!' })
+      setOtpSent(false)
+      setOtp('')
+      await loadProfile()
+    } catch (err: any) {
+      toast({ title: err.message || 'Verification failed', variant: 'destructive' })
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  const isVerified = profile?.is_verified || profile?.emailVerified
+
+  if (loading) return (
+    <div className="page-shell">
       <Header />
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="page-shell">
+      <Header />
+      <div className="page-container max-w-4xl">
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold">Account Settings</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your account information and preferences
-          </p>
+          <p className="text-muted-foreground mt-1">Manage your account information and preferences</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Information */}
+          {/* Left: Profile + Status */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Profile Information
-                </CardTitle>
-                <CardDescription>
-                  Update your personal information and account details
-                </CardDescription>
+                <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />Profile Information</CardTitle>
+                <CardDescription>Update your name and email address</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your name"
-                    />
+                    <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
                   </div>
-                  
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={e => !isVerified && setEmail(e.target.value)}
+                        placeholder="Your email"
+                        disabled={isVerified}
+                        className={isVerified ? 'pr-10 opacity-70 cursor-not-allowed' : ''}
+                      />
+                      {isVerified && <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />}
+                    </div>
+                    {isVerified && <p className="text-xs text-muted-foreground">Email cannot be changed after verification.</p>}
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Button 
-                    onClick={handleSaveProfile} 
-                    disabled={saving}
-                    className="flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </div>
+                <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {saving ? 'Saving…' : 'Save Changes'}
+                </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Account Status
-                </CardTitle>
+                <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" />Account Status</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Email Verification</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      {profile?.is_verified ? (
-                        <Badge variant="default">Verified</Badge>
-                      ) : (
-                        <Badge variant="destructive">Not Verified</Badge>
-                      )}
+                      {isVerified
+                        ? <Badge className="gap-1"><CheckCircle className="h-3 w-3" />Verified</Badge>
+                        : <Badge variant="destructive" className="gap-1"><AlertCircle className="h-3 w-3" />Not Verified</Badge>
+                      }
                     </div>
                   </div>
-                  
                   <div>
-                    <Label className="text-sm font-medium">Account Type</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={subscription?.isActive ? "default" : "outline"}>
-                        {subscription?.tierName || user?.tier || 'Free'}
-                      </Badge>
+                    <Label className="text-sm font-medium">Plan</Label>
+                    <div className="mt-1">
+                      <Badge variant="outline">{usage?.tier || user?.tier || 'Free'}</Badge>
                     </div>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Member Since</Label>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {profile?.created_at ? formatDate(profile.created_at) : 'N/A'}
+                      {(profile?.createdAt || profile?.created_at)
+                        ? new Date(profile.createdAt || profile.created_at).toLocaleDateString()
+                        : 'N/A'}
                     </p>
                   </div>
-                  
                   <div>
                     <Label className="text-sm font-medium">Last Login</Label>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {profile?.last_login ? formatDate(profile.last_login) : 'N/A'}
+                      {(profile?.lastLogin || profile?.last_login || profile?.updatedAt)
+                        ? new Date(profile.lastLogin || profile.last_login || profile.updatedAt).toLocaleDateString()
+                        : 'N/A'}
                     </p>
                   </div>
                 </div>
 
-                {!profile?.is_verified && (
-                  <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                    <p className="text-sm text-yellow-800">
-                      Please verify your email address to access all features.
-                    </p>
+                {!isVerified && (
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-lg space-y-3">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-yellow-600 shrink-0" />
+                      <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                        Verify your email to unlock all features.
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      <Button onClick={handleSendOtp} disabled={verifying || otpSent} variant="outline" size="sm">
+                        {verifying ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Mail className="h-4 w-4 mr-2" />}
+                        {otpSent ? 'Code sent — check email' : 'Send Code to Email'}
+                      </Button>
+                      <Button onClick={handleGoogleVerify} disabled={verifying} variant="outline" size="sm">
+                        {verifying ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : (
+                          <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                          </svg>
+                        )}
+                        Verify with Google
+                      </Button>
+                    </div>
+                    {otpSent && (
+                      <div className="flex gap-2">
+                        <Input placeholder="6-digit code" value={otp} onChange={e => setOtp(e.target.value)} maxLength={6} className="text-center tracking-widest w-40" />
+                        <Button size="sm" onClick={handleVerifyOtp} disabled={otp.length !== 6 || verifying}>
+                          {verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verify'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </CardContent>
+                )}              </CardContent>
             </Card>
           </div>
 
-          {/* Usage Statistics */}
+          {/* Right: Usage + Actions */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
-                  Usage Statistics
-                </CardTitle>
+                <CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" />Usage</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-sm">This Month</Label>
-                    <span className="text-sm font-medium">
-                      {usage?.analysesThisMonth || 0} / {usage?.analysesLimit || '∞'}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-primary h-2 rounded-full" 
-                      style={{ 
-                        width: usage?.analysesLimit ? 
-                          `${Math.min((usage.analysesThisMonth / usage.analysesLimit) * 100, 100)}%` : 
-                          '0%' 
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Total Analyses</span>
-                    <span className="text-sm font-medium">{usage?.totalAnalyses || 0}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Plan Type</span>
-                    <Badge variant={subscription?.isActive ? "default" : "outline"}>
-                      {subscription?.tierName || user?.tier || 'Free'}
-                    </Badge>
-                  </div>
-                </div>
-
-                {(!subscription?.isActive || subscription?.tier === 0) && (
-                  <Button className="w-full" variant="outline" asChild>
-                    <a href="/subscription">Upgrade Plan</a>
-                  </Button>
+                {usage && (
+                  <>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>This month</span>
+                        <span className="font-medium">{usage.thisMonth} / {usage.limit === -1 ? '∞' : usage.limit}</span>
+                      </div>
+                      <Progress value={usage.limit > 0 ? Math.min((usage.thisMonth / usage.limit) * 100, 100) : 0} className="h-2" />
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Total analyses</span>
+                      <span className="font-medium">{usage.total}</span>
+                    </div>
+                  </>
                 )}
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/subscription">Manage Plan</Link>
+                </Button>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Account Actions</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>Security</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Resend Verification
-                </Button>
-                
-                <Button variant="outline" className="w-full">
-                  Change Password
-                </Button>
-                
-                <Separator />
-                
-                <Button variant="destructive" className="w-full">
-                  Delete Account
-                </Button>
+                <ChangePasswordForm />
               </CardContent>
             </Card>
           </div>
