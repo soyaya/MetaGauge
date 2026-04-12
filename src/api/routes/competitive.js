@@ -1,27 +1,9 @@
-/**
- * GET /api/competitive/dashboard
- * POST /api/competitive/add-competitor
- */
-
 import express from 'express';
-import { UserStorage, AnalysisStorage } from '../database/index.js';
-import AlertConfigurationStorage from '../database/AlertConfigurationStorage.js';
-import { readJsonFile } from '../database/fileStorage.js';
+import { UserStorage, AnalysisStorage, AlertConfigStorage, CompetitorDataStorage, LivePollStorage } from '../database/index.js';
 import { buildFullReportFromAnalysis } from './onboarding.js';
 import { functionDecoder } from '../../services/FunctionSignatureDecoder.js';
-import path from 'path';
-import fs from 'fs/promises';
 
 export const competitiveRouter = express.Router();
-
-const DATA_DIR = './data';
-
-function competitorMetricsFile(userId) {
-  return path.join(DATA_DIR, 'users', userId, 'competitor_metrics.json');
-}
-function competitorsDir(userId) {
-  return path.join(DATA_DIR, 'users', userId, 'competitors');
-}
 
 const featureLabel = (input, txTo = null, contractAddress = null) => {
   if (!input || input === '0x') return 'ETH Transfer';
@@ -124,15 +106,11 @@ competitiveRouter.get('/dashboard', async (req, res) => {
     // ── Competitors ──────────────────────────────────────────────────────────
     const competitors = [];
     try {
-      const dir = competitorsDir(req.user.id);
-      const files = await fs.readdir(dir).catch(() => []);
-      for (const file of files.filter(f => f.endsWith('.json') && !f.endsWith('.backup'))) {
-        try {
-          const c = JSON.parse(await fs.readFile(path.join(dir, file), 'utf8'));
-          competitors.push(buildBenchmark(c.name || c.address?.slice(0,10), c.address, c.chain, c.transactions || [], c.metrics || {}));
-        } catch { /* skip */ }
+      const compList = await CompetitorDataStorage.findByUserId(req.user.id);
+      for (const c of compList) {
+        competitors.push(buildBenchmark(c.name || c.address?.slice(0,10), c.address, c.chain, c.transactions || [], c.metrics || {}));
       }
-    } catch { /* no competitors dir */ }
+    } catch { /* no competitors */ }
 
     // ── Feature benchmark table ──────────────────────────────────────────────
     // All unique features across my contract + competitors
@@ -268,57 +246,38 @@ competitiveRouter.post('/add-competitor', async (req, res) => {
 competitiveRouter.delete('/remove-competitor/:competitorId', async (req, res) => {
   try {
     const { competitorId } = req.params;
-    const filePath = path.join('./data', 'users', req.user.id, 'competitors', `${competitorId}.json`);
-    const backupPath = filePath + '.backup';
-
-    await fs.unlink(filePath).catch(() => {});
-    await fs.unlink(backupPath).catch(() => {});
-
-    // Remove from live poll state
-    const { LivePollStorage } = await import('../database/index.js');
+    const [address, chain] = competitorId.split('_');
+    await CompetitorDataStorage.delete(req.user.id, address, chain);
     const poll = await LivePollStorage.get(req.user.id) || {};
     delete poll[`competitor_${competitorId}`];
     await LivePollStorage.save(req.user.id, poll);
-
     res.json({ message: 'Competitor removed', competitorId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /api/competitive/list — all indexed competitors for this user
 competitiveRouter.get('/list', async (req, res) => {
   try {
-    const dir = path.join('./data', 'users', req.user.id, 'competitors');
-    const files = await fs.readdir(dir).catch(() => []);
-    const competitors = [];
-    for (const file of files.filter(f => f.endsWith('.json') && !f.endsWith('.backup'))) {
-      try {
-        const c = JSON.parse(await fs.readFile(path.join(dir, file), 'utf8'));
-        competitors.push({
-          id: c.id,
-          name: c.name,
-          address: c.address,
-          chain: c.chain,
-          txs: c.transactions?.length || 0,
-          uniqueUsers: c.metrics?.uniqueUsers || 0,
-          successRate: c.metrics?.successRate || 0,
-          lastUpdated: c.lastUpdated,
-        });
-      } catch { /* skip */ }
-    }
+    const compList = await CompetitorDataStorage.findByUserId(req.user.id);
+    const competitors = compList.map(c => ({
+      id: c.id, name: c.name, address: c.address, chain: c.chain,
+      txs: c.transactions?.length || 0,
+      uniqueUsers: c.metrics?.uniqueUsers || 0,
+      successRate: c.metrics?.successRate || 0,
+      lastUpdated: c.lastUpdated,
+    }));
     res.json({ competitors });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /api/competitive/insight/:competitorId — AI insight comparing my contract vs one competitor
 competitiveRouter.get('/insight/:competitorId', async (req, res) => {
   try {
     const { competitorId } = req.params;
-    const filePath = path.join('./data', 'users', req.user.id, 'competitors', `${competitorId}.json`);
-    const c = JSON.parse(await fs.readFile(filePath, 'utf8').catch(() => 'null'));
+    const [address, chain] = competitorId.split('_');
+    const c = await CompetitorDataStorage.get(req.user.id, address, chain);
     if (!c) return res.status(404).json({ error: 'Competitor not found' });
 
     // Get my metrics
@@ -384,7 +343,7 @@ competitiveRouter.post('/alert', async (req, res) => {
     if (!competitorId || !metric || !condition || threshold == null)
       return res.status(400).json({ error: 'competitorId, metric, condition, threshold required' });
 
-    const config = await AlertConfigurationStorage.create({
+    const config = await AlertConfigStorage.create({
       userId: req.user.id,
       type: 'competitive',
       competitorId,
@@ -405,7 +364,7 @@ competitiveRouter.post('/alert', async (req, res) => {
 // GET /api/competitive/alerts — list all competitive alerts for this user
 competitiveRouter.get('/alerts', async (req, res) => {
   try {
-    const all = await AlertConfigurationStorage.findByUserId(req.user.id);
+    const all = await AlertConfigStorage.findByUserId(req.user.id);
     res.json({ alerts: all.filter(a => a.type === 'competitive') });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -415,9 +374,9 @@ competitiveRouter.get('/alerts', async (req, res) => {
 // DELETE /api/competitive/alerts/:id — remove a competitive alert
 competitiveRouter.delete('/alerts/:id', async (req, res) => {
   try {
-    const config = await AlertConfigurationStorage.findById(req.params.id);
+    const config = await AlertConfigStorage.findById(req.params.id);
     if (!config || config.userId !== req.user.id) return res.status(404).json({ error: 'Alert not found' });
-    await AlertConfigurationStorage.delete(req.params.id);
+    await AlertConfigStorage.delete(req.params.id);
     res.json({ message: 'Alert deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

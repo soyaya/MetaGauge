@@ -13,7 +13,7 @@ interface EnhancedAIInsightsProps {
 
 export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIInsightsProps) {
   const [data, setData]       = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // start true so spinner shows immediately
   const [error, setError]     = useState<string | null>(null);
 
   const load = async () => {
@@ -30,7 +30,17 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
     }
   };
 
-  useEffect(() => { load(); }, [analysisId]);
+  useEffect(() => {
+    let cancelled = false;
+    if (!analysisId) return;
+    setLoading(true);
+    setError(null);
+    api.analysis.getAISummary(analysisId)
+      .then(result => { if (!cancelled) setData(result); })
+      .catch((e: any) => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [analysisId]);
 
   if (!analysisId) return (
     <Card><CardContent className="pt-6 text-center text-sm text-muted-foreground">
@@ -70,6 +80,18 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
 
   const { insights, interpretation, alerts, sentiment, optimizations } = data;
 
+  // interpretation.interpretation is the parsed Gemini JSON object
+  const interp = interpretation?.interpretation || {};
+  const interpText: string | null =
+    typeof interp === 'string' ? interp :
+    interp.summary?.overallHealth ? `Overall health: ${interp.summary.overallHealth}. Risk: ${interp.summary.riskLevel}. Score: ${interp.summary.performanceScore}/100` :
+    null;
+  const interpFindings: string[] = interp.summary?.keyFindings || [];
+  const interpRecs: any[] = interp.recommendations || [];
+  const interpAlerts: any[] = interp.alerts || alerts?.alerts || [];
+  const interpStrengths: string[] = interp.insights?.strengths || [];
+  const interpWeaknesses: string[] = interp.insights?.weaknesses || [];
+
   const sentimentColor =
     sentiment?.sentiment === 'bullish'  ? 'bg-green-100 text-green-800' :
     sentiment?.sentiment === 'bearish'  ? 'bg-red-100 text-red-800'    :
@@ -105,8 +127,8 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
           </CardHeader>
           <CardContent className="space-y-2">
             {insights.insights.map((ins: any, i: number) => (
-              <div key={i} className="flex items-start gap-2 text-sm p-2 bg-muted/30 rounded">
-                <span className="text-yellow-500 mt-0.5">•</span>
+              <div key={i} className="flex items-start gap-2 text-sm p-2 bg-muted/30 rounded text-foreground">
+                <span className="text-yellow-500 mt-0.5 shrink-0">•</span>
                 {typeof ins === 'string' ? ins : ins.text || ins.insight || ins.overall || ins.summary || JSON.stringify(ins)}
               </div>
             ))}
@@ -115,20 +137,38 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
       )}
 
       {/* ── Interpretation / Summary ──────────────────────────────────── */}
-      {interpretation?.summary && (
+      {(interpText || interpFindings.length > 0 || interpStrengths.length > 0) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2"><Brain className="h-4 w-4 text-blue-500" />Analysis Summary</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">{interpretation.summary}</p>
-            {interpretation.recommendations?.length > 0 && (
-              <div className="mt-3 space-y-1">
+          <CardContent className="space-y-3">
+            {interpText && <p className="text-sm text-foreground leading-relaxed">{interpText}</p>}
+            {interpFindings.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Key Findings</p>
+                {interpFindings.map((f, i) => <div key={i} className="text-sm flex gap-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-foreground"><span className="text-blue-500">→</span>{f}</div>)}
+              </div>
+            )}
+            {interpStrengths.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Strengths</p>
+                {interpStrengths.map((s, i) => <div key={i} className="text-sm flex gap-2 p-2 bg-green-50 dark:bg-green-950/30 rounded text-foreground"><span className="text-green-500">✓</span>{s}</div>)}
+              </div>
+            )}
+            {interpWeaknesses.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Weaknesses</p>
+                {interpWeaknesses.map((w, i) => <div key={i} className="text-sm flex gap-2 p-2 bg-red-50 dark:bg-red-950/30 rounded text-foreground"><span className="text-red-500">✗</span>{w}</div>)}
+              </div>
+            )}
+            {interpRecs.length > 0 && (
+              <div className="space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Recommendations</p>
-                {interpretation.recommendations.slice(0, 5).map((r: any, i: number) => (
-                  <div key={i} className="text-sm flex items-start gap-2 p-2 bg-blue-50 rounded">
-                    <span className="text-blue-500">→</span>
-                    {typeof r === 'string' ? r : r.text || r.recommendation || r.suggestion || JSON.stringify(r)}
+                {interpRecs.slice(0, 5).map((r: any, i: number) => (
+                  <div key={i} className="text-sm flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-foreground">
+                    <span className="text-blue-500 shrink-0">→</span>
+                    {typeof r === 'string' ? r : r.description || r.title || JSON.stringify(r)}
                   </div>
                 ))}
               </div>
@@ -138,19 +178,19 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
       )}
 
       {/* ── Alerts ────────────────────────────────────────────────────── */}
-      {alerts?.alerts?.length > 0 && (
+      {interpAlerts.length > 0 && (
         <Card className="border-amber-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-500" />Alerts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {alerts.alerts.map((a: any, i: number) => (
+            {interpAlerts.map((a: any, i: number) => (
               <div key={i} className={`text-sm p-2 rounded border ${
-                a.severity === 'critical' ? 'bg-red-50 border-red-200 text-red-800' :
-                a.severity === 'warning'  ? 'bg-amber-50 border-amber-200 text-amber-800' :
-                'bg-blue-50 border-blue-200 text-blue-800'
+                a.severity === 'critical' ? 'bg-red-50 border-red-200 text-red-900 dark:bg-red-950/30 dark:border-red-800 dark:text-red-100' :
+                a.severity === 'warning'  ? 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-100' :
+                'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-100'
               }`}>
-                <span className="font-medium">{a.type || a.severity}: </span>{a.message || a.description || String(a)}
+                <span className="font-medium">{a.title || a.type || a.severity}: </span>{a.message || a.description || String(a)}
               </div>
             ))}
           </CardContent>
@@ -165,7 +205,7 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
           </CardHeader>
           <CardContent className="space-y-2">
             {optimizations.suggestions.slice(0, 5).map((s: any, i: number) => (
-              <div key={i} className="text-sm p-2 bg-green-50 rounded border border-green-200 text-green-800">
+              <div key={i} className="text-sm p-2 bg-green-50 dark:bg-green-950/30 rounded border border-green-200 dark:border-green-800 text-green-900 dark:text-green-100">
                 {typeof s === 'string' ? s : s.suggestion || s.description || JSON.stringify(s)}
               </div>
             ))}
@@ -191,6 +231,13 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
             {sentiment.summary && <p className="text-sm text-muted-foreground">{sentiment.summary}</p>}
           </CardContent>
         </Card>
+      )}
+
+      {/* Fallback — data loaded but all sections empty */}
+      {!interpText && !interpFindings.length && !interpStrengths.length && !interpRecs.length && !interpAlerts.length && !insights?.insights?.length && (
+        <Card><CardContent className="pt-6 text-center text-sm text-muted-foreground">
+          AI insights loaded but no content was returned. Try clicking Refresh or run a new analysis.
+        </CardContent></Card>
       )}
     </div>
   );

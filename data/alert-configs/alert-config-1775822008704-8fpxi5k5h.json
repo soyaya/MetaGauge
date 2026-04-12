@@ -1,0 +1,69 @@
+{
+  "id": "alert-config-1775822008704-8fpxi5k5h",
+  "userId": "a94fe5fd-ddbd-4f62-8d54-988128135f3c",
+  "contractId": null,
+  "enabled": true,
+  "categories": {
+    "security": true,
+    "performance": true,
+    "liquidity": true,
+    "anomaly": true,
+    "growth": true
+  },
+  "severityLevels": {
+    "critical": true,
+    "high": true,
+    "medium": true,
+    "low": false
+  },
+  "thresholds": {
+    "gasPrice": {
+      "enabled": false,
+      "value": 100,
+      "unit": "gwei"
+    },
+    "failureRate": {
+      "enabled": false,
+      "value": 5,
+      "unit": "%"
+    },
+    "tvlChange": {
+      "enabled": false,
+      "value": 20,
+      "unit": "%"
+    },
+    "volumeChange": {
+      "enabled": false,
+      "value": 30,
+      "unit": "%"
+    },
+    "userDropoff": {
+      "enabled": false,
+      "value": 25,
+      "unit": "%"
+    },
+    "whaleActivity": {
+      "enabled": false,
+      "value": 100000,
+      "unit": "USD"
+    }
+  },
+  "notifications": {
+    "inApp": true,
+    "email": false,
+    "webhook": false,
+    "webhookUrl": null
+  },
+  "schedule": {
+    "realTime": true,
+    "daily": false,
+    "weekly": false
+  },
+  "competitorAlerts": {
+    "volumeSpike": false,
+    "userGrowth": false,
+    "tvlChange": false
+  },
+  "createdAt": "2026-04-10T11:53:28.704Z",
+  "updatedAt": "2026-04-10T11:53:28.704Z"
+}

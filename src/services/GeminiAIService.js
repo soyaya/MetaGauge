@@ -8,9 +8,27 @@ import { GoogleGenAI } from '@google/genai';
 // Rate limiting store (in production, use Redis or similar)
 const rateLimitStore = new Map();
 
+function getApiKeys() {
+  const keys = [];
+  if (process.env.GEMINI_API_KEY) keys.push(process.env.GEMINI_API_KEY);
+  for (let i = 2; i <= 10; i++) {
+    const k = process.env[`GEMINI_API_KEY_${i}`];
+    if (k) keys.push(k);
+  }
+  return keys;
+}
+
+function isKeyError(err) {
+  const msg = err?.message || '';
+  return msg.includes('403') || msg.includes('429') || msg.includes('PERMISSION_DENIED') ||
+    msg.includes('API_KEY') || msg.includes('blocked') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('SERVICE_DISABLED') || msg.includes('has not been used') || msg.includes('is disabled');
+}
+
 class GeminiAIService {
   constructor() {
-    this.genAI = null;
+    this.keys = [];
+    this.currentKeyIndex = 0;
+    this.clients = {};
     this.enabled = null;
     this.initialized = false;
   }
@@ -20,17 +38,42 @@ class GeminiAIService {
    */
   initialize() {
     if (this.initialized) return;
-
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn('GEMINI_API_KEY not configured - AI features will be disabled');
+    this.keys = getApiKeys();
+    if (this.keys.length === 0) {
+      console.warn('No GEMINI_API_KEY configured - AI features will be disabled');
       this.enabled = false;
       this.initialized = true;
       return;
     }
-
-    this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     this.enabled = true;
     this.initialized = true;
+  }
+
+  _getClient(idx) {
+    const key = this.keys[idx % this.keys.length];
+    if (!this.clients[key]) this.clients[key] = new GoogleGenAI({ apiKey: key });
+    return this.clients[key];
+  }
+
+  async _generateWithFallback(params) {
+    this.initialize();
+    let lastErr;
+    for (let attempt = 0; attempt < this.keys.length; attempt++) {
+      const idx = (this.currentKeyIndex + attempt) % this.keys.length;
+      try {
+        const result = await this._getClient(idx).models.generateContent(params);
+        this.currentKeyIndex = idx;
+        return result;
+      } catch (err) {
+        lastErr = err;
+        if (isKeyError(err)) {
+          console.warn(`[GeminiAIService] Key ${idx + 1}/${this.keys.length} failed, trying next...`);
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastErr;
   }
 
   /**
@@ -73,7 +116,7 @@ class GeminiAIService {
     try {
       const prompt = this.buildInterpretationPrompt(analysisResults, analysisType);
       
-      const response = await this.genAI.models.generateContent({
+      const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite', // Latest model for best performance
         contents: [
           {
@@ -266,7 +309,7 @@ Important rules:
 - Use null for any field that cannot be determined
 `;
 
-      const response = await this.genAI.models.generateContent({
+      const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite',
         contents: [{ text: prompt }],
         generationConfig: {
@@ -352,7 +395,7 @@ Important rules:
 - Consider gas optimization, security, and user experience
 `;
 
-      const response = await this.genAI.models.generateContent({
+      const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite',
         contents: [{ text: prompt }],
         generationConfig: {
@@ -453,7 +496,7 @@ IMPORTANT RULES:
 - Be conservative - only alert on significant issues
 `;
 
-      const response = await this.genAI.models.generateContent({
+      const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite',
         contents: [{ text: prompt }],
         generationConfig: {
@@ -613,7 +656,7 @@ Important rules:
 - Consider both technical and fundamental factors
 `;
 
-      const response = await this.genAI.models.generateContent({
+      const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite',
         contents: [{ text: prompt }],
         generationConfig: {
@@ -709,7 +752,7 @@ Important rules:
 - Prioritize based on ROI and implementation difficulty
 `;
 
-      const response = await this.genAI.models.generateContent({
+      const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite',
         contents: [{ text: prompt }],
         generationConfig: {
@@ -742,20 +785,22 @@ Important rules:
   }
   getFallbackInterpretation(analysisResults) {
     const target = analysisResults.results?.target;
-    const transactions = target?.transactions || 0;
+    const txCount = Array.isArray(target?.transactions)
+      ? target.transactions.length
+      : (typeof target?.transactions === 'number' ? target.transactions : 0);
     const metrics = target?.metrics || {};
     const fullReport = target?.fullReport || {};
 
     return {
       summary: {
-        overallHealth: transactions > 1000 ? 'good' : transactions > 100 ? 'fair' : 'poor',
+        overallHealth: txCount > 1000 ? 'good' : txCount > 100 ? 'fair' : 'poor',
         keyFindings: [
-          `Contract processed ${transactions.toLocaleString()} transactions`,
-          `Analysis completed for ${target?.contract?.chain || 'unknown'} chain`,
+          `Contract has ${txCount.toLocaleString()} transactions indexed`,
+          `Chain: ${target?.contract?.chain || 'ethereum'}`,
           fullReport.summary?.successRate ? `${fullReport.summary.successRate}% success rate` : 'Transaction data analyzed'
         ],
         riskLevel: 'medium',
-        performanceScore: Math.min(100, Math.max(0, (transactions / 10) + 50))
+        performanceScore: Math.min(100, Math.max(0, (txCount / 10) + 50))
       },
       insights: {
         strengths: ['Contract is operational', 'Transaction history available'],
@@ -802,16 +847,18 @@ Important rules:
    */
   getFallbackQuickInsights(analysisResults) {
     const target = analysisResults.results?.target;
-    const transactions = target?.transactions || 0;
+    const txCount = Array.isArray(target?.transactions)
+      ? target.transactions.length
+      : (typeof target?.transactions === 'number' ? target.transactions : 0);
 
     return {
       insights: [
-        `Contract has ${transactions.toLocaleString()} transactions`,
-        'Analysis completed successfully',
-        'Enable AI for deeper insights'
+        `Contract has ${txCount.toLocaleString()} transactions indexed`,
+        'Analysis completed for ethereum chain',
+        'Configure Gemini API key to unlock AI-powered insights'
       ],
-      score: Math.min(100, Math.max(20, (transactions / 10) + 40)),
-      status: transactions > 500 ? 'healthy' : 'concerning'
+      score: Math.min(100, Math.max(20, (txCount / 10) + 40)),
+      status: txCount > 500 ? 'healthy' : 'concerning'
     };
   }
 

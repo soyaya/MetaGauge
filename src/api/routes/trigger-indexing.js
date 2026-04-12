@@ -11,8 +11,8 @@
  *   for continuous metrics calculation.
  */
 
-import { UserStorage, AnalysisStorage, LivePollStorage, MetricsStorage } from '../database/index.js';
-import AlertConfigurationStorage from '../database/AlertConfigurationStorage.js';
+import { UserStorage, AnalysisStorage, LivePollStorage, MetricsStorage, AlertConfigStorage } from '../database/index.js';
+
 import { AlertNotificationService } from '../../services/AlertNotificationService.js';
 import { checkRetentionDrop, checkBotSurge, checkChurnSpike } from '../../services/AlertEngine.js';
 
@@ -196,70 +196,92 @@ export async function triggerDefaultContractIndexing(req, res) {
         // ── PHASE 1: Historical ──────────────────────────────────────────────
         console.log(`📜 PHASE 1: Fetching up to ${HISTORY_LIMIT} historical transactions`);
 
-        const collectedTxs   = [];
-        const seenHashes     = new Set();
-        let   scanEnd        = currentBlock;
-        let   reachedGenesis = false;
-        let   emptyChunks    = 0;
-        const MAX_EMPTY_CHUNKS = 5; // Stop after 5 empty chunks to avoid scanning too far back
-        const startTime = Date.now();
-        const MAX_SCAN_TIME = 5 * 60 * 1000; // 5 minutes max
+        const collectedTxs = [];
+        let reachedGenesis = false;
+        const isStarknet = contract.chain.toLowerCase() === 'starknet';
 
-        // Scan backwards in CHUNK_SIZE-block windows until we have 50 txs
-        // or we hit block 0 (contract deployed before our scan window)
-        while (collectedTxs.length < HISTORY_LIMIT && !reachedGenesis && emptyChunks < MAX_EMPTY_CHUNKS) {
-          // Check timeout
-          if (Date.now() - startTime > MAX_SCAN_TIME) {
-            console.log(`   ⏰ Timeout reached (${MAX_SCAN_TIME/1000}s), stopping with ${collectedTxs.length} transactions`);
-            break;
-          }
-          const scanStart = Math.max(0, scanEnd - CHUNK_SIZE + 1);
-          if (scanStart === 0) reachedGenesis = true;
-
-          console.log(`   🔍 Scanning blocks ${scanStart}–${scanEnd} (have ${collectedTxs.length}/${HISTORY_LIMIT})`);
-
+        if (isStarknet) {
+          // ── Starknet: use starknet_getEvents ────────────────────────────
           try {
-            const logs = await rpcClient._makeRpcCall('eth_getLogs', [{
-              fromBlock: '0x' + scanStart.toString(16),
-              toBlock:   '0x' + scanEnd.toString(16),
-              address:   contract.address,
-            }]);
+            const scanStart = Math.max(0, currentBlock - CHUNK_SIZE);
+            console.log(`   🔍 Starknet: fetching events ${scanStart}–${currentBlock}`);
+            await updateProgress(20, 'Fetching Starknet events...');
 
-            if (!logs || logs.length === 0) {
-              emptyChunks++;
-              console.log(`   ⚠️ Empty chunk ${emptyChunks}/${MAX_EMPTY_CHUNKS}`);
-              scanEnd = scanStart - 1;
-              continue;
+            const result = await rpcClient.getTransactionsByAddress(contract.address, scanStart, currentBlock);
+            const txs = (result?.transactions || []).slice(0, HISTORY_LIMIT);
+
+            for (const tx of txs) {
+              collectedTxs.push({
+                hash:           tx.hash,
+                from:           tx.from,
+                to:             tx.to || contract.address,
+                value:          '0',
+                gasUsed:        tx.gasUsed || '0',
+                gasPrice:       '0',
+                blockNumber:    tx.blockNumber || 0,
+                blockTimestamp: tx.blockTimestamp || null,
+                status:         tx.status,
+                input:          tx.input || '0x',
+                chain:          'starknet',
+              });
             }
+            console.log(`✅ Starknet: collected ${collectedTxs.length} transactions`);
+          } catch (err) {
+            console.warn(`   ⚠️ Starknet historical fetch failed: ${err.message}`);
+          }
+        } else {
+          // ── Ethereum: eth_getLogs scan backwards ─────────────────────────
+          const seenHashes   = new Set();
+          let   scanEnd      = currentBlock;
+          let   emptyChunks  = 0;
+          const MAX_EMPTY    = 5;
+          const startTime    = Date.now();
+          const MAX_TIME     = 5 * 60 * 1000;
 
-            emptyChunks = 0; // Reset counter when we find logs
+          while (collectedTxs.length < HISTORY_LIMIT && !reachedGenesis && emptyChunks < MAX_EMPTY) {
+            if (Date.now() - startTime > MAX_TIME) {
+              console.log(`   ⏰ Timeout reached, stopping with ${collectedTxs.length} transactions`);
+              break;
+            }
+            const scanStart = Math.max(0, scanEnd - CHUNK_SIZE + 1);
+            if (scanStart === 0) reachedGenesis = true;
 
-            // Build a blockTimestamp map from log entries (gateway provides this for free)
-            const blockTsMap = {};
-            for (const log of (Array.isArray(logs) ? logs : [])) {
-              if (log.blockTimestamp && log.blockNumber)
-                blockTsMap[log.blockNumber] = parseInt(log.blockTimestamp, 16);
-              if (log.transactionHash && !seenHashes.has(log.transactionHash)) {
-                seenHashes.add(log.transactionHash);
+            console.log(`   🔍 Scanning blocks ${scanStart}–${scanEnd} (have ${collectedTxs.length}/${HISTORY_LIMIT})`);
+
+            try {
+              const logs = await rpcClient._makeRpcCall('eth_getLogs', [{
+                fromBlock: '0x' + scanStart.toString(16),
+                toBlock:   '0x' + scanEnd.toString(16),
+                address:   contract.address,
+              }]);
+
+              if (!logs || logs.length === 0) {
+                emptyChunks++;
+                scanEnd = scanStart - 1;
+                continue;
               }
-              if (seenHashes.size >= HISTORY_LIMIT) break;
-            }
+              emptyChunks = 0;
 
-            // Fetch tx details for newly seen hashes in batches
-            const newHashes = Array.from(seenHashes).filter(h => !collectedTxs.find(t => t.hash === h));
-            const batchSize = 10; // Process 10 transactions at a time
-            
-            for (let i = 0; i < newHashes.length && collectedTxs.length < HISTORY_LIMIT; i += batchSize) {
-              const batch = newHashes.slice(i, Math.min(i + batchSize, newHashes.length));
-              
-              const batchPromises = batch.map(async (txHash) => {
-                if (collectedTxs.length >= HISTORY_LIMIT) return null;
-                try {
-                  const [tx, receipt] = await Promise.all([
-                    rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
-                    rpcClient._makeRpcCall('eth_getTransactionReceipt', [txHash]),
-                  ]);
-                  if (tx) {
+              const blockTsMap = {};
+              for (const log of (Array.isArray(logs) ? logs : [])) {
+                if (log.blockTimestamp && log.blockNumber)
+                  blockTsMap[log.blockNumber] = parseInt(log.blockTimestamp, 16);
+                if (log.transactionHash && !seenHashes.has(log.transactionHash))
+                  seenHashes.add(log.transactionHash);
+                if (seenHashes.size >= HISTORY_LIMIT) break;
+              }
+
+              const newHashes = Array.from(seenHashes).filter(h => !collectedTxs.find(t => t.hash === h));
+              const batchSize = 10;
+              for (let i = 0; i < newHashes.length && collectedTxs.length < HISTORY_LIMIT; i += batchSize) {
+                const batch = newHashes.slice(i, i + batchSize);
+                const results = await Promise.all(batch.map(async txHash => {
+                  try {
+                    const [tx, receipt] = await Promise.all([
+                      rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
+                      rpcClient._makeRpcCall('eth_getTransactionReceipt', [txHash]),
+                    ]);
+                    if (!tx) return null;
                     return {
                       hash:           tx.hash,
                       from:           tx.from,
@@ -273,36 +295,22 @@ export async function triggerDefaultContractIndexing(req, res) {
                       input:          tx.input || '0x',
                       chain:          contract.chain,
                     };
-                  }
-                } catch (txErr) {
-                  console.warn(`   ⚠️ Could not fetch tx ${txHash}: ${txErr.message}`);
-                  return null;
-                }
-              });
-              
-              const batchResults = await Promise.all(batchPromises);
-              const validTxs = batchResults.filter(tx => tx !== null);
-              collectedTxs.push(...validTxs);
-              
-              console.log(`   📦 Batch ${Math.floor(i/batchSize) + 1}: +${validTxs.length} txs (total: ${collectedTxs.length})`);
-              
-              if (collectedTxs.length >= HISTORY_LIMIT) break;
+                  } catch { return null; }
+                }));
+                collectedTxs.push(...results.filter(Boolean));
+              }
+            } catch (logsErr) {
+              console.warn(`   ⚠️ eth_getLogs failed: ${logsErr.message}`);
             }
-          } catch (logsErr) {
-            console.warn(`   ⚠️ eth_getLogs failed for ${scanStart}–${scanEnd}: ${logsErr.message}`);
+
+            const pct = Math.min(80, 10 + Math.round((collectedTxs.length / HISTORY_LIMIT) * 70));
+            await updateProgress(pct, `Historical: ${collectedTxs.length}/${HISTORY_LIMIT} transactions`);
+            scanEnd = scanStart - 1;
+            if (scanEnd < 0) reachedGenesis = true;
           }
-
-          const pct = Math.min(80, 10 + Math.round((collectedTxs.length / HISTORY_LIMIT) * 70));
-          await updateProgress(pct, `Historical: ${collectedTxs.length}/${HISTORY_LIMIT} transactions`);
-
-          scanEnd = scanStart - 1;
-          if (scanEnd < 0) reachedGenesis = true;
         }
 
         console.log(`✅ PHASE 1 COMPLETE: ${collectedTxs.length} historical transactions collected`);
-        if (reachedGenesis && collectedTxs.length < HISTORY_LIMIT) {
-          console.log(`   ℹ️ Reached contract genesis — fewer than ${HISTORY_LIMIT} total transactions exist`);
-        }
 
         // ── Enrich with block timestamps ────────────────────────────────────
         const blockTimestampCache = {};
@@ -398,47 +406,55 @@ export async function triggerDefaultContractIndexing(req, res) {
         const livePoll = async () => {
           try {
             const latestBlock = await rpcClient.getBlockNumber();
-            if (latestBlock <= lastBlock) return; // no new blocks yet
+            if (latestBlock <= lastBlock) return;
 
             console.log(`   📡 Live: scanning blocks ${lastBlock + 1}–${latestBlock}`);
 
-            const logs = await rpcClient._makeRpcCall('eth_getLogs', [{
-              fromBlock: '0x' + (lastBlock + 1).toString(16),
-              toBlock:   '0x' + latestBlock.toString(16),
-              address:   contract.address,
-            }]);
+            let newTxs = [];
 
-            // Gateway provides blockTimestamp on each log — use it directly
-            const logTsMap = {};
-            for (const log of (Array.isArray(logs) ? logs : [])) {
-              if (log.blockTimestamp && log.blockNumber)
-                logTsMap[log.blockNumber] = parseInt(log.blockTimestamp, 16);
-            }
-
-            const newHashes = [...new Set((Array.isArray(logs) ? logs : []).map(l => l.transactionHash).filter(Boolean))];
-
-            // Cap live transactions at 50 per poll to avoid overwhelming the DB
-            const cappedHashes = newHashes.slice(0, 50);
-            if (cappedHashes.length < newHashes.length) {
-              console.log(`   📡 Live: capped at 50 (${newHashes.length} available)`);
-            }
-
-            if (cappedHashes.length === 0) {
-              lastBlock = latestBlock;
-              return;
-            }
-
-            console.log(`   📡 Live: ${cappedHashes.length} new transactions`);
-
-            const newTxs = [];
-            for (const txHash of cappedHashes) {
+            if (contract.chain.toLowerCase() === 'starknet') {
+              // Starknet: use starknet_getEvents
               try {
-                const [tx, receipt] = await Promise.all([
-                  rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
-                  rpcClient._makeRpcCall('eth_getTransactionReceipt', [txHash]),
-                ]);
-                if (tx) {
-                  newTxs.push({
+                const result = await rpcClient.getTransactionsByAddress(contract.address, lastBlock + 1, latestBlock);
+                newTxs = (result?.transactions || []).slice(0, 50).map(tx => ({
+                  hash:           tx.hash,
+                  from:           tx.from,
+                  to:             tx.to || contract.address,
+                  value:          '0',
+                  gasUsed:        tx.gasUsed || '0',
+                  gasPrice:       '0',
+                  blockNumber:    tx.blockNumber || 0,
+                  blockTimestamp: tx.blockTimestamp || null,
+                  status:         tx.status,
+                  input:          tx.input || '0x',
+                  chain:          'starknet',
+                }));
+              } catch (e) {
+                console.warn(`   ⚠️ Starknet live poll failed: ${e.message}`);
+              }
+            } else {
+              // Ethereum: eth_getLogs
+              const logs = await rpcClient._makeRpcCall('eth_getLogs', [{
+                fromBlock: '0x' + (lastBlock + 1).toString(16),
+                toBlock:   '0x' + latestBlock.toString(16),
+                address:   contract.address,
+              }]);
+
+              const logTsMap = {};
+              for (const log of (Array.isArray(logs) ? logs : [])) {
+                if (log.blockTimestamp && log.blockNumber)
+                  logTsMap[log.blockNumber] = parseInt(log.blockTimestamp, 16);
+              }
+
+              const cappedHashes = [...new Set((Array.isArray(logs) ? logs : []).map(l => l.transactionHash).filter(Boolean))].slice(0, 50);
+
+              for (const txHash of cappedHashes) {
+                try {
+                  const [tx, receipt] = await Promise.all([
+                    rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
+                    rpcClient._makeRpcCall('eth_getTransactionReceipt', [txHash]),
+                  ]);
+                  if (tx) newTxs.push({
                     hash:           tx.hash,
                     from:           tx.from,
                     to:             tx.to,
@@ -451,9 +467,9 @@ export async function triggerDefaultContractIndexing(req, res) {
                     input:          tx.input || '0x',
                     chain:          contract.chain,
                   });
+                } catch (e) {
+                  console.warn(`   ⚠️ Live tx fetch failed ${txHash}: ${e.message}`);
                 }
-              } catch (e) {
-                console.warn(`   ⚠️ Live tx fetch failed ${txHash}: ${e.message}`);
               }
             }
 
@@ -501,7 +517,7 @@ export async function triggerDefaultContractIndexing(req, res) {
               // ── Alert checking ──────────────────────────────────────────
               try {
                 const user = await UserStorage.findById(req.user.id);
-                const alertConfigs = await AlertConfigurationStorage.findByUserId(req.user.id).catch(() => []);
+                const alertConfigs = await AlertConfigStorage.findByUserId(req.user.id).catch(() => []);
                 const activeConfig = alertConfigs.find(c => c.enabled) || null;
 
                 if (activeConfig) {
@@ -552,6 +568,31 @@ export async function triggerDefaultContractIndexing(req, res) {
                     lastBlock: latestBlock,
                     timestamp: new Date().toISOString(),
                   });
+
+                  // Notify about significant new transactions
+                  const whaleThreshold = 1; // ETH
+                  const whaleTxs = newTxs.filter(t => Number(t.value || 0) / 1e18 >= whaleThreshold);
+                  const failedNew = newTxs.filter(t => !t.status);
+
+                  if (whaleTxs.length > 0) {
+                    wsManager.sendToUser(req.user.id, {
+                      type: 'transaction_alert',
+                      severity: 'info',
+                      title: `${whaleTxs.length} whale transaction${whaleTxs.length > 1 ? 's' : ''} detected`,
+                      message: `Large value transaction(s) on ${contract.name}`,
+                      txs: whaleTxs.slice(0, 3).map(t => ({ hash: t.hash, valueETH: (Number(t.value || 0) / 1e18).toFixed(4) })),
+                      timestamp: new Date().toISOString(),
+                    });
+                  }
+                  if (failedNew.length > 2) {
+                    wsManager.sendToUser(req.user.id, {
+                      type: 'transaction_alert',
+                      severity: 'warning',
+                      title: `${failedNew.length} failed transactions`,
+                      message: `Elevated failure rate detected on ${contract.name}`,
+                      timestamp: new Date().toISOString(),
+                    });
+                  }
                 }
               } catch (_) { /* WebSocket push is best-effort */ }
             }
@@ -652,17 +693,29 @@ export async function resumeLivePoll({ userId, contractAddress, chain, analysisI
       const latestBlock = await rpcClient.getBlockNumber();
       if (latestBlock <= lastBlock) return;
 
-      const logs = await rpcClient._makeRpcCall('eth_getLogs', [{
-        fromBlock: '0x' + (lastBlock + 1).toString(16),
-        toBlock:   '0x' + latestBlock.toString(16),
-        address:   contractAddress,
-      }]);
+      let newTxs = [];
 
-      const newHashes = [...new Set((Array.isArray(logs) ? logs : []).map(l => l.transactionHash).filter(Boolean))].slice(0, 50);
+      if (chain.toLowerCase() === 'starknet') {
+        try {
+          const result = await rpcClient.getTransactionsByAddress(contractAddress, lastBlock + 1, latestBlock);
+          newTxs = (result?.transactions || []).slice(0, 50).map(tx => ({
+            hash: tx.hash, from: tx.from, to: tx.to || contractAddress,
+            value: '0', gasUsed: tx.gasUsed || '0', gasPrice: '0',
+            blockNumber: tx.blockNumber || 0, blockTimestamp: tx.blockTimestamp || null,
+            status: tx.status, input: tx.input || '0x', chain: 'starknet',
+          }));
+        } catch (e) {
+          console.warn(`   ⚠️ Starknet resume poll failed: ${e.message}`);
+        }
+      } else {
+        const logs = await rpcClient._makeRpcCall('eth_getLogs', [{
+          fromBlock: '0x' + (lastBlock + 1).toString(16),
+          toBlock:   '0x' + latestBlock.toString(16),
+          address:   contractAddress,
+        }]);
 
-      if (newHashes.length > 0) {
-        const newTxs = [];
-        for (const txHash of newHashes) {
+        const hashes = [...new Set((Array.isArray(logs) ? logs : []).map(l => l.transactionHash).filter(Boolean))].slice(0, 50);
+        for (const txHash of hashes) {
           try {
             const [tx, receipt] = await Promise.all([
               rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
@@ -675,10 +728,11 @@ export async function resumeLivePoll({ userId, contractAddress, chain, analysisI
               status: receipt?.status === '0x1' || receipt?.status === 1,
               input: tx.input || '0x', chain,
             });
-          } catch { /* skip failed tx */ }
+          } catch { /* skip */ }
         }
+      }
 
-        if (newTxs.length > 0) {
+      if (newTxs.length > 0) {
           const current = await AnalysisStorage.findById(analysisId);
           const allTxs = [...(current?.results?.target?.transactions || []), ...newTxs];
           const updatedMetrics = calculateMetrics(allTxs);
@@ -704,7 +758,6 @@ export async function resumeLivePoll({ userId, contractAddress, chain, analysisI
           await extractAndStoreFunctionSignatures(contractAddress, chain, newTxs);
           console.log(`   ✅ Resumed live: +${newTxs.length} txs for user ${userId}`);
         }
-      }
 
       lastBlock = latestBlock;
       await LivePollStorage.save(userId, { active: true, contractAddress, chain, analysisId, lastBlock });

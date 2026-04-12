@@ -10,12 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Loader2, CheckCircle2, Circle, AlertTriangle, Download, Brain, TrendingUp, TrendingDown } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
+import { CHART_PRIMARY, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 
 export default function TractionPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [productivityScore, setProductivityScore] = useState<number>(0);
+  const [agentTasks, setAgentTasks] = useState<any[]>([]);
+  const [agentLoading, setAgentLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push('/login?redirect=/analyzer');
@@ -24,11 +28,21 @@ export default function TractionPage() {
   useEffect(() => {
     if (isAuthenticated) {
       (api as any).traction.getDashboard()
-        .then((d: any) => setData(d))
+        .then((d: any) => { setData(d); setProductivityScore(d.productivityScore ?? 0); })
         .catch(() => {})
         .finally(() => setLoading(false));
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated && data?.contract) {
+      setAgentLoading(true);
+      (api as any).agent.analyze({ contractAddress: data.contract.address, chain: data.contract.chain })
+        .then((r: any) => setAgentTasks(r.tasks || []))
+        .catch(() => {})
+        .finally(() => setAgentLoading(false));
+    }
+  }, [isAuthenticated, data?.contract?.address]);
 
   const exportCSV = () => {
     if (!data) return;
@@ -138,6 +152,13 @@ export default function TractionPage() {
   const pillarWeights: Record<string,string> = {
     featureStability:'25%', responseToAlerts:'25%', resolutionEfficiency:'20%', taskCompletion:'15%', hygiene:'15%'
   };
+  const pillarDescriptions: Record<string,string> = {
+    featureStability:     'Measures how reliably your contract executes. Calculated from transaction success rate (70%) and absence of bot activity (30%). 100 = all txs succeed with no bots.',
+    responseToAlerts:     'Measures how quickly you act on system alerts. Starts at 100 and drops by 15 points per unresolved alert. Keep your Alerts tab clear to maintain a high score.',
+    resolutionEfficiency: 'Measures how well you retain users and reduce friction. Penalised by churn rate (×0.5) and bounce rate (×0.3). Lower churn and bounce = higher score.',
+    taskCompletion:       'Measures weekly habit formation — the % of users who return within 7 days of their first transaction (D7 retention). Target: 10%+.',
+    hygiene:              'Measures the quality of your user base. Combines activation rate (50%) and wallet quality score (50%). High-value, returning wallets push this score up.',
+  };
 
   return (
     <div className="page-shell">
@@ -161,8 +182,7 @@ export default function TractionPage() {
         {/* OPS Score */}
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center gap-8 flex-wrap">
-              {/* Circle */}
+            <div className="flex items-center gap-8 flex-wrap">              {/* Circle */}
               <div className="relative w-28 h-28 shrink-0">
                 <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                   <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="10" />
@@ -179,7 +199,15 @@ export default function TractionPage() {
                 <p className="text-sm font-semibold mb-3">Operational Productivity Score — <span style={{color:opsRing}}>{ops.label}</span></p>
                 {Object.entries(ops.pillars).map(([key, val]: any) => (
                   <div key={key} className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-36 shrink-0">{pillarLabels[key]} <span className="text-muted-foreground/60">({pillarWeights[key]})</span></span>
+                    <span className="text-xs text-muted-foreground w-36 shrink-0 flex items-center gap-1">
+                      {pillarLabels[key]} <span className="text-muted-foreground/60">({pillarWeights[key]})</span>
+                      <span className="relative group cursor-help">
+                        <svg className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2"/><path strokeLinecap="round" strokeWidth="2" d="M12 16v-4M12 8h.01"/></svg>
+                        <span className="absolute left-4 top-0 z-50 hidden group-hover:block w-56 rounded bg-popover border text-xs text-popover-foreground shadow-lg p-2 leading-relaxed">
+                          {pillarDescriptions[key]}
+                        </span>
+                      </span>
+                    </span>
                     <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{width:`${val}%`, backgroundColor: val>=75?'#22c55e':val>=50?'#eab308':'#ef4444'}} />
                     </div>
@@ -273,13 +301,48 @@ export default function TractionPage() {
 
         {/* Tasks */}
         <div>
-          <h2 className="text-base font-semibold mb-1">Productivity Tasks</h2>
-          <p className="text-xs text-muted-foreground mb-3">Generated from your on-chain metrics. Mark done when fixed — AI will verify against live data.</p>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-base font-semibold">Productivity Tasks</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Productivity Score</span>
+              <span className="text-sm font-bold" style={{color: productivityScore>=75?'#22c55e':productivityScore>=40?'#eab308':'#ef4444'}}>
+                {productivityScore}/100
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">Fix issues in your project — each resolved task raises your productivity score.</p>
           <div className="space-y-2">
             {tasks.map((task: any) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onResolved={setProductivityScore} />
             ))}
           </div>
+
+          {/* AI Enhanced Tasks */}
+          {(agentLoading || agentTasks.length > 0) && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                <Brain className="h-3 w-3" /> AI Enhanced Tasks
+                {agentLoading && <span className="ml-1 animate-pulse">generating...</span>}
+              </p>
+              <div className="space-y-2">
+                {agentTasks.map((task: any, i: number) => (
+                  <div key={task.id || i} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30">
+                    <Circle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium">{task.goal || task.title}</span>
+                        <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">AI Enhanced</Badge>
+                        {task.priority && (
+                          <Badge variant="outline" className="text-xs">{task.priority}</Badge>
+                        )}
+                      </div>
+                      {task.rationale && <p className="text-xs text-muted-foreground mt-1">{task.rationale}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Recommendations */}
@@ -293,6 +356,8 @@ export default function TractionPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Generate Content */}
 
       </main>
     </div>
@@ -413,12 +478,12 @@ function HistoryChart() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={160}>
-          <LineChart data={history}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{fontSize:10}} tickFormatter={(d:string) => d.slice(5)} />
-            <YAxis tick={{fontSize:10}} />
-            <Tooltip labelFormatter={(d: any) => `Date: ${d}`} />
-            <Line type="monotone" dataKey={metric} stroke="#2563EB" strokeWidth={2} dot={{ r:3 }} />
+          <LineChart data={history} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid {...GRID_STYLE} />
+            <XAxis dataKey="date" {...AXIS_STYLE} tickFormatter={(d:string) => d.slice(5)} />
+            <YAxis {...AXIS_STYLE} />
+            <Tooltip {...TOOLTIP_STYLE} labelFormatter={(d: any) => `Date: ${d}`} />
+            <Line type="monotone" dataKey={metric} stroke={CHART_PRIMARY} strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
@@ -426,20 +491,44 @@ function HistoryChart() {
   );
 }
 
-function TaskCard({ task }: { task: any }) {
+function TaskCard({ task, onResolved }: { task: any; onResolved?: (score: number) => void }) {
+  const isResolved = task.status === 'resolved';
   const [checking, setChecking] = useState(false);
   const [checkResult, setCheckResult] = useState<any>(null);
   const [rec, setRec] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [resolved, setResolved] = useState(isResolved);
+  const [pending, setPending] = useState(task.pendingConfirmation ?? false);
+
+  const borderColor = resolved && !pending ? 'border-l-green-400' : pending ? 'border-l-yellow-400' : task.priority === 'high' ? 'border-l-red-400' : 'border-l-orange-300';
 
   const check = async () => {
     setChecking(true);
     try {
       const d = await (api as any).traction.checkTask(task.id);
       setCheckResult(d);
+      if (d.resolved) { setResolved(true); setPending(false); onResolved?.(d.productivityScore); }
     } catch (e: any) {
       setCheckResult({ resolved: false, aiGuidance: 'Check failed: ' + e.message });
     } finally { setChecking(false); }
+  };
+
+  const submitResolve = async () => {
+    if (!feedback.trim()) return;
+    setResolving(true);
+    try {
+      const d = await (api as any).traction.resolveTask(task.id, feedback);
+      setResolved(true);
+      setPending(true);
+      setShowFeedback(false);
+      onResolved?.(d.productivityScore);
+      window.dispatchEvent(new Event('notifications-refresh'));
+    } catch (e: any) {
+      setCheckResult({ resolved: false, aiGuidance: 'Failed: ' + e.message });
+    } finally { setResolving(false); }
   };
 
   const getRecommendation = async () => {
@@ -451,9 +540,6 @@ function TaskCard({ task }: { task: any }) {
     finally { setRecLoading(false); }
   };
 
-  const resolved = checkResult?.resolved;
-  const borderColor = resolved ? 'border-l-green-400' : task.priority === 'high' ? 'border-l-red-400' : 'border-l-yellow-400';
-
   return (
     <Card className={`border-l-4 ${borderColor}`}>
       <CardContent className="py-3 flex items-start gap-3">
@@ -464,8 +550,9 @@ function TaskCard({ task }: { task: any }) {
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className={`text-sm font-medium ${resolved ? 'line-through text-muted-foreground' : ''}`}>{task.title}</span>
             <Badge variant="outline" className="text-xs">{task.pillar}</Badge>
-            {task.priority === 'high' && <Badge className="text-xs bg-red-50 text-red-700 border-red-200">High</Badge>}
-            {resolved && <Badge className="text-xs bg-green-50 text-green-700 border-green-200">✓ Resolved</Badge>}
+            {task.priority === 'high' && !resolved && <Badge className="text-xs bg-red-50 text-red-700 border-red-200">High</Badge>}
+            {resolved && !pending && <Badge className="text-xs bg-green-50 text-green-700 border-green-200">✓ Confirmed</Badge>}
+            {resolved && pending && <Badge className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">⏳ Pending confirmation</Badge>}
           </div>
           <p className="text-xs text-muted-foreground mb-1.5">{task.description}</p>
           <p className="text-xs text-muted-foreground bg-muted/40 rounded px-2 py-1">💡 {task.action}</p>
@@ -494,15 +581,44 @@ function TaskCard({ task }: { task: any }) {
             </div>
           )}
 
-          {!resolved && (
+          {showFeedback && !resolved && (
+            <div className="mt-2 space-y-2">
+              <textarea
+                value={feedback}
+                onChange={e => setFeedback(e.target.value)}
+                placeholder="How did you fix this? (e.g. 'Added weekly email digest, churn dropped from 45% to 22%')"
+                className="w-full border rounded px-2 py-1.5 text-xs bg-background resize-none h-16"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" onClick={submitResolve} disabled={resolving || !feedback.trim()} className="text-xs">
+                  {resolving ? <><Loader2 className="h-3 w-3 animate-spin mr-1" />Saving...</> : 'Submit & Mark Resolved'}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setShowFeedback(false)} className="text-xs">Cancel</Button>
+              </div>
+            </div>
+          )}
+
+          {!resolved && !showFeedback && (
             <div className="flex gap-3 mt-2">
               <button onClick={check} disabled={checking}
                 className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50">
                 {checking ? <><Loader2 className="h-3 w-3 animate-spin" />Checking...</> : '↻ Check live data'}
               </button>
+              <button onClick={() => setShowFeedback(true)}
+                className="text-xs text-green-600 hover:underline flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />Mark resolved
+              </button>
               <button onClick={getRecommendation} disabled={recLoading}
                 className="text-xs text-muted-foreground hover:text-foreground hover:underline flex items-center gap-1 disabled:opacity-50">
                 {recLoading ? <><Loader2 className="h-3 w-3 animate-spin" />Loading...</> : <><Brain className="h-3 w-3" />Get recommendation</>}
+              </button>
+            </div>
+          )}
+          {pending && !showFeedback && (
+            <div className="flex gap-3 mt-2">
+              <button onClick={check} disabled={checking}
+                className="text-xs text-yellow-600 hover:underline flex items-center gap-1 disabled:opacity-50">
+                {checking ? <><Loader2 className="h-3 w-3 animate-spin" />Checking...</> : '↻ Verify fix in live data'}
               </button>
             </div>
           )}

@@ -85,11 +85,11 @@ export function AIInsights({ analysisId, analysisResults }: AIInsightsProps) {
 
   const getHealthColor = (health: string) => {
     switch (health) {
-      case 'excellent': return 'text-green-600 bg-green-50 border-green-200';
-      case 'good': return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'fair': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'poor': return 'text-red-600 bg-red-50 border-red-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'excellent': return 'text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800';
+      case 'good': return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800';
+      case 'fair': return 'text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800';
+      case 'poor': return 'text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800';
+      default: return 'text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700';
     }
   };
 
@@ -217,9 +217,9 @@ export function AIInsights({ analysisId, analysisResults }: AIInsightsProps) {
           <CardContent className="space-y-3">
             {interpretation.alerts.map((alert, i) => (
               <div key={i} className={`p-3 rounded-lg border ${
-                alert.severity === 'critical' ? 'bg-red-50 border-red-200' :
-                alert.severity === 'warning' ? 'bg-yellow-50 border-yellow-200' :
-                'bg-blue-50 border-blue-200'
+                alert.severity === 'critical' ? 'bg-red-50 border-red-200 text-red-900 dark:bg-red-950/30 dark:border-red-800 dark:text-red-100' :
+                alert.severity === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-950/30 dark:border-yellow-800 dark:text-yellow-100' :
+                'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-100'
               }`}>
                 <div className="flex items-start justify-between">
                   <div>

@@ -62,7 +62,7 @@ const fetchWithTimeout = (url: string, options: RequestInit, timeoutMs: number):
       if (error.name === 'AbortError') {
         const err = new Error(`Backend server not responding`);
         err.name = 'BackendTimeout';
-        console.error(`[FETCH] Converted to BackendTimeout error`);
+        console.error(`[FETCH] Converted to BackendTimeout error`, url);
         throw err;
       }
       
@@ -284,8 +284,10 @@ export const api = {
     },
 
     verifyOTP: async (data: { email?: string; phone?: string; otp: string }) => {
-      // For now, just return success - OTP not implemented in backend yet
-      return { success: true, message: 'Verification successful' };
+      return apiRequest('/api/auth/verify-otp', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     }
   },
 
@@ -355,7 +357,20 @@ export const api = {
     },
 
     getAISummary: async (analysisId: string) => {
-      return apiRequest(`/api/analysis/${analysisId}/ai-summary`);
+      // AI calls need longer timeout — use direct fetch, no retry
+      const token = getAuthToken();
+      const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+      const base = API_URL;
+      const [insights, interpretation] = await Promise.allSettled([
+        fetch(`${base}/api/analysis/${analysisId}/quick-insights`, { headers, signal: AbortSignal.timeout(90000) }).then(r => r.json()),
+        fetch(`${base}/api/analysis/${analysisId}/interpret`, { method: 'POST', headers, body: JSON.stringify({}), signal: AbortSignal.timeout(90000) }).then(r => r.json()),
+      ]);
+      return {
+        enabled: true,
+        insights:       insights.status === 'fulfilled'       ? insights.value       : null,
+        interpretation: interpretation.status === 'fulfilled' ? interpretation.value : null,
+        alerts: null, sentiment: null, optimizations: null,
+      };
     },
 
     getRecommendations: async (analysisId: string, contractType: string = 'defi') => {
@@ -452,6 +467,20 @@ export const api = {
         body: JSON.stringify({ transactionHash })
       });
     }
+  },
+
+  agent: {
+    analyze: async (body: { contractAddress: string; chain: string }) =>
+      apiRequest('/api/agent/analyze', { method: 'POST', body: JSON.stringify(body) }),
+
+    feedback: async (body: { messageId: string; sessionId?: string; rating: number; note?: string; componentType?: string }) =>
+      apiRequest('/api/agent/feedback', { method: 'POST', body: JSON.stringify(body) }),
+
+    generateContent: async (body: { type: string; contractAddress: string; chain: string }) =>
+      apiRequest('/api/agent/generate-content', { method: 'POST', body: JSON.stringify(body) }),
+
+    getDigest: async (type: string = 'daily') =>
+      apiRequest(`/api/agent/digest?type=${type}`),
   },
 
   indexing: {
@@ -563,7 +592,11 @@ export const api = {
     getGrowth:         async () => apiRequest('/api/traction/growth'),
     getHistory:        async () => apiRequest('/api/traction/history'),
     getActivity:       async () => apiRequest('/api/traction/activity'),
+    getHealth:         async () => apiRequest('/api/traction/health'),
+    getProductivity:   async () => apiRequest('/api/traction/productivity'),
     checkTask:         async (taskId: string) => apiRequest(`/api/traction/tasks/${taskId}/check`, { method: 'POST' }),
+    resolveTask:       async (taskId: string, feedback: string) =>
+      apiRequest(`/api/traction/tasks/${taskId}/resolve`, { method: 'POST', body: JSON.stringify({ feedback }) }),
     getRecommendation: async (taskId: string) => apiRequest(`/api/traction/tasks/${taskId}/recommendation`),
     sendReport:        async (body: { email: string; sections: string[] }) =>
       apiRequest('/api/traction/send-report', { method: 'POST', body: JSON.stringify(body) }),
@@ -639,58 +672,44 @@ export const api = {
 
 // Analysis monitoring helper
 export const monitorAnalysis = async (
-  analysisId: string, 
+  analysisId: string,
   onProgress: (status: any) => void,
-  pollInterval: number = 5000
+  pollInterval: number = 5000,
+  maxAttempts: number = 120  // 10 minutes max
 ): Promise<any> => {
-  const poll = async (): Promise<any> => {
-    try {
-      const status = await api.analysis.getStatus(analysisId);
-      onProgress(status);
-      
-      if (status.status === 'completed') {
-        return api.analysis.getResults(analysisId);
-      } else if (status.status === 'failed') {
-        throw new Error(status.errorMessage || 'Analysis failed');
-      } else {
-        // Continue polling
-        await new Promise(resolve => setTimeout(resolve, pollInterval));
-        return poll();
+  let attempts = 0;
+  return new Promise((resolve, reject) => {
+    const timer = setInterval(async () => {
+      attempts++;
+      try {
+        const status = await api.analysis.getStatus(analysisId);
+        onProgress(status);
+        if (status.status === 'completed') {
+          clearInterval(timer);
+          resolve(await api.analysis.getResults(analysisId));
+        } else if (status.status === 'failed') {
+          clearInterval(timer);
+          reject(new Error(status.errorMessage || 'Analysis failed'));
+        } else if (attempts >= maxAttempts) {
+          clearInterval(timer);
+          reject(new Error('Analysis timed out after 10 minutes'));
+        }
+      } catch (error) {
+        clearInterval(timer);
+        reject(error);
       }
-    } catch (error) {
-      console.error('Analysis monitoring error:', error);
-      throw error;
-    }
-  };
-  
-  return poll();
+    }, pollInterval);
+  });
 };
 
 // Alert configuration API
 export const alertsApi = {
-  getConfig: async () => {
-    return apiRequest('/api/alerts/config');
-  },
-
-  createConfig: async (config: any) => {
-    return apiRequest('/api/alerts/config', {
-      method: 'POST',
-      body: JSON.stringify(config),
-    });
-  },
-
-  updateConfig: async (id: string, config: any) => {
-    return apiRequest(`/api/alerts/config/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(config),
-    });
-  },
-
-  deleteConfig: async (id: string) => {
-    return apiRequest(`/api/alerts/config/${id}`, {
-      method: 'DELETE',
-    });
-  },
+  getAlerts: async () => apiRequest('/api/alerts'),
+  acknowledge: async (id: string) => apiRequest(`/api/alerts/${id}/acknowledge`, { method: 'PATCH' }),
+  getConfig: async () => apiRequest('/api/alerts/config'),
+  createConfig: async (config: any) => apiRequest('/api/alerts/config', { method: 'POST', body: JSON.stringify(config) }),
+  updateConfig: async (id: string, config: any) => apiRequest(`/api/alerts/config/${id}`, { method: 'PUT', body: JSON.stringify(config) }),
+  deleteConfig: async (id: string) => apiRequest(`/api/alerts/config/${id}`, { method: 'DELETE' }),
 };
 
 // Extend api object with alerts

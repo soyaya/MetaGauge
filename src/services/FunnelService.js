@@ -3,59 +3,30 @@
  * User-defined funnel tracking and feature adoption rates.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-
-const DATA_DIR = './data';
-const FUNNELS_FILE = join(DATA_DIR, 'funnels.json');
-const MAPPINGS_FILE = join(DATA_DIR, 'function_mappings.json');
-
-function readJson(file) {
-  if (!existsSync(file)) return [];
-  try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return []; }
-}
-
-function writeJson(file, data) {
-  writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
-}
+import { FunnelStorage } from '../api/database/index.js';
 
 // --- Function Mappings ---
 
-export function getFunctionMappings(contractId) {
-  return readJson(MAPPINGS_FILE).filter(m => m.contractId === contractId);
+export async function getFunctionMappings(contractId) {
+  return FunnelStorage.getFunctionMappings(contractId);
 }
 
-export function saveFunctionMapping(contractId, signature, displayName) {
-  const all = readJson(MAPPINGS_FILE);
-  const idx = all.findIndex(m => m.contractId === contractId && m.signature === signature);
-  const entry = { contractId, signature, displayName, updatedAt: new Date().toISOString() };
-  if (idx >= 0) all[idx] = entry; else all.push(entry);
-  writeJson(MAPPINGS_FILE, all);
-  return entry;
+export async function saveFunctionMapping(contractId, signature, displayName) {
+  return FunnelStorage.saveFunctionMapping(contractId, signature, displayName);
 }
 
 // --- Funnels ---
 
-export function getFunnels(contractId) {
-  return readJson(FUNNELS_FILE).filter(f => f.contractId === contractId);
+export async function getFunnels(contractId) {
+  return FunnelStorage.getFunnels(contractId);
 }
 
-export function saveFunnel(contractId, name, steps) {
-  const all = readJson(FUNNELS_FILE);
-  const funnel = {
-    id: `${contractId}-${Date.now()}`,
-    contractId,
-    name,
-    steps, // [{ order, signature, name }]
-    createdAt: new Date().toISOString()
-  };
-  all.push(funnel);
-  writeJson(FUNNELS_FILE, all);
-  return funnel;
+export async function saveFunnel(contractId, name, steps) {
+  return FunnelStorage.saveFunnel(contractId, name, steps);
 }
 
-export function getFunnel(funnelId) {
-  return readJson(FUNNELS_FILE).find(f => f.id === funnelId) || null;
+export async function getFunnel(funnelId) {
+  return FunnelStorage.getFunnel(funnelId);
 }
 
 /**

@@ -1,0 +1,15 @@
+[
+  {
+    "enabled": true,
+    "permissions": {
+      "createTasks": true,
+      "autoAnalyze": true,
+      "sendDigests": true,
+      "postSocial": true,
+      "checkCompetitors": true,
+      "regressionAlerts": true
+    },
+    "userId": "a94fe5fd-ddbd-4f62-8d54-988128135f3c",
+    "updatedAt": "2026-04-10T11:53:28.707Z"
+  }
+]

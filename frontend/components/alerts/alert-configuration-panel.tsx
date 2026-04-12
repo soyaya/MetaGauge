@@ -43,6 +43,10 @@ export function AlertConfigurationPanel({ contractId = null }: { contractId?: st
   const [config, setConfig] = useState<AlertConfig | null>(null);
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
+  const [agentConfig, setAgentConfig] = useState<any>({
+    enabled: false,
+    permissions: { createTasks: false, autoAnalyze: false, sendDigests: false, postSocial: false, checkCompetitors: false, regressionAlerts: false },
+  });
 
   useEffect(() => {
     loadConfig();
@@ -51,11 +55,15 @@ export function AlertConfigurationPanel({ contractId = null }: { contractId?: st
   const loadConfig = async () => {
     try {
       setLoading(true);
-      const response = await (api as any).alerts.getConfig();
+      const [alertRes, agentRes] = await Promise.all([
+        (api as any).alerts.getConfig(),
+        api.get('/api/alerts/agent-config').catch(() => ({ config: null })),
+      ]);
       const existingConfig = contractId
-        ? response.configs?.find((c: AlertConfig) => c.contractId === contractId)
-        : response.configs?.find((c: AlertConfig) => !c.contractId);
+        ? alertRes.configs?.find((c: AlertConfig) => c.contractId === contractId)
+        : alertRes.configs?.find((c: AlertConfig) => !c.contractId);
       setConfig(existingConfig || getDefaultConfig());
+      if (agentRes.config) setAgentConfig(agentRes.config);
     } catch {
       setConfig(getDefaultConfig());
     } finally {
@@ -105,12 +113,15 @@ export function AlertConfigurationPanel({ contractId = null }: { contractId?: st
     try {
       setSaving(true);
       setMessage('');
+      // Save alert config first (need the id if newly created)
       if (config.id) {
         await (api as any).alerts.updateConfig(config.id, config);
       } else {
-        const response = await (api as any).alerts.createConfig(config);
-        setConfig(response.config);
+        const r = await (api as any).alerts.createConfig(config);
+        setConfig(r.config);
       }
+      // Save agent config in parallel is fine — independent
+      await api.put('/api/alerts/agent-config', agentConfig);
       setMessage('Configuration saved successfully!');
       setIsError(false);
       setTimeout(() => setMessage(''), 3000);
@@ -170,14 +181,14 @@ export function AlertConfigurationPanel({ contractId = null }: { contractId?: st
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="severity">Severity</TabsTrigger>
             <TabsTrigger value="thresholds">Thresholds</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="competitors">Competitors</TabsTrigger>
+            <TabsTrigger value="agent">Agent</TabsTrigger>
           </TabsList>
-
           <TabsContent value="categories" className="space-y-4">
             <p className="text-sm text-muted-foreground">Select which types of alerts you want to receive</p>
             
@@ -317,6 +328,42 @@ export function AlertConfigurationPanel({ contractId = null }: { contractId?: st
                     ...prev,
                     competitorAlerts: { ...(prev as any).competitorAlerts, [key]: val }
                   }) : prev)}
+                />
+              </div>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="agent" className="space-y-4">
+            <div className="flex items-center justify-between py-2 border-b">
+              <div>
+                <Label className="font-semibold">Enable Agent Automation</Label>
+                <p className="text-xs text-muted-foreground">Master switch — agent does nothing unless this is on</p>
+              </div>
+              <Switch
+                checked={agentConfig.enabled}
+                onCheckedChange={(val) => setAgentConfig((prev: any) => ({ ...prev, enabled: val }))}
+              />
+            </div>
+            {([
+              { key: 'createTasks',      label: 'Create Tasks',          desc: 'Agent can create tasks for failing metrics' },
+              { key: 'autoAnalyze',      label: 'Auto-Analyze (Weekly)', desc: 'Run contract analysis every Monday automatically' },
+              { key: 'sendDigests',      label: 'Send Digests',          desc: 'Daily and weekly briefing emails' },
+              { key: 'postSocial',       label: 'Post to Social',        desc: 'Auto-generate and post social media updates' },
+              { key: 'checkCompetitors', label: 'Monitor Competitors',   desc: 'Alert on competitor volume/TVL spikes' },
+              { key: 'regressionAlerts', label: 'Regression Alerts',     desc: 'Alert when key metrics drop significantly' },
+            ] as const).map(({ key, label, desc }) => (
+              <div key={key} className="flex items-center justify-between py-2 border-b">
+                <div>
+                  <Label className={!agentConfig.enabled ? 'text-muted-foreground' : ''}>{label}</Label>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+                <Switch
+                  disabled={!agentConfig.enabled}
+                  checked={agentConfig.permissions?.[key] ?? false}
+                  onCheckedChange={(val) => setAgentConfig((prev: any) => ({
+                    ...prev,
+                    permissions: { ...prev.permissions, [key]: val },
+                  }))}
                 />
               </div>
             ))}

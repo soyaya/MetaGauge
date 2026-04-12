@@ -7,7 +7,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-const KB_DIR = path.resolve('./data/ai-knowledge');
+const KB_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../data/ai-knowledge');
 
 async function readJson(file, fallback) {
   try {
@@ -102,9 +102,20 @@ export class RAGContextBuilder {
       });
     }
 
-    // 6. Role instruction
+    // 6. Feedback patterns
+    try {
+      const { FeedbackProcessor } = await import('./FeedbackProcessor.js');
+      const patterns = await FeedbackProcessor.getPatterns(userId);
+      if (patterns.disliked.length > 0) {
+        sections.push(`\n=== USER PREFERENCES ===`);
+        sections.push(`Avoid these response types (user rated poorly): ${patterns.disliked.join(', ')}`);
+        if (patterns.liked.length > 0) sections.push(`Prefer these response types: ${patterns.liked.join(', ')}`);
+      }
+    } catch {}
+
+    // 7. Role instruction
     sections.push(`
-=== YOUR ROLE ===
+    // 7. Role instruction
 You are a business intelligence AI for blockchain protocols. You MUST:
 - Only draw conclusions supported by the data and boundaries above
 - Reference specific metric values and their status (good/warn/bad)

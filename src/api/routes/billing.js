@@ -15,7 +15,6 @@ const stripe = process.env.STRIPE_SECRET_KEY
 
 // ── Authenticated routes ──────────────────────────────────────────────────
 
-router.use(authenticateToken);
 
 // GET /api/billing/usage
 router.get('/usage', async (req, res) => {

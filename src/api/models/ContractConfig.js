@@ -13,7 +13,7 @@ const contractSchema = new mongoose.Schema({
   chain: {
     type: String,
     required: true,
-    enum: ['ethereum', 'lisk', 'starknet', 'polygon', 'base', 'arbitrum', 'optimism']
+    enum: ['ethereum', 'starknet', 'polygon', 'base', 'arbitrum', 'optimism']
   },
   name: {
     type: String,

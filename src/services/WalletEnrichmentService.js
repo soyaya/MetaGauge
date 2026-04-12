@@ -1,39 +1,16 @@
 /**
  * WalletEnrichmentService
  * Fetches on-chain data per wallet: nonce, balance, recent Transfer events.
- * Results cached to disk. Enrichment runs in background — callers get
- * whatever is cached immediately and fresh data arrives on next poll.
+ * Results cached in DB. Enrichment runs in background.
  */
 
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { WalletEnrichmentStorage } from '../api/database/index.js';
 
-const CACHE_DIR  = './data/wallet-enrichment';
-const CACHE_TTL  = 30 * 60 * 1000; // 30 min
-const BATCH_SIZE = 5;               // wallets per batch
-const BATCH_DELAY = 2000;           // ms between batches (rate limit)
+const CACHE_TTL  = 30 * 60 * 1000;
+const BATCH_SIZE = 5;
+const BATCH_DELAY = 2000;
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-const BLOCK_LOOKBACK = 2000;        // ~6.5 hours of blocks
-
-async function ensureDir() {
-  await mkdir(CACHE_DIR, { recursive: true });
-}
-
-function cacheFile(contractAddress, chain) {
-  return join(CACHE_DIR, `${contractAddress}_${chain}.json`);
-}
-
-async function readCache(contractAddress, chain) {
-  try {
-    const raw = await readFile(cacheFile(contractAddress, chain), 'utf8');
-    return JSON.parse(raw);
-  } catch { return {}; }
-}
-
-async function writeCache(contractAddress, chain, data) {
-  await ensureDir();
-  await writeFile(cacheFile(contractAddress, chain), JSON.stringify(data, null, 2), 'utf8');
-}
+const BLOCK_LOOKBACK = 2000;
 
 async function enrichWallet(rpc, walletAddr, currentBlock) {
   const padded = '0x000000000000000000000000' + walletAddr.slice(2).toLowerCase();
@@ -69,33 +46,30 @@ async function enrichWallet(rpc, walletAddr, currentBlock) {
  * Get cached enrichment data immediately, trigger background refresh if stale.
  */
 export async function getWalletEnrichment(contractAddress, chain, walletAddresses, rpcUrls) {
-  await ensureDir();
-  const cache = await readCache(contractAddress, chain);
+  const cache = await WalletEnrichmentStorage.getCache(contractAddress, chain);
   const now   = Date.now();
 
-  // Return cached data immediately
   const result = {};
   const stale  = [];
 
   for (const addr of walletAddresses) {
-    const entry = cache[addr];
+    const entry = cache[addr.toLowerCase()];
     if (entry && (now - new Date(entry.enrichedAt).getTime()) < CACHE_TTL) {
       result[addr] = entry;
     } else {
       stale.push(addr);
-      result[addr] = entry || null; // return stale/null immediately
+      result[addr] = entry || null;
     }
   }
 
-  // Background enrichment for stale wallets
   if (stale.length > 0) {
-    enrichInBackground(contractAddress, chain, stale, rpcUrls, cache).catch(() => {});
+    enrichInBackground(contractAddress, chain, stale, rpcUrls).catch(() => {});
   }
 
   return { data: result, staleCount: stale.length, totalCount: walletAddresses.length };
 }
 
-async function enrichInBackground(contractAddress, chain, wallets, rpcUrls, existingCache) {
+async function enrichInBackground(contractAddress, chain, wallets, rpcUrls) {
   try {
     let rpc;
     if (chain.toLowerCase() === 'starknet') {
@@ -107,23 +81,19 @@ async function enrichInBackground(contractAddress, chain, wallets, rpcUrls, exis
     }
 
     const currentBlock = await rpc.getBlockNumber();
-    const cache = { ...existingCache };
 
-    // Process in batches to avoid rate limiting
     for (let i = 0; i < wallets.length; i += BATCH_SIZE) {
       const batch = wallets.slice(i, i + BATCH_SIZE);
       await Promise.all(batch.map(async addr => {
         try {
-          cache[addr] = await enrichWallet(rpc, addr, currentBlock);
+          const data = await enrichWallet(rpc, addr, currentBlock);
+          await WalletEnrichmentStorage.saveWallet(contractAddress, chain, addr, data);
         } catch (e) {
-          // Mark as attempted so we don't retry immediately
-          cache[addr] = { address: addr, error: e.message, enrichedAt: new Date().toISOString() };
+          await WalletEnrichmentStorage.saveWallet(contractAddress, chain, addr,
+            { address: addr, error: e.message, enrichedAt: new Date().toISOString() });
         }
       }));
-      await writeCache(contractAddress, chain, cache);
-      if (i + BATCH_SIZE < wallets.length) {
-        await new Promise(r => setTimeout(r, BATCH_DELAY));
-      }
+      if (i + BATCH_SIZE < wallets.length) await new Promise(r => setTimeout(r, BATCH_DELAY));
     }
     console.log(`✅ Enriched ${wallets.length} wallets for ${contractAddress}`);
   } catch (e) {

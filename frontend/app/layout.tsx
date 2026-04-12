@@ -5,6 +5,7 @@ import "./globals.css"
 
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { ThemeProvider } from "@/components/theme/theme-provider"
+import { SupportWidget } from "@/components/ui/support-widget"
 
 export const metadata: Metadata = {
   title: "MetaGauge - Measure, Optimize, and Scale Your Web3 Project",
@@ -41,6 +42,7 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="dark" storageKey="metagauge-ui-theme">
           <AuthProvider>
             {children}
+            <SupportWidget />
           </AuthProvider>
         </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}

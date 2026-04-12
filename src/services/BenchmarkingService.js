@@ -1,18 +1,7 @@
 /**
  * BenchmarkingService - Category benchmarks and percentile rankings
  */
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-
-const BENCHMARKS_FILE = './data/category_benchmarks.json';
-
-function readBenchmarks() {
-  if (!existsSync(BENCHMARKS_FILE)) return {};
-  try { return JSON.parse(readFileSync(BENCHMARKS_FILE, 'utf8')); } catch { return {}; }
-}
-
-function writeBenchmarks(benchmarks) {
-  writeFileSync(BENCHMARKS_FILE, JSON.stringify(benchmarks, null, 2), 'utf8');
-}
+import { BenchmarksStorage } from '../api/database/index.js';
 
 export class BenchmarkingService {
   constructor() {
@@ -22,12 +11,10 @@ export class BenchmarkingService {
 
   async recalculateAll() {
     const benchmarks = {};
-    
     for (const category of this.categories) {
       benchmarks[category] = await this.calculateCategory(category);
     }
-    
-    writeBenchmarks(benchmarks);
+    await BenchmarksStorage.write(benchmarks);
     console.log('Benchmarks recalculated for all categories');
   }
 
@@ -109,7 +96,6 @@ export class BenchmarkingService {
   }
 
   getBenchmarks(category) {
-    const benchmarks = readBenchmarks();
-    return benchmarks[category] || null;
+    return BenchmarksStorage.read().then(b => b[category] || null);
   }
 }

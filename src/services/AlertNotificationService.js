@@ -4,6 +4,7 @@
  */
 
 import geminiService from './GeminiAIService.js';
+import { FREE_QUOTA } from '../config/pricing.js';
 
 const gemini = geminiService;
 
@@ -20,9 +21,8 @@ export class AlertNotificationService {
     return ['inApp', 'email', 'webhook'];
   }
 
-  getMaxAlerts(tier) {
-    const limits = { free: 3, starter: 10, pro: 50, enterprise: 999999 };
-    return limits[(tier || 'free').toLowerCase()] ?? 3;
+  getMaxAlerts() {
+    return FREE_QUOTA.alerts;
   }
 
   /**

@@ -1,192 +1,76 @@
 /**
- * BriefingScheduler - Daily, weekly, monthly briefings
+ * BriefingScheduler - Daily, weekly, monthly briefings using real data + AgentService
  */
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import GeminiAIService from './GeminiAIService.js';
-
-const BRIEFINGS_FILE = './data/briefings.json';
-
-function readBriefings() {
-  if (!existsSync(BRIEFINGS_FILE)) return [];
-  try { return JSON.parse(readFileSync(BRIEFINGS_FILE, 'utf8')); } catch { return []; }
-}
-
-function writeBriefings(briefings) {
-  writeFileSync(BRIEFINGS_FILE, JSON.stringify(briefings, null, 2), 'utf8');
-}
 
 export class BriefingScheduler {
-  constructor() {
-    this.gemini = GeminiAIService; // singleton instance
-  }
-
-  initialize() {
-    // Schedule briefings
-    this.scheduleDailyBrief();
-    this.scheduleWeeklyStrategy();
-    this.scheduleMonthlyBoardSummary();
-  }
-
-  scheduleDailyBrief() {
-    // Daily at 08:00 UTC
-    setInterval(async () => {
-      const now = new Date();
-      if (now.getUTCHours() === 8 && now.getUTCMinutes() === 0) {
-        await this.generateDailyBrief('all-users');
-      }
-    }, 60000); // Check every minute
-  }
-
-  scheduleWeeklyStrategy() {
-    // Weekly on Monday 08:00 UTC
-    setInterval(async () => {
-      const now = new Date();
-      if (now.getUTCDay() === 1 && now.getUTCHours() === 8 && now.getUTCMinutes() === 0) {
-        await this.generateWeeklyStrategy('all-users');
-      }
-    }, 60000);
-  }
-
-  scheduleMonthlyBoardSummary() {
-    // Monthly on 1st at 08:00 UTC
-    setInterval(async () => {
-      const now = new Date();
-      if (now.getUTCDate() === 1 && now.getUTCHours() === 8 && now.getUTCMinutes() === 0) {
-        await this.generateMonthlyBoardSummary('all-users');
-      }
-    }, 60000);
+  async _generate(userId, type, prompt) {
+    try {
+      const { default: AgentService } = await import('./AgentService.js');
+      const { UserStorage, BriefingsStorage } = await import('../api/database/index.js');
+      const user = await UserStorage.findById(userId);
+      const contract = user?.onboarding?.defaultContract;
+      const result = await AgentService.run(userId, prompt, { contractAddress: contract?.address||'', chain: contract?.chain||'ethereum', source: 'briefing' });
+      const briefing = {
+        id: `${type}-${Date.now()}`,
+        userId, type,
+        title: type==='daily' ? `Daily Brief — ${new Date().toDateString()}` : type==='weekly' ? `Weekly Strategy — ${new Date().toDateString()}` : `Monthly Summary — ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}`,
+        content: result.content,
+        createdAt: new Date().toISOString(),
+      };
+      await BriefingsStorage.append(briefing);
+      return briefing;
+    } catch (err) {
+      console.error(`[BriefingScheduler] ${type} failed:`, err.message);
+      return null;
+    }
   }
 
   async generateDailyBrief(userId) {
-    try {
-      const metrics = await this.getYesterdayMetrics(userId);
-      const competitors = await this.getCompetitorMovements(userId);
-      
-      const prompt = `
-Generate a daily brief for ${new Date().toDateString()}:
-
-Yesterday's Metrics: ${JSON.stringify(metrics)}
-Competitor Movements: ${JSON.stringify(competitors)}
-
-Include:
-1. Key metric changes from previous day
-2. One actionable insight
-3. New competitor movements
-`;
-
-      const content = await this.gemini.generateContent(prompt);
-      
-      const briefing = {
-        id: `brief-${Date.now()}`,
-        userId,
-        type: 'daily',
-        title: `Daily Brief - ${new Date().toDateString()}`,
-        content,
-        createdAt: new Date().toISOString()
-      };
-
-      const briefings = readBriefings();
-      briefings.unshift(briefing);
-      writeBriefings(briefings);
-
-      return briefing;
-    } catch (error) {
-      console.error('Daily brief generation failed:', error);
-      return null;
-    }
+    const metrics = await this._getMetrics(userId);
+    const competitors = await this._getCompetitors(userId);
+    return this._generate(userId, 'daily',
+      `Generate a concise daily brief for ${new Date().toDateString()}. Use get_metrics and get_business_intelligence tools. Include: 1) Key metric summary with real numbers, 2) One urgent action item, 3) Any competitor movements. Metrics context: ${JSON.stringify(metrics).slice(0, 300)}`
+    );
   }
 
   async generateWeeklyStrategy(userId) {
-    try {
-      const weeklyData = await this.getWeeklyData(userId);
-      
-      const prompt = `
-Generate a weekly strategy brief:
-
-Weekly Data: ${JSON.stringify(weeklyData)}
-
-Include:
-1. Deep dive on one strategic area
-2. Competitive landscape changes
-3. Recommended focus for next week
-`;
-
-      const content = await this.gemini.generateContent(prompt);
-      
-      const briefing = {
-        id: `weekly-${Date.now()}`,
-        userId,
-        type: 'weekly',
-        title: `Weekly Strategy - Week of ${new Date().toDateString()}`,
-        content,
-        createdAt: new Date().toISOString()
-      };
-
-      const briefings = readBriefings();
-      briefings.unshift(briefing);
-      writeBriefings(briefings);
-
-      return briefing;
-    } catch (error) {
-      console.error('Weekly strategy generation failed:', error);
-      return null;
-    }
+    const history = await this._getHistory(userId);
+    return this._generate(userId, 'weekly',
+      `Generate a weekly strategy brief. Use get_metrics, get_history, and get_business_intelligence tools. Include: 1) Week-over-week performance, 2) Top 3 growth opportunities, 3) Recommended focus for next week. History context: ${JSON.stringify(history).slice(0, 300)}`
+    );
   }
 
   async generateMonthlyBoardSummary(userId) {
+    return this._generate(userId, 'monthly',
+      `Generate an investor-ready monthly board summary. Use get_metrics, get_competitors, and get_market_context tools. Include: 1) Key metrics vs last month, 2) Market position, 3) Risks and opportunities, 4) 90-day outlook.`
+    );
+  }
+
+  async _getMetrics(userId) {
     try {
-      const monthlyData = await this.getMonthlyData(userId);
-      
-      const prompt = `
-Generate an investor-ready monthly board summary:
-
-Monthly Data: ${JSON.stringify(monthlyData)}
-
-Include:
-1. Investor-ready metrics summary
-2. Progress against goals
-3. Key risks and opportunities
-`;
-
-      const content = await this.gemini.generateContent(prompt);
-      
-      const briefing = {
-        id: `monthly-${Date.now()}`,
-        userId,
-        type: 'monthly',
-        title: `Monthly Board Summary - ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
-        content,
-        createdAt: new Date().toISOString()
-      };
-
-      const briefings = readBriefings();
-      briefings.unshift(briefing);
-      writeBriefings(briefings);
-
-      return briefing;
-    } catch (error) {
-      console.error('Monthly summary generation failed:', error);
-      return null;
-    }
+      const { AnalysisStorage } = await import('../api/database/index.js');
+      const a = await AnalysisStorage.findByUserId(userId);
+      const latest = a.find(x => x.status === 'completed');
+      return latest?.results?.target?.metrics || {};
+    } catch { return {}; }
   }
 
-  async getYesterdayMetrics(userId) {
-    // Mock yesterday's metrics
-    return { activeUsers: 150, transactions: 45, revenue: 1200 };
+  async _getCompetitors(userId) {
+    try {
+      const { readdir, readFile } = await import('fs/promises');
+      const { resolve, join } = await import('path');
+      const dir = resolve(`./data/users/${userId}/competitors`);
+      const files = await readdir(dir).catch(() => []);
+      return (await Promise.all(files.filter(f => f.endsWith('.json')).map(async f => {
+        try { return JSON.parse(await readFile(join(dir, f), 'utf8')); } catch { return null; }
+      }))).filter(Boolean);
+    } catch { return []; }
   }
 
-  async getCompetitorMovements(userId) {
-    // Mock competitor data
-    return [{ name: 'Competitor A', change: '+15% users' }];
-  }
-
-  async getWeeklyData(userId) {
-    // Mock weekly data
-    return { weeklyGrowth: 8, newFeatures: 2, churnRate: 12 };
-  }
-
-  async getMonthlyData(userId) {
-    // Mock monthly data
-    return { monthlyRevenue: 45000, userGrowth: 25, marketShare: 3.2 };
+  async _getHistory(userId) {
+    try {
+      const { MetricsHistoryStorage } = await import('../api/database/index.js');
+      return await MetricsHistoryStorage.get(userId).catch(() => []);
+    } catch { return []; }
   }
 }

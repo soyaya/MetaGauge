@@ -1,0 +1,40 @@
+{
+  "id": "alert-config-1775765838905-gcal4jlix",
+  "userId": "605bb44d-0d92-423f-ba26-65a3e7d5e7ca",
+  "contractId": "test-id",
+  "enabled": true,
+  "categories": {
+    "security": true
+  },
+  "severityLevels": {
+    "critical": true,
+    "high": true,
+    "medium": true,
+    "low": false
+  },
+  "thresholds": {
+    "retentionRate": {
+      "min": 20
+    }
+  },
+  "notifications": {
+    "inApp": true,
+    "email": false,
+    "webhook": false,
+    "webhookUrl": null
+  },
+  "schedule": {
+    "realTime": true,
+    "daily": false,
+    "weekly": false,
+    "dailyTime": "09:00",
+    "weeklyDay": "monday"
+  },
+  "competitorAlerts": {
+    "volumeSpike": false,
+    "userGrowth": false,
+    "tvlChange": false
+  },
+  "createdAt": "2026-04-09T20:17:18.905Z",
+  "updatedAt": "2026-04-09T20:17:18.905Z"
+}

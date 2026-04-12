@@ -11,8 +11,11 @@ import { ProgressiveDataFetcher } from '../../services/ProgressiveDataFetcher.js
 import { performContinuousContractSync } from './continuous-sync-improved.js';
 import { initializeStreamingIndexer } from '../../indexer/index.js';
 import SubscriptionService from '../../services/SubscriptionService.js';
+import { PRICING } from '../../config/pricing.js';
 import { triggerDefaultContractIndexing } from './trigger-indexing.js';
 import { MetricsNormalizer } from '../../services/MetricsNormalizer.js';
+import { isBot } from '../../services/BotDetectionService.js';
+import { priceService } from '../../services/PriceService.js';
 
 // Get streaming indexer from server
 let streamingIndexer = null;
@@ -38,7 +41,8 @@ export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTar
   const txs = rawTxs || [];
   const now = Date.now() / 1000;
   const DAY = 86400;
-  const ETH_PRICE = 2500;
+  // Use live price passed in from caller, fall back to 2500
+  const ETH_PRICE = rawTarget?._ethPriceUSD || 2500;
 
   // Per-wallet
   const wm = {};
@@ -81,13 +85,22 @@ export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTar
   const totalETH    = totalWei / 1e18;
   const avgTxSizeETH = txs.length ? (totalETH/txs.length).toFixed(6) : '0';
 
-  // Retention
+  // Retention — proper cohort: did the wallet make a tx AFTER the Nth day from their first tx?
   const retRate  = totalUsers ? Math.round((returning/totalUsers)*100) : 0;
   const churn    = 100 - retRate;
   const bounce   = totalUsers ? Math.round((newUsers/totalUsers)*100) : 0;
-  const d1 = totalUsers ? Math.round((wallets.filter(([,w])=>w.lastTs-w.firstTs>=DAY).length/totalUsers)*100) : 0;
-  const d7 = totalUsers ? Math.round((wallets.filter(([,w])=>w.lastTs-w.firstTs>=7*DAY).length/totalUsers)*100) : 0;
-  const d30= totalUsers ? Math.round((wallets.filter(([,w])=>w.lastTs-w.firstTs>=30*DAY).length/totalUsers)*100) : 0;
+  const d1 = totalUsers ? Math.round((wallets.filter(([,w]) => {
+    const sorted = [...w.txs].sort((a,b)=>(a.blockTimestamp||0)-(b.blockTimestamp||0));
+    return sorted.some(t => (t.blockTimestamp||0) > (sorted[0].blockTimestamp||0) + DAY);
+  }).length / totalUsers) * 100) : 0;
+  const d7 = totalUsers ? Math.round((wallets.filter(([,w]) => {
+    const sorted = [...w.txs].sort((a,b)=>(a.blockTimestamp||0)-(b.blockTimestamp||0));
+    return sorted.some(t => (t.blockTimestamp||0) > (sorted[0].blockTimestamp||0) + 7*DAY);
+  }).length / totalUsers) * 100) : 0;
+  const d30 = totalUsers ? Math.round((wallets.filter(([,w]) => {
+    const sorted = [...w.txs].sort((a,b)=>(a.blockTimestamp||0)-(b.blockTimestamp||0));
+    return sorted.some(t => (t.blockTimestamp||0) > (sorted[0].blockTimestamp||0) + 30*DAY);
+  }).length / totalUsers) * 100) : 0;
 
   // Session (median)
   const sessionArr = wallets.filter(([,w])=>w.txs.length>1).map(([,w])=>w.lastTs-w.firstTs);
@@ -114,7 +127,16 @@ export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTar
   txs.forEach(tx => { if(tx.blockTimestamp){const h=new Date(tx.blockTimestamp*1000).getUTCHours();hc[h]=(hc[h]||0)+1;} });
   const peakHours = Object.entries(hc).sort(([,a],[,b])=>b-a).slice(0,3).map(([h,c])=>({hour:`${h}:00 UTC`,count:c}));
 
-  // Quality
+  // Bot detection — use real heuristics
+  const botAddresses = new Set(
+    wallets
+      .filter(([addr, w]) => isBot({ address: addr, transactions: w.txs }).isBot)
+      .map(([addr]) => addr)
+  );
+  const botCount = botAddresses.size;
+  const botPct   = totalUsers ? Math.round((botCount / totalUsers) * 100) : 0;
+
+  // Quality — exclude bots from wallet quality calc
   const powerRate = totalUsers ? Math.round((power/totalUsers)*100) : 0;
   const avgSoph   = totalUsers ? Math.round(wallets.reduce((s,[,w])=>s+new Set(w.txs.map(t=>t.input?.slice(0,10)||'0x')).size,0)/totalUsers*10)/10 : 0;
   const walletQ   = Math.round(retRate*0.4 + powerRate*0.3 + Math.min(avgSoph*10,30));
@@ -192,7 +214,7 @@ export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTar
     userBehavior: {
       whaleRatio: totalUsers ? Math.round((whales/totalUsers)*100) : 0,
       loyaltyScore: retRate, retentionRate: retRate, churnRate: churn,
-      engagementScore: retRate, botActivity: 0,
+      engagementScore: retRate, botActivity: botPct,
       userClassifications: { new:newUsers, returning, whale:whales, active:active24h },
     },
     userLifecycle: {
@@ -221,7 +243,7 @@ export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTar
       bounceRate: bounce,
     },
     userJourneys: { averageJourneyLength: avgJourney },
-    userQualityMetrics: { whaleCount:whales, botCount:0, botPct:0, powerUserRate:powerRate, avgWalletQuality:walletQ, avgSophistication:avgSoph },
+    userQualityMetrics: { whaleCount:whales, botCount, botPct, powerUserRate:powerRate, avgWalletQuality:walletQ, avgSophistication:avgSoph },
     interactions: { featureCounts:fc, peakInteractionTimes:peakHours },
     users: usersTable,
     recommendations: rawTarget?.recommendations || [],
@@ -902,7 +924,19 @@ router.post('/trigger-indexing', triggerDefaultContractIndexing);
 router.post('/refresh-default-contract', async (req, res) => {
   try {
     const { continuous = false } = req.body;
-    console.log(`🔍 DEBUG: Received continuous parameter: ${continuous}, type: ${typeof continuous}`);
+
+    // Continuous monitoring: check balance covers at least 1 day ($0.17), charge daily via scheduler
+    if (continuous) {
+      const billing = (await UserStorage.findById(req.user.id))?.billing || {};
+      if ((billing.balance || 0) < PRICING.perContractDayActive) {
+        return res.status(402).json({
+          error: 'Insufficient balance',
+          message: `Continuous monitoring costs $${PRICING.perContractDayActive}/day per contract. Your balance is $${billing.balance || 0}. Please top up.`,
+          balance: billing.balance || 0,
+          required: PRICING.perContractDayActive,
+        });
+      }
+    }
     
     const user = await UserStorage.findById(req.user.id);
     if (!user || !user.onboarding?.defaultContract?.address) {
@@ -1119,6 +1153,17 @@ router.post('/refresh-default-contract', async (req, res) => {
         }, ANALYSIS_TIMEOUT);
       });
       
+      // performDefaultContractRefresh: re-trigger indexing via triggerDefaultContractIndexing logic
+      async function performDefaultContractRefresh(analysisId, config, userId) {
+        const { triggerDefaultContractIndexing } = await import('./trigger-indexing.js');
+        const mockReq = { user: { id: userId }, body: config, params: {} };
+        const mockRes = {
+          json: () => {},
+          status: () => mockRes,
+        };
+        return triggerDefaultContractIndexing(mockReq, mockRes);
+      }
+
       Promise.race([
         performDefaultContractRefresh(analysisId, defaultConfig, req.user.id),
         timeoutPromise
@@ -1350,12 +1395,6 @@ function getDefaultRpcConfig() {
     ethereum: [
       process.env.ETHEREUM_RPC_URL,
       process.env.ETHEREUM_RPC_URL_FALLBACK
-    ].filter(Boolean),
-    lisk: [
-      process.env.LISK_RPC_URL1,
-      process.env.LISK_RPC_URL2,
-      process.env.LISK_RPC_URL3,
-      process.env.LISK_RPC_URL4
     ].filter(Boolean),
     starknet: [
       process.env.STARKNET_RPC_URL1,

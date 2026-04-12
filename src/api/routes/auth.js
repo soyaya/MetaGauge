@@ -118,14 +118,14 @@ router.post('/register', async (req, res) => {
     }
 
     // Abuse detection — disposable email, device fingerprint, domain velocity
-    const abuseCheck = AbuseDetectionService.checkRegistration(req, email);
+    const abuseCheck = await AbuseDetectionService.checkRegistration(req, email);
     if (!abuseCheck.allowed) {
       return res.status(403).json({ error: 'Registration blocked', message: abuseCheck.reason });
     }
 
     // Hash password (6 rounds for faster response on WSL)
     console.log('[AUTH] Hashing password...');
-    const hashedPassword = await bcrypt.hash(password, 6);
+    const hashedPassword = await bcrypt.hash(password, 12);
     console.log('[AUTH] Password hashed successfully');
 
     // Create user
@@ -134,11 +134,13 @@ router.post('/register', async (req, res) => {
       email,
       password: hashedPassword,
       name,
-      role: 'admin',
+      role: 'user',
       tier: 'free',
       apiKey: crypto.randomBytes(32).toString('hex'),
       isActive: true,
       emailVerified: false,
+      syncHour: new Date().getUTCHours(),     // hour of day (UTC) user registered — used for daily sync scheduling
+      syncMinute: new Date().getUTCMinutes(),  // minute of hour
       usage: {
         analysisCount: 0,
         monthlyAnalysisCount: 0,
@@ -482,52 +484,41 @@ router.post('/oauth/github', async (req, res) => {
       });
     }
 
-    // Find or create user
-    let user = await User.findOne({
-      $or: [
-        { email: email },
-        { oauthProvider: 'github', oauthId: githubUser.id.toString() }
-      ]
-    });
+    // Find or create user using PostgreSQL storage
+    let user = await UserStorage.findByEmail(email);
 
     if (user) {
-      // Update existing user
-      user.oauthProvider = 'github';
-      user.oauthId = githubUser.id.toString();
-      user.avatar = githubUser.avatar_url;
-      user.lastLogin = new Date();
-      user.emailVerified = true;
-    } else {
-      // Create new user
-      user = new User({
-        email: email,
-        name: githubUser.name || githubUser.login,
+      await UserStorage.update(user.id, {
+        emailVerified: true,
+        is_verified: true,
         avatar: githubUser.avatar_url,
+        lastLogin: new Date().toISOString(),
         oauthProvider: 'github',
         oauthId: githubUser.id.toString(),
-        emailVerified: true,
-        lastLogin: new Date()
       });
-      user.generateApiKey();
+      user = await UserStorage.findById(user.id);
+    } else {
+      user = await UserStorage.create({
+        email,
+        name: githubUser.name || githubUser.login,
+        avatar: githubUser.avatar_url,
+        password: crypto.randomBytes(32).toString('hex'),
+        tier: 'free',
+        apiKey: crypto.randomBytes(32).toString('hex'),
+        isActive: true,
+        emailVerified: true,
+        is_verified: true,
+        oauthProvider: 'github',
+        oauthId: githubUser.id.toString(),
+        usage: { analysisCount: 0, monthlyAnalysisCount: 0, lastAnalysis: null, monthlyResetDate: new Date().toISOString() },
+      });
     }
 
-    await user.save();
-
-    // Generate token
     const token = generateToken(user);
-
     res.json({
-      message: 'OAuth login successful',
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar,
-        tier: user.tier,
-        apiKey: user.apiKey,
-        oauthProvider: user.oauthProvider
-      },
-      token
+      message: 'GitHub login successful',
+      user: { id: user.id, email: user.email, name: user.name, tier: user.tier, is_verified: true, avatar: user.avatar },
+      token,
     });
 
   } catch (error) {
@@ -611,8 +602,12 @@ router.post('/forgot-password', async (req, res) => {
     const user = await UserStorage.findByEmail(email);
     if (user) {
       const token = crypto.randomBytes(32).toString('hex');
-      const expiry = Date.now() + 3600000; // 1 hour
-      await UserStorage.update(user.id, { resetToken: token, resetTokenExpiry: expiry });
+      // Use DB time to avoid WSL2 clock drift
+      const { query: dbQuery } = await import('../database/postgres.js');
+      await dbQuery(
+        `UPDATE users SET reset_token = $1, reset_token_expiry = NOW() + INTERVAL '1 hour', updated_at = NOW() WHERE id = $2`,
+        [token, user.id]
+      );
 
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
       const html = `
@@ -671,11 +666,15 @@ router.post('/reset-password', async (req, res) => {
   if (password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
 
   try {
-    const users = await UserStorage.findAll();
-    const user = users.find(u => u.resetToken === token && u.resetTokenExpiry > Date.now());
+    const { query } = await import('../database/postgres.js');
+    const result = await query(
+      `SELECT * FROM users WHERE reset_token = $1 AND reset_token_expiry > NOW()`,
+      [token]
+    );
+    const user = result.rows[0];
     if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
 
-    const hashedPassword = await bcrypt.hash(password, 6);
+    const hashedPassword = await bcrypt.hash(password, 12);
     await UserStorage.update(user.id, { password: hashedPassword, resetToken: null, resetTokenExpiry: null });
     res.json({ message: 'Password reset successfully' });
   } catch (error) {
@@ -752,7 +751,7 @@ router.post('/send-verification', authenticateToken, async (req, res) => {
     const isDev = process.env.NODE_ENV !== 'production';
     res.json({
       message: sent ? 'Verification code sent to your email' : `Dev mode — no email provider configured`,
-      ...((!sent || isDev) ? { devOtp: otp } : {}),
+      ...(isDev && !sent ? { devOtp: otp } : {}),
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

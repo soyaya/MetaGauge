@@ -4,11 +4,11 @@ import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { PieChart, Pie, Cell, AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface TransactionsTabProps { analysisResults: any }
 
-import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY } from '@/lib/chart-colors';
+import { CHART_COLORS, CHART_PRIMARY, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 const COLORS = CHART_COLORS;
 
 const METHOD_NAMES: Record<string, string> = {
@@ -139,21 +139,21 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {volumeData.length > 0 && (
           <Card>
-            <CardHeader><CardTitle className="text-sm">Volume by Block Range (ETH)</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-sm">Volume by Block Range</CardTitle></CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={volumeData}>
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={volumeData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="vol" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={CHART_PRIMARY} stopOpacity={0.3} />
+                      <stop offset="5%" stopColor={CHART_PRIMARY} stopOpacity={0.25} />
                       <stop offset="95%" stopColor={CHART_PRIMARY} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="block" tick={{ fontSize: 9 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="volume" stroke={CHART_PRIMARY} fill="url(#vol)" />
+                  <CartesianGrid {...GRID_STYLE} />
+                  <XAxis dataKey="block" {...AXIS_STYLE} />
+                  <YAxis {...AXIS_STYLE} />
+                  <Tooltip {...TOOLTIP_STYLE} />
+                  <Area type="monotone" dataKey="volume" stroke={CHART_PRIMARY} strokeWidth={2} fill="url(#vol)" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
@@ -164,14 +164,16 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
           <Card>
             <CardHeader><CardTitle className="text-sm">Transaction Type Distribution</CardTitle></CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie data={typeData} cx="50%" cy="50%" outerRadius={75} dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`} labelLine={false}>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={typeData} layout="vertical" margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid {...GRID_STYLE} horizontal={false} />
+                  <XAxis type="number" {...AXIS_STYLE} />
+                  <YAxis dataKey="name" type="category" width={80} {...AXIS_STYLE} />
+                  <Tooltip {...TOOLTIP_STYLE} />
+                  <Bar dataKey="value" radius={[0,4,4,0]} maxBarSize={28}>
                     {typeData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>

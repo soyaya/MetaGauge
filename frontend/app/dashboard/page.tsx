@@ -221,20 +221,12 @@ export default function DashboardPage() {
 
   const loadDefaultContractData = async () => {
     try {
-      // Check if user is authenticated first
       const token = localStorage.getItem('token')
-      if (!token) {
-        console.log('📊 No auth token, skipping default contract load')
-        return
-      }
-      
+      if (!token) return
       const data = await api.onboarding.getDefaultContract()
-      console.log('📊 Default contract data:', data)
-      console.log('   Subscription:', data.subscription)
-      console.log('   Block range:', data.blockRange)
       setDefaultContract(data)
-    } catch (err) {
-      // Silently fail - don't log to console
+    } catch (err: any) {
+      console.error('Failed to load default contract:', err.message)
     }
   }
 
@@ -242,8 +234,8 @@ export default function DashboardPage() {
     try {
       const data = await api.onboarding.getUserMetrics()
       setUserMetrics(data)
-    } catch (err) {
-      // console.error('Failed to load user metrics:', err)
+    } catch (err: any) {
+      console.error('Failed to load user metrics:', err.message)
     }
   }
 
@@ -432,7 +424,7 @@ export default function DashboardPage() {
                   <OverviewTab 
                     analysisResults={{
                       results: {
-                        target: defaultContract.fullResults
+                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
                       }
                     }}
                     analysisId={defaultContract.analysisHistory.latest?.id}
@@ -443,7 +435,7 @@ export default function DashboardPage() {
                   <MetricsTab 
                     analysisResults={{
                       results: {
-                        target: defaultContract.fullResults
+                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
                       }
                     }}
                   />
@@ -453,7 +445,7 @@ export default function DashboardPage() {
                   <UsersTab 
                     analysisResults={{
                       results: {
-                        target: defaultContract.fullResults
+                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
                       }
                     }}
                   />
@@ -463,7 +455,7 @@ export default function DashboardPage() {
                   <TransactionsTab 
                     analysisResults={{
                       results: {
-                        target: defaultContract.fullResults
+                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
                       }
                     }}
                   />
@@ -487,7 +479,7 @@ export default function DashboardPage() {
                   <UxTab 
                     analysisResults={{
                       results: {
-                        target: defaultContract.fullResults
+                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
                       }
                     }}
                   />
@@ -498,7 +490,7 @@ export default function DashboardPage() {
                     analysisId={defaultContract.analysisHistory.latest?.id || ''}
                     analysisResults={{
                       results: {
-                        target: defaultContract.fullResults
+                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
                       }
                     }}
                   />
@@ -508,7 +500,7 @@ export default function DashboardPage() {
                   <CompetitiveTab 
                     analysisResults={{
                       results: {
-                        target: defaultContract.fullResults
+                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
                       }
                     }}
                   />

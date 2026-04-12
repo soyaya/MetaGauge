@@ -9,6 +9,7 @@ import ChatAIService from '../../services/ChatAIService.js';
 import { authenticateToken } from '../middleware/auth.js';
 import businessAI from '../../services/BusinessAIEngine.js';
 import subscriptionService from '../../services/SubscriptionService.js';
+import { LIMITS } from '../../config/pricing.js';
 
 const router = express.Router();
 
@@ -327,7 +328,7 @@ router.get('/sessions/:sessionId/messages', async (req, res) => {
  *       404:
  *         description: Session not found
  */
-router.post('/sessions/:sessionId/messages', subscriptionService.chargeMiddleware('ai_query'), async (req, res) => {
+router.post('/sessions/:sessionId/messages', async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { content, message } = req.body;
@@ -337,10 +338,11 @@ router.post('/sessions/:sessionId/messages', subscriptionService.chargeMiddlewar
     const messageContent = content || message;
 
     if (!messageContent || typeof messageContent !== 'string' || messageContent.trim().length === 0) {
-      return res.status(400).json({
-        error: 'Message content required',
-        message: 'Message content cannot be empty (use content or message field)'
-      });
+      return res.status(400).json({ error: 'Message content required' });
+    }
+
+    if (messageContent.length > LIMITS.maxMessageLength) {
+      return res.status(400).json({ error: `Message too long. Max ${LIMITS.maxMessageLength} characters.` });
     }
 
     const session = await ChatSessionStorage.findById(sessionId);
@@ -351,6 +353,9 @@ router.post('/sessions/:sessionId/messages', subscriptionService.chargeMiddlewar
         message: 'Chat session not found or access denied'
       });
     }
+
+    // Soft charge — log but don't block chat
+    try { await subscriptionService.charge(userId, 'ai_query'); } catch {}
 
     // Save user message
     const userMessage = await ChatMessageStorage.create({
@@ -370,16 +375,14 @@ router.post('/sessions/:sessionId/messages', subscriptionService.chargeMiddlewar
     // Get recent chat history for context
     const chatHistory = await ChatMessageStorage.getRecentContext(sessionId, 10);
 
-    // Generate AI response via BusinessAIEngine (RAG-grounded)
-    const aiResponse = await businessAI.chat({
-      userId,
-      message: messageContent.trim(),
+    // Generate AI response via AgentService (function calling)
+    const AgentService = (await import('../../services/AgentService.js')).default;
+    const aiResponse = await AgentService.run(userId, messageContent.trim(), {
       contractAddress: session.contractAddress,
       chain: session.contractChain,
-      metrics: contractContext.analysisData?.results?.target?.metrics ||
-               contractContext.analysisData?.results?.target?.fullReport?.metrics || {},
-      analysisData: contractContext.analysisData || null,
-      sessionHistory: chatHistory.map(m => ({ role: m.role, content: m.content })),
+      sessionId,
+      sessionHistory: chatHistory.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', content: m.content })),
+      source: 'chat',
     });
 
     // Save AI response (aiResponse is now { content, components[] })
@@ -388,7 +391,7 @@ router.post('/sessions/:sessionId/messages', subscriptionService.chargeMiddlewar
       role: 'assistant',
       content: aiResponse.content || "I don't have enough data to answer that. Please run an analysis first.",
       components: aiResponse.components || [],
-      metadata: { ragGrounded: true },
+      metadata: { ragGrounded: true, toolsUsed: aiResponse.toolsUsed || [], iterations: aiResponse.iterations || 0 },
     });
 
     res.json({
@@ -555,8 +558,8 @@ router.get('/suggested-questions', async (req, res) => {
       });
     }
 
-    // Use anonymous user for public access
-    const userId = 'anonymous';
+    // Use authenticated user if available, otherwise anonymous
+    const userId = req.user?.id || 'anonymous';
 
     // Get contract context
     const contractContext = await ChatAIService.getContractContext(

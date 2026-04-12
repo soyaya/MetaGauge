@@ -1,57 +1,29 @@
-/**
- * Share token management for read-only dashboard links
- */
 import { randomBytes } from 'crypto';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 
-const TOKENS_FILE = './data/share_tokens.json';
-
-function readTokens() {
-  if (!existsSync(TOKENS_FILE)) return [];
-  try { return JSON.parse(readFileSync(TOKENS_FILE, 'utf8')); } catch { return []; }
+async function storage() {
+  const { ShareTokensStorage } = await import('../api/database/index.js');
+  return ShareTokensStorage;
 }
 
-function writeTokens(tokens) {
-  writeFileSync(TOKENS_FILE, JSON.stringify(tokens, null, 2), 'utf8');
-}
-
-export function createShareToken(contractId, userId) {
+export async function createShareToken(contractId, userId) {
   const token = randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-  
-  const tokens = readTokens();
-  tokens.push({
-    token,
-    contractId,
-    userId,
-    createdAt: new Date().toISOString(),
-    expiresAt: expiresAt.toISOString(),
-    revoked: false
-  });
-  
-  writeTokens(tokens);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const s = await storage();
+  await s.append({ token, contractId, userId, createdAt: new Date().toISOString(), expiresAt, revoked: false });
   return { token, expiresAt };
 }
 
-export function validateShareToken(token) {
-  const tokens = readTokens();
-  const shareToken = tokens.find(t => t.token === token);
-  
-  if (!shareToken) return { valid: false, status: 404 };
-  if (shareToken.revoked) return { valid: false, status: 410 };
-  if (new Date(shareToken.expiresAt) < new Date()) return { valid: false, status: 410 };
-  
-  return { valid: true, contractId: shareToken.contractId };
+export async function validateShareToken(token) {
+  const s = await storage();
+  const t = await s.findByToken(token);
+  if (!t) return { valid: false, status: 404 };
+  if (t.revoked) return { valid: false, status: 410 };
+  if (new Date(t.expiresAt) < new Date()) return { valid: false, status: 410 };
+  return { valid: true, contractId: t.contractId };
 }
 
-export function revokeShareToken(token) {
-  const tokens = readTokens();
-  const index = tokens.findIndex(t => t.token === token);
-  
-  if (index !== -1) {
-    tokens[index].revoked = true;
-    writeTokens(tokens);
-    return true;
-  }
-  return false;
+export async function revokeShareToken(token) {
+  const s = await storage();
+  await s.revoke(token);
+  return true;
 }

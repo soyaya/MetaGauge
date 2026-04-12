@@ -1,0 +1,119 @@
+[
+  {
+    "taskId": "churn",
+    "feedback": "We added a weekly digest email and a re-engagement campaign targeting wallets inactive for 7+ days. Churn dropped from 57% to 38% over 2 weeks.",
+    "metricBefore": 57,
+    "metricAfter": 25,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T11:40:04.770Z"
+  },
+  {
+    "taskId": "churn",
+    "feedback": "Fixed again",
+    "metricBefore": 57,
+    "metricAfter": 25,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T11:49:54.477Z"
+  },
+  {
+    "taskId": "fake_task",
+    "feedback": "test",
+    "metricBefore": null,
+    "metricAfter": null,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T11:49:54.539Z"
+  },
+  {
+    "taskId": "churn",
+    "feedback": "We added a weekly digest email and a re-engagement campaign targeting wallets inactive for 7+ days. Churn dropped from 57% to 38% over 2 weeks.",
+    "metricBefore": 57,
+    "metricAfter": 25,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T11:52:04.100Z"
+  },
+  {
+    "taskId": "adoption_funnel",
+    "feedback": "Doe",
+    "metricBefore": 16,
+    "metricAfter": 30,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T12:03:27.690Z"
+  },
+  {
+    "taskId": "d7_ret",
+    "feedback": "Added weekly streak rewards, D7 retention improved",
+    "metricBefore": 7,
+    "metricAfter": 15,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T13:37:56.517Z"
+  },
+  {
+    "taskId": "d7_ret",
+    "feedback": "Added weekly streak rewards",
+    "metricBefore": 7,
+    "metricAfter": 15,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T13:42:58.507Z"
+  },
+  {
+    "taskId": "ops_stability",
+    "feedback": "Fixed failed tx patterns by adding pre-flight validation",
+    "metricBefore": 26,
+    "metricAfter": 80,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-07T13:55:02.329Z"
+  },
+  {
+    "taskId": "ops_stability",
+    "feedback": "Fixed the failed transactions",
+    "metricBefore": 30,
+    "metricAfter": 80,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-09T12:48:56.906Z"
+  },
+  {
+    "taskId": "d7_ret",
+    "feedback": "fixed",
+    "metricBefore": 0,
+    "metricAfter": 15,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-09T16:26:22.425Z"
+  },
+  {
+    "taskId": "churn",
+    "feedback": "test",
+    "metricBefore": 100,
+    "metricAfter": 25,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-09T16:39:19.662Z"
+  },
+  {
+    "taskId": "churn",
+    "feedback": "done",
+    "metricBefore": 100,
+    "metricAfter": 25,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-09T16:44:48.507Z"
+  },
+  {
+    "taskId": "wau",
+    "feedback": "through ads",
+    "metricBefore": 0,
+    "metricAfter": 19,
+    "chain": "ethereum",
+    "contractType": "unknown",
+    "savedAt": "2026-04-10T13:53:29.310Z"
+  }
+]

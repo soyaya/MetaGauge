@@ -1,35 +1,33 @@
 /**
- * Competitor storage (file-based)
+ * Competitor storage — delegates to database/index.js (postgres or file)
  */
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { ContractStorage } from './index.js';
 
-const FILE = './data/competitors.json';
-
-function read() {
-  if (!existsSync(FILE)) return [];
-  try { return JSON.parse(readFileSync(FILE, 'utf8')); } catch { return []; }
-}
-function write(data) { writeFileSync(FILE, JSON.stringify(data, null, 2), 'utf8'); }
-
-export function findByContractId(contractId) {
-  return read().filter(c => c.contractId === contractId);
+export async function findByContractId(contractId) {
+  const all = await ContractStorage.findAll();
+  const contract = all.find(c => c.id === contractId);
+  return contract?.competitors || [];
 }
 
-export function create(data) {
-  const all = read();
+export async function create(data) {
+  const contract = await ContractStorage.findById(data.contractId);
+  if (!contract) throw new Error('Contract not found');
+  const competitors = contract.competitors || [];
   const entry = { id: `comp-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, ...data, createdAt: new Date().toISOString() };
-  all.push(entry);
-  write(all);
+  competitors.push(entry);
+  await ContractStorage.update(data.contractId, { competitors });
   return entry;
 }
 
-export function remove(id, contractId) {
-  const all = read();
-  const idx = all.findIndex(c => c.id === id && c.contractId === contractId);
-  if (idx === -1) return false;
-  all.splice(idx, 1);
-  write(all);
+export async function remove(id, contractId) {
+  const contract = await ContractStorage.findById(contractId);
+  if (!contract) return false;
+  const competitors = (contract.competitors || []).filter(c => c.id !== id);
+  await ContractStorage.update(contractId, { competitors });
   return true;
 }
 
-export function findAll() { return read(); }
+export async function findAll() {
+  const all = await ContractStorage.findAll();
+  return all.flatMap(c => c.competitors || []);
+}

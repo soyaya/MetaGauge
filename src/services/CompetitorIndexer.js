@@ -1,19 +1,10 @@
 /**
  * CompetitorIndexer
  * Schedules background indexing for competitor contracts.
- * Stores results in data/competitor_analyses.json.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { findAll } from '../api/database/CompetitorStorage.js';
-
-const RESULTS_FILE = './data/competitor_analyses.json';
-
-function readResults() {
-  if (!existsSync(RESULTS_FILE)) return {};
-  try { return JSON.parse(readFileSync(RESULTS_FILE, 'utf8')); } catch { return {}; }
-}
-function writeResults(data) { writeFileSync(RESULTS_FILE, JSON.stringify(data, null, 2), 'utf8'); }
+import { CompetitorAnalysesStorage } from '../api/database/index.js';
 
 let _wsManager = null;
 let _reindexInterval = null;
@@ -23,15 +14,13 @@ let _reindexInterval = null;
  */
 export async function indexCompetitor(competitor) {
   try {
-    const results = readResults();
-    results[competitor.id] = {
+    await CompetitorAnalysesStorage.save(competitor.id, {
       competitorId: competitor.id,
       address: competitor.address,
       chain: competitor.chain,
       status: 'indexing',
       indexedAt: new Date().toISOString()
-    };
-    writeResults(results);
+    });
 
     // Dynamically import the right RPC client — Ethereum or Starknet only
     let client;
@@ -39,7 +28,6 @@ export async function indexCompetitor(competitor) {
       const { default: StarknetRpcClient } = await import('./StarknetRpcClient.js');
       client = new StarknetRpcClient();
     } else {
-      // Default to Ethereum for ethereum and any unknown chain
       const { default: EthereumRpcClient } = await import('./EthereumRpcClient.js');
       client = new EthereumRpcClient();
     }
@@ -47,12 +35,13 @@ export async function indexCompetitor(competitor) {
     const txData = await client.getTransactionsByAddress(competitor.address, null, null);
     const txs = Array.isArray(txData) ? txData : (txData?.transactions || []);
 
-    // Basic metrics from tx data
     const uniqueWallets = new Set(txs.map(tx => tx.from).filter(Boolean));
     const totalVolume = txs.reduce((s, tx) => s + parseFloat(tx.valueEth || tx.value || 0), 0);
 
-    results[competitor.id] = {
-      ...results[competitor.id],
+    const result = {
+      competitorId: competitor.id,
+      address: competitor.address,
+      chain: competitor.chain,
       status: 'completed',
       metrics: {
         totalTransactions: txs.length,
@@ -61,16 +50,11 @@ export async function indexCompetitor(competitor) {
         indexedAt: new Date().toISOString()
       }
     };
-    writeResults(results);
-    return results[competitor.id];
+    await CompetitorAnalysesStorage.save(competitor.id, result);
+    return result;
   } catch (err) {
-    const results = readResults();
-    if (results[competitor.id]) {
-      results[competitor.id].status = 'failed';
-      results[competitor.id].error = err.message;
-      writeResults(results);
-    }
-    // Isolated failure — does not block other competitors
+    const existing = await CompetitorAnalysesStorage.get(competitor.id) || {};
+    await CompetitorAnalysesStorage.save(competitor.id, { ...existing, status: 'failed', error: err.message });
     console.error(`[CompetitorIndexer] Failed to index ${competitor.address}:`, err.message);
     return null;
   }

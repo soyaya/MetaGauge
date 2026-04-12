@@ -1,19 +1,6 @@
-/**
- * AIGrowthAdvisor - Proactive advice engine
- */
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 import GeminiAIService from './GeminiAIService.js';
 
-const ADVICE_FILE = './data/ai_advice.json';
-
-function readAdvice() {
-  if (!existsSync(ADVICE_FILE)) return [];
-  try { return JSON.parse(readFileSync(ADVICE_FILE, 'utf8')); } catch { return []; }
-}
-
-function writeAdvice(advice) {
-  writeFileSync(ADVICE_FILE, JSON.stringify(advice, null, 2), 'utf8');
-}
+async function db() { return import('../api/database/index.js'); }
 
 export class AIGrowthAdvisor {
   constructor() {
@@ -46,21 +33,17 @@ export class AIGrowthAdvisor {
       
       const advice = {
         id: `advice-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        userId,
-        contractId,
-        trigger,
+        userId, contractId, trigger,
         title: this.getTriggerTitle(trigger),
         message: response,
         metricName: this.getTriggerMetric(trigger),
         metricValue: metrics[this.getTriggerMetric(trigger)],
         createdAt: new Date().toISOString(),
-        implemented: false,
-        feedback: null
+        implemented: false, feedback: null
       };
 
-      const allAdvice = readAdvice();
-      allAdvice.unshift(advice);
-      writeAdvice(allAdvice);
+      const { AIAdviceStorage } = await db();
+      await AIAdviceStorage.append(advice);
 
       // Send notification
       this.sendNotification(userId, advice);

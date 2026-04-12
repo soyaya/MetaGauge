@@ -7,7 +7,8 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { UserStorage, ContractStorage, AnalysisStorage } from '../database/index.js';
-import { requireRole } from '../middleware/requireRole.js';
+import { FREE_QUOTA, PRICING, LIMITS } from '../../config/pricing.js';
+import { generateApiKey } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -182,10 +183,15 @@ router.get('/dashboard', async (req, res) => {
       recentAnalyses,
       usage: user.usage || { analysisCount: 0, monthlyAnalysisCount: 0 },
       limits: {
-        free: 10,
-        pro: 100,
-        enterprise: -1
-      }
+        freeAnalyses:   FREE_QUOTA.analyses,
+        freeAiQueries:  FREE_QUOTA.aiQueries,
+        maxProjects:    FREE_QUOTA.contracts,
+        maxAlerts:      FREE_QUOTA.alerts,
+        historicalDays: FREE_QUOTA.historicalDays,
+        maxMessageLength:   LIMITS.maxMessageLength,
+        maxAnalysisPerDay:  LIMITS.maxAnalysisPerDay,
+      },
+      pricing: PRICING,
     });
 
   } catch (error) {
@@ -219,7 +225,7 @@ router.post('/api-key', async (req, res) => {
     }
 
     // Generate new API key
-    const newApiKey = 'ak_' + crypto.randomUUID().replace(/-/g, '');
+    const newApiKey = generateApiKey(); // mg_live_xxxxx format
     
     const updatedUser = await UserStorage.update(req.user.id, {
       apiKey: newApiKey
@@ -304,9 +310,10 @@ router.get('/usage', async (req, res) => {
     res.json({
       current: user.usage || { analysisCount: 0, monthlyAnalysisCount: 0 },
       limits: {
-        free: 10,
-        pro: 100,
-        enterprise: -1
+        freeAnalyses:  FREE_QUOTA.analyses,
+        freeAiQueries: FREE_QUOTA.aiQueries,
+        maxProjects:   FREE_QUOTA.contracts,
+        maxAlerts:     FREE_QUOTA.alerts,
       },
       monthlyBreakdown,
       typeBreakdown: Object.entries(typeBreakdown).map(([type, count]) => ({ _id: type, count })),
@@ -333,7 +340,7 @@ router.get('/usage', async (req, res) => {
  *       200:
  *         description: Account deleted successfully
  */
-router.delete('/delete-account', requireRole('admin'), async (req, res) => {
+router.delete('/delete-account', async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -374,12 +381,54 @@ router.post('/change-password', async (req, res) => {
     const valid = await bcrypt.compare(currentPassword, user.password);
     if (!valid) return res.status(401).json({ message: 'Current password is incorrect' });
 
-    const hashed = await bcrypt.hash(newPassword, 6);
+    const hashed = await bcrypt.hash(newPassword, 12);
     await UserStorage.update(req.user.id, { password: hashed });
     res.json({ message: 'Password changed successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+// ── Per-user social credentials ───────────────────────────────────────────────
+router.get('/social-credentials', async (req, res) => {
+  const user = await UserStorage.findById(req.user.id);
+  const creds = user?.socialCredentials || {};
+  // Never expose secrets — just tell the frontend which are connected
+  res.json({
+    twitter:  { connected: !!(creds.twitterApiKey && creds.twitterAccessToken) },
+    linkedin: { connected: !!(creds.linkedinAccessToken && creds.linkedinPersonUrn) },
+  });
+});
+
+router.put('/social-credentials', async (req, res) => {
+  const { twitterApiKey, twitterApiSecret, twitterAccessToken, twitterAccessSecret, linkedinAccessToken, linkedinPersonUrn } = req.body;
+  const user = await UserStorage.findById(req.user.id);
+  const existing = user?.socialCredentials || {};
+  await UserStorage.update(req.user.id, {
+    socialCredentials: {
+      ...existing,
+      ...(twitterApiKey        && { twitterApiKey }),
+      ...(twitterApiSecret     && { twitterApiSecret }),
+      ...(twitterAccessToken   && { twitterAccessToken }),
+      ...(twitterAccessSecret  && { twitterAccessSecret }),
+      ...(linkedinAccessToken  && { linkedinAccessToken }),
+      ...(linkedinPersonUrn    && { linkedinPersonUrn }),
+    },
+  });
+  res.json({ message: 'Social credentials saved' });
+});
+
+router.delete('/social-credentials/:platform', async (req, res) => {
+  const user = await UserStorage.findById(req.user.id);
+  const creds = { ...(user?.socialCredentials || {}) };
+  if (req.params.platform === 'twitter') {
+    delete creds.twitterApiKey; delete creds.twitterApiSecret;
+    delete creds.twitterAccessToken; delete creds.twitterAccessSecret;
+  } else if (req.params.platform === 'linkedin') {
+    delete creds.linkedinAccessToken; delete creds.linkedinPersonUrn;
+  }
+  await UserStorage.update(req.user.id, { socialCredentials: creds });
+  res.json({ message: `${req.params.platform} disconnected` });
 });
 
 export default router;

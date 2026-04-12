@@ -39,7 +39,7 @@ function ChatPageContent() {
   // Load chat sessions
   useEffect(() => {
     if (isAuthenticated) {
-      loadChatSessions();
+      loadChatSessions().finally(() => setIsLoading(false));
     }
   }, [isAuthenticated]);
 
@@ -51,6 +51,7 @@ function ChatPageContent() {
   }, [isAuthenticated, contractAddress, contractChain]);
 
   const loadChatSessions = async () => {
+    setError('');
     try {
       const response = await api.chat.getSessions();
       setSessions(response.sessions || []);
@@ -62,7 +63,7 @@ function ChatPageContent() {
 
   const createOrLoadContractSession = async () => {
     if (!contractAddress || !contractChain) return;
-    
+    setError('');
     try {
       setIsLoading(true);
       const response = await api.chat.createSession({

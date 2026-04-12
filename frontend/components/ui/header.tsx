@@ -11,6 +11,7 @@ const NAV_AUTH = [
   { href: '/analyzer',  label: 'Traction' },
   { href: '/alerts',    label: 'Alerts' },
   { href: '/chat',      label: 'AI Chat' },
+  { href: '/developers', label: 'API' },
 ];
 const NAV_PUBLIC = [
   { href: '/', label: 'Home' },
@@ -23,12 +24,43 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+  const [openTasks, setOpenTasks] = useState(0);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const load = () => Promise.all([
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/traction/productivity`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+        .then(r => r.json()).catch(() => ({ open: 0 })),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/alerts`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+        .then(r => r.json()).catch(() => ({ alerts: [] })),
+    ]).then(([prod, alertData]) => {
+      const unread = (alertData.alerts || []).filter((a: any) => !a.is_read).length;
+      setOpenTasks(prod.open || 0);
+      setNotifCount((prod.open || 0) + unread);
+    });
+    load();
+    const interval = setInterval(load, 60000);
+    window.addEventListener('notifications-refresh', load);
+
+    // Real-time: bump count immediately when a new alert arrives via WebSocket
+    const wsUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/^http/, 'ws');
+    const ws = new WebSocket(`${wsUrl}/ws`);
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'alert') setNotifCount(n => n + 1);
+      } catch {}
+    };
+
+    return () => { clearInterval(interval); ws.close(); window.removeEventListener('notifications-refresh', load); };
+  }, [isAuthenticated]);
 
   // Close menus on route change
   useEffect(() => { setMobileOpen(false); setUserMenu(false); }, [pathname]);
@@ -90,10 +122,16 @@ export function Header() {
 
             {isAuthenticated ? (
               <>
-                {/* Alerts icon */}
-                <Link href="/alerts"
-                  className="w-9 h-9 rounded-lg hidden sm:flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all">
+                {/* Notifications icon with badge */}
+                <Link href={openTasks > 0 ? '/analyzer' : '/alerts'}
+                  className="w-9 h-9 rounded-lg hidden sm:flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all relative"
+                  title={openTasks > 0 ? `${openTasks} open tasks` : 'Alerts'}>
                   <Bell className="w-4 h-4" />
+                  {notifCount > 0 && (
+                    <span className="absolute top-1 right-1 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-0.5 leading-none">
+                      {notifCount > 99 ? '99+' : notifCount}
+                    </span>
+                  )}
                 </Link>
 
                 {/* User dropdown */}

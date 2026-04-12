@@ -9,8 +9,11 @@ import {
   User, 
   Bot,
   Copy,
-  Check
+  Check,
+  ThumbsUp,
+  ThumbsDown,
 } from 'lucide-react';
+import { api } from '@/lib/api';
 import { 
   LineChart, 
   Line, 
@@ -51,6 +54,7 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message, isLoading }: ChatMessageProps) {
   const [copiedComponent, setCopiedComponent] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<number | null>(null);
 
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
@@ -251,17 +255,17 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                           <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke='hsl(var(--border))' opacity={0.6} />
                       <XAxis 
                         dataKey="label" 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <YAxis 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <Tooltip 
                         contentStyle={{ 
@@ -284,8 +288,8 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                         dataKey="value" 
                         stroke={chartColors.primary}
                         strokeWidth={3}
-                        dot={{ fill: chartColors.primary, strokeWidth: 2, r: 5, stroke: '#ffffff' }}
-                        activeDot={{ r: 7, stroke: chartColors.primary, strokeWidth: 2, fill: '#ffffff' }}
+                        dot={{ fill: chartColors.primary, strokeWidth: 2, r: 5, stroke: 'hsl(var(--card))' }}
+                        activeDot={{ r: 7, stroke: chartColors.primary, strokeWidth: 2, fill: 'hsl(var(--card))' }}
                       />
                       {/* Support for multiple series */}
                       {component.data?.series && component.data.series.map((seriesKey: string, index: number) => (
@@ -295,11 +299,11 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                           dataKey={seriesKey}
                           stroke={getChartColor(index + 1)}
                           strokeWidth={3}
-                          dot={{ fill: getChartColor(index + 1), strokeWidth: 2, r: 4, stroke: '#ffffff' }}
-                          activeDot={{ r: 6, stroke: getChartColor(index + 1), strokeWidth: 2, fill: '#ffffff' }}
+                          dot={{ fill: getChartColor(index + 1), strokeWidth: 2, r: 4, stroke: 'hsl(var(--card))' }}
+                          activeDot={{ r: 6, stroke: getChartColor(index + 1), strokeWidth: 2, fill: 'hsl(var(--card))' }}
                         />
                       ))}
-                      {component.data?.series && <Legend wrapperStyle={{ fontSize: '12px', color: '#64748b' }} />}
+                      {component.data?.series && <Legend wrapperStyle={{ fontSize: '11px', color: 'hsl(var(--muted-foreground))' }} />}
                     </LineChart>
                   )}
                   {component.data?.type === 'bar' && (
@@ -317,17 +321,17 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                           </linearGradient>
                         ))}
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke='hsl(var(--border))' opacity={0.6} />
                       <XAxis 
                         dataKey="label" 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <YAxis 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <Tooltip 
                         contentStyle={{ 
@@ -355,7 +359,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                           strokeWidth={1}
                         />
                       ))}
-                      {component.data?.series && <Legend wrapperStyle={{ fontSize: '12px', color: '#64748b' }} />}
+                      {component.data?.series && <Legend wrapperStyle={{ fontSize: '11px', color: 'hsl(var(--muted-foreground))' }} />}
                     </BarChart>
                   )}
                   {component.data?.type === 'area' && (
@@ -366,17 +370,17 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                           <stop offset="95%" stopColor={chartColors.tertiary} stopOpacity={0.1}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke='hsl(var(--border))' opacity={0.6} />
                       <XAxis 
                         dataKey="label" 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <YAxis 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <Tooltip 
                         contentStyle={{ 
@@ -413,8 +417,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                         outerRadius={85}
                         paddingAngle={3}
                         dataKey="value"
-                        stroke="#ffffff"
-                        strokeWidth={2}
+                        strokeWidth={0}
                       >
                         {(component.data?.data || []).map((entry: any, index: number) => (
                           <Cell 
@@ -432,7 +435,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                         }}
                       />
                       <Legend 
-                        wrapperStyle={{ fontSize: '12px', color: '#64748b' }}
+                        wrapperStyle={{ fontSize: '11px', color: 'hsl(var(--muted-foreground))' }}
                       />
                     </PieChart>
                   )}
@@ -444,17 +447,17 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                           <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0.6}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke='hsl(var(--border))' opacity={0.6} />
                       <XAxis 
                         dataKey="label" 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <YAxis 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <Tooltip 
                         contentStyle={{ 
@@ -464,7 +467,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                         }}
                       />
-                      <Legend wrapperStyle={{ fontSize: '12px', color: '#64748b' }} />
+                      <Legend wrapperStyle={{ fontSize: '11px', color: 'hsl(var(--muted-foreground))' }} />
                       <Bar 
                         dataKey="volume" 
                         fill="url(#composedBarGradient)" 
@@ -483,18 +486,18 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                   )}
                   {component.data?.type === 'scatter' && (
                     <ScatterChart data={component.data?.data || []}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke='hsl(var(--border))' opacity={0.6} />
                       <XAxis 
                         dataKey="x" 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <YAxis 
                         dataKey="y"
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        tickLine={{ stroke: '#cbd5e1' }}
-                        axisLine={{ stroke: '#cbd5e1' }}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--border))' }}
+                        axisLine={{ stroke: 'hsl(var(--border))' }}
                       />
                       <Tooltip 
                         contentStyle={{ 
@@ -524,10 +527,10 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                       <PolarGrid stroke="#cbd5e1" />
                       <PolarAngleAxis 
                         dataKey="label" 
-                        tick={{ fontSize: 12, fill: '#64748b' }} 
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} 
                       />
                       <PolarRadiusAxis 
-                        tick={{ fontSize: 12, fill: '#64748b' }} 
+                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} 
                         tickCount={4}
                       />
                       <Radar
@@ -629,7 +632,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                   {component.data?.confidence || 0}% confidence
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-sm text-foreground mb-2">
                 {component.data?.insight || 'No insight provided'}
               </p>
               <Badge variant="secondary" className="text-xs">
@@ -704,9 +707,9 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
           {/* Message Bubble */}
           {message.content && (
             <div className={`inline-block p-3 rounded-lg mb-2 ${
-              isUser 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted text-foreground'
+              isUser
+                ? 'bg-primary text-white'
+                : 'bg-zinc-900 dark:bg-zinc-800 text-white'
             }`}>
               <p className="whitespace-pre-wrap text-sm">{message.content}</p>
             </div>
@@ -740,6 +743,26 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
                   <Copy className="h-3 w-3" />
                 )}
               </Button>
+            )}
+            {!isUser && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setFeedback(1); api.agent.feedback({ messageId: message.id, rating: 1 }).catch(() => {}); }}
+                  className="h-4 w-4 p-0 ml-1"
+                >
+                  <ThumbsUp className={`h-3 w-3 ${feedback === 1 ? 'text-green-600 fill-green-600' : ''}`} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setFeedback(-1); api.agent.feedback({ messageId: message.id, rating: -1 }).catch(() => {}); }}
+                  className="h-4 w-4 p-0 ml-1"
+                >
+                  <ThumbsDown className={`h-3 w-3 ${feedback === -1 ? 'text-red-500 fill-red-500' : ''}`} />
+                </Button>
+              </>
             )}
           </div>
         </div>

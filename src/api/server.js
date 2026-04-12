@@ -29,7 +29,8 @@ import { initializeIndexerRoutes } from './routes/indexer.js';
 import analyzerRoutes from './routes/analyzer.js';
 import functionsRoutes from './routes/functions.js';
 import alertRoutes from './routes/alerts.js';
-import billingRoutes from './routes/billing.js';
+import billingRoutes, { stripeWebhookHandler } from './routes/billing.js';
+import supportRoutes from './routes/support.js';
 import metricsRoutes from './routes/metrics.js';
 import dashboardRoutes from './routes/dashboard.js';
 import tractionRoutes from './routes/traction.js';
@@ -38,9 +39,10 @@ import { walletAnalyticsRouter } from './routes/wallet-analytics.js';
 import monitoringRoutes from './routes/monitoring.js';
 import indexingRoutes from './routes/indexing.js';
 import { resumeLivePoll } from './routes/trigger-indexing.js';
+import agentRoutes from './routes/agent.js';
 
 // Import middleware
-import { authenticateToken } from './middleware/auth.js';
+import { authenticateToken, verifyToken } from './middleware/auth.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestLogger } from './middleware/logger.js';
 
@@ -103,15 +105,18 @@ wss.on('connection', (ws, req) => {
   
   let userId = null;
   
-  ws.on('message', (message) => {
+  ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message);
       
-      // Register user
-      if (data.type === 'register' && data.userId) {
-        userId = data.userId;
-        wsManager?.registerClient(userId, ws);
-        console.log(`✅ WebSocket client registered: ${userId}`);
+      if (data.type === 'register' && data.token) {
+        try {
+          const decoded = verifyToken(data.token);
+          userId = decoded.userId;
+          wsManager?.registerClient(userId, ws);
+        } catch {
+          ws.close(1008, 'Invalid token');
+        }
       }
     } catch (error) {
       console.error('❌ WebSocket message error:', error);
@@ -139,6 +144,7 @@ app.use(cors({
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     /^http:\/\/192\.168\.\d+\.\d+:3000$/, // Allow local network IPs
+    /^http:\/\/172\.\d+\.\d+\.\d+:3000$/, // Allow WSL2 network IPs
     config.frontendUrl
   ].filter(Boolean),
   credentials: true,
@@ -146,14 +152,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Stripe webhook — must be BEFORE express.json() to get raw body
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), stripeWebhookHandler);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 200 : 2000,
   message: {
     error: 'Too many requests from this IP, please try again later.'
   }
@@ -168,6 +177,7 @@ const limiter = rateLimit({
 // });
 
 // app.use(limiter); // Temporarily disabled for testing
+app.use(limiter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -224,86 +234,30 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 
-// TEMPORARY: Simple test registration endpoint
-app.post('/api/test-register', async (req, res) => {
-  console.log('[TEST-REGISTER] Request received:', req.body);
-  try {
-    res.json({ 
-      success: true, 
-      message: 'Test registration endpoint working',
-      body: req.body 
-    });
-  } catch (error) {
-    console.error('[TEST-REGISTER] Error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Public chat routes (no authentication required)
-app.get('/api/chat/suggested-questions', async (req, res) => {
-  try {
-    console.log('Public suggested questions endpoint hit:', req.query);
-    
-    const { contractAddress, contractChain } = req.query;
-
-    if (!contractAddress || !contractChain) {
-      return res.status(400).json({
-        error: 'Missing required parameters',
-        message: 'contractAddress and contractChain are required'
-      });
-    }
-
-    // Import ChatAIService
-    const { default: ChatAIService } = await import('../services/ChatAIService.js');
-
-    // Get contract context (using anonymous user)
-    const contractContext = await ChatAIService.getContractContext(
-      'anonymous', 
-      contractAddress, 
-      contractChain
-    );
-
-    // Generate suggested questions
-    const questions = await ChatAIService.generateSuggestedQuestions(contractContext);
-
-    res.json({
-      questions: questions,
-      contractAddress,
-      contractChain,
-      total: questions.length,
-      aiEnabled: ChatAIService.isEnabled()
-    });
-
-  } catch (error) {
-    console.error('Suggested questions error:', error);
-    res.status(500).json({
-      error: 'Failed to generate suggested questions',
-      message: error.message
-    });
-  }
-});
-
 app.use('/api/contracts', authenticateToken, contractRoutes);
-app.use('/api/analysis', authenticateToken, analysisRoutes); // analysisLimiter temporarily disabled for testing
-app.use('/api/analysis', authenticateToken, quickScanRoutes); // Quick scan route
-app.use('/api/analyzer', authenticateToken, analyzerRoutes); // Optimized analyzer route
-app.use('/api/functions', authenticateToken, functionsRoutes); // Function signature analytics
+app.use('/api/analysis', authenticateToken, analysisRoutes);
+app.use('/api/analysis', authenticateToken, quickScanRoutes);
+app.use('/api/analyzer', authenticateToken, analyzerRoutes);
+app.use('/api/functions', authenticateToken, functionsRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
 app.use('/api/onboarding', authenticateToken, onboardingRoutes);
-app.use('/api/subscription', subscriptionRoutes); // Some routes require auth, some don't
-app.use('/api/faucet', faucetRoutes); // Public faucet endpoints
+app.use('/api/subscription', authenticateToken, subscriptionRoutes);
+app.use('/api/faucet', authenticateToken, faucetRoutes);
 
 // Alert configuration routes
 app.use('/api/alerts', authenticateToken, alertRoutes);
 
-app.use('/api/billing', billingRoutes); // auth handled inside billing.js
+app.use('/api/billing', authenticateToken, billingRoutes);
+app.use('/api/support', authenticateToken, supportRoutes);
 
 app.use('/api/metrics', authenticateToken, metricsRoutes);
 
 app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 
 app.use('/api/traction', authenticateToken, tractionRoutes);
+
+app.use('/api/agent', authenticateToken, agentRoutes);
 
 app.use('/api/competitive', authenticateToken, competitiveRouter);
 
@@ -312,12 +266,6 @@ app.use('/api/functions/wallet-analytics', authenticateToken, walletAnalyticsRou
 app.use('/api/monitoring', authenticateToken, monitoringRoutes);
 
 app.use('/api/indexing', authenticateToken, indexingRoutes);
-
-// Streaming indexer routes
-if (streamingIndexer) {
-  const indexerRoutes = initializeIndexerRoutes(streamingIndexer);
-  app.use('/api/indexer', authenticateToken, indexerRoutes);
-}
 
 // Serve OpenAPI documentation
 app.use('/api-docs', express.static(join(__dirname, 'docs')));
@@ -409,6 +357,15 @@ async function startServer() {
       initializeIndexerAsync().catch(err => {
         console.error('❌ Indexer initialization failed:', err);
       });
+
+      // Start proactive agent
+      import('../services/ProactiveAgent.js').then(({ ProactiveAgent }) => {
+        ProactiveAgent.init(wsManager);
+      }).catch(err => console.warn('⚠️ ProactiveAgent failed to start:', err.message));
+
+      import('../scripts/monitoring-billing.js').then(({ startMonitoringBillingScheduler }) => {
+        startMonitoringBillingScheduler();
+      }).catch(err => console.warn('⚠️ Monitoring billing scheduler failed:', err.message));
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

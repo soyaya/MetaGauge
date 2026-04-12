@@ -1,13 +1,5 @@
-/**
- * AbuseDetectionService
- * Tracks fingerprints, disposable emails, and suspicious patterns
- */
 import crypto from 'crypto';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 
-const STORE_FILE = './data/abuse-fingerprints.json';
-
-// Known disposable email domains
 const DISPOSABLE_DOMAINS = new Set([
   'mailinator.com','tempmail.com','guerrillamail.com','10minutemail.com',
   'throwaway.email','yopmail.com','sharklasers.com','guerrillamailblock.com',
@@ -17,18 +9,17 @@ const DISPOSABLE_DOMAINS = new Set([
   'spamgourmet.com','spamgourmet.net','spamgourmet.org','maildrop.cc',
   'discard.email','spamfree24.org','spamfree24.de','spamfree24.eu',
   'spamfree24.info','spamfree24.net','spamfree24.org','fakeinbox.com',
-  'mailnesia.com','mailnull.com','spamspot.com','spamthisplease.com',
-  'tempr.email','discard.email','spamgourmet.com','trashmail.at',
-  'trashmail.io','trashmail.xyz','tempinbox.com','throwam.com',
+  'mailnesia.com','spamspot.com','spamthisplease.com',
+  'tempr.email','trashmail.at','trashmail.io','trashmail.xyz','tempinbox.com','throwam.com',
 ]);
 
-function readStore() {
-  if (!existsSync(STORE_FILE)) return { fingerprints: {}, emailDomains: {}, contractAddresses: {} };
-  try { return JSON.parse(readFileSync(STORE_FILE, 'utf8')); } catch { return { fingerprints: {}, emailDomains: {}, contractAddresses: {} }; }
+async function readStore() {
+  const { AbuseFingerprintsStorage } = await import('../api/database/index.js');
+  return AbuseFingerprintsStorage.read();
 }
-
-function writeStore(data) {
-  try { writeFileSync(STORE_FILE, JSON.stringify(data, null, 2)); } catch {}
+async function writeStore(data) {
+  const { AbuseFingerprintsStorage } = await import('../api/database/index.js');
+  return AbuseFingerprintsStorage.write(data);
 }
 
 export class AbuseDetectionService {
@@ -59,7 +50,11 @@ export class AbuseDetectionService {
    * Returns { allowed, reason }
    */
   static checkRegistration(req, email) {
-    const store = readStore();
+    return this._checkRegistration(req, email);
+  }
+
+  static async _checkRegistration(req, email) {
+    const store = await readStore();
     const now = Date.now();
     const ip = req.ip || '';
     const fingerprint = this.getDeviceFingerprint(req);
@@ -94,16 +89,12 @@ export class AbuseDetectionService {
       if (!store.emailDomains[domain]) store.emailDomains[domain] = [];
       store.emailDomains[domain].push(now);
     }
-    writeStore(store);
-
+    await writeStore(store);
     return { allowed: true };
   }
 
-  /**
-   * Check if a contract address is being abused (same contract across many accounts)
-   */
-  static checkContractAbuse(contractAddress, userId) {
-    const store = readStore();
+  static async checkContractAbuse(contractAddress, userId) {
+    const store = await readStore();
     const addr = contractAddress?.toLowerCase();
     if (!addr) return { allowed: true };
 
@@ -120,7 +111,7 @@ export class AbuseDetectionService {
     }
 
     store.contractAddresses[addr].push({ userId, ts: now });
-    writeStore(store);
+    await writeStore(store);
     return { allowed: true };
   }
 }

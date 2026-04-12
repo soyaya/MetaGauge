@@ -9,11 +9,12 @@ import { query, transaction } from './postgres.js';
 function toCamelCase(obj) {
   if (!obj || typeof obj !== 'object') return obj;
   if (Array.isArray(obj)) return obj.map(toCamelCase);
+  if (obj instanceof Date) return obj;
   
   const result = {};
   for (const [key, value] of Object.entries(obj)) {
     const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-    result[camelKey] = value && typeof value === 'object' && !Array.isArray(value) 
+    result[camelKey] = value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)
       ? toCamelCase(value) 
       : value;
   }
@@ -24,11 +25,14 @@ function toCamelCase(obj) {
 function toSnakeCase(obj) {
   if (!obj || typeof obj !== 'object') return obj;
   if (Array.isArray(obj)) return obj;
-  
+  if (obj instanceof Date) return obj;
+
   const result = {};
   for (const [key, value] of Object.entries(obj)) {
     const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-    result[snakeKey] = value;
+    result[snakeKey] = value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)
+      ? toSnakeCase(value)
+      : value;
   }
   return result;
 }
@@ -214,60 +218,91 @@ export class PostgresUserStorage {
 
   // Onboarding methods
   static async getOnboarding(userId) {
-    const result = await query(
-      'SELECT * FROM user_onboarding WHERE user_id = $1',
-      [userId]
-    );
+    const result = await query('SELECT * FROM user_onboarding WHERE user_id = $1', [userId]);
     if (!result.rows[0]) return null;
-    
-    const onboarding = toCamelCase(result.rows[0]);
-    
-    // Parse JSONB fields
-    if (typeof onboarding.socialLinks === 'string') {
-      onboarding.socialLinks = JSON.parse(onboarding.socialLinks);
-    }
-    if (typeof onboarding.defaultContract === 'string') {
-      onboarding.defaultContract = JSON.parse(onboarding.defaultContract);
-    }
-    
-    // Remove internal fields
-    delete onboarding.id;
-    delete onboarding.userId;
-    
-    return onboarding;
+    const row = result.rows[0];
+
+    // Reconstruct the nested shape expected by the app
+    return {
+      completed: row.completed,
+      logo: row.logo,
+      socialLinks: {
+        website:  row.website  || null,
+        twitter:  row.twitter  || null,
+        discord:  row.discord  || null,
+        telegram: row.telegram || null,
+      },
+      defaultContract: {
+        address:              row.contract_address    || null,
+        chain:                row.contract_chain      || null,
+        abi:                  row.contract_abi        || null,
+        name:                 row.contract_name       || null,
+        purpose:              row.contract_purpose    || null,
+        category:             row.contract_category   || null,
+        startDate:            row.contract_start_date || null,
+        isIndexed:            row.is_indexed          || false,
+        indexingProgress:     row.indexing_progress   || 0,
+        lastAnalysisId:       row.last_analysis_id    || null,
+        currentStep:          row.current_step        || null,
+        continuousSync:       row.continuous_sync     || false,
+        continuousSyncStarted:row.continuous_sync_started || null,
+        continuousSyncStopped:row.continuous_sync_stopped || null,
+        deploymentBlock:      row.deployment_block    || null,
+      },
+    };
   }
 
   static async updateOnboarding(userId, data) {
-    // Handle JSONB fields separately
-    const jsonbFields = ['socialLinks', 'defaultContract'];
-    const regularData = {};
-    const jsonbData = {};
-    
+    // socialLinks is stored as separate columns (website, twitter, discord, telegram)
+    // defaultContract fields are stored as separate columns too
+    const snakeData = {};
+
+    // Expand socialLinks into individual columns
+    if (data.socialLinks) {
+      if (data.socialLinks.website  !== undefined) snakeData.website  = data.socialLinks.website;
+      if (data.socialLinks.twitter  !== undefined) snakeData.twitter  = data.socialLinks.twitter;
+      if (data.socialLinks.discord  !== undefined) snakeData.discord  = data.socialLinks.discord;
+      if (data.socialLinks.telegram !== undefined) snakeData.telegram = data.socialLinks.telegram;
+    }
+
+    // Expand defaultContract into individual columns
+    if (data.defaultContract) {
+      const dc = data.defaultContract;
+      if (dc.address          !== undefined) snakeData.contract_address    = dc.address;
+      if (dc.chain            !== undefined) snakeData.contract_chain      = dc.chain;
+      if (dc.abi              !== undefined) snakeData.contract_abi        = dc.abi;
+      if (dc.name             !== undefined) snakeData.contract_name       = dc.name;
+      if (dc.purpose          !== undefined) snakeData.contract_purpose    = dc.purpose;
+      if (dc.category         !== undefined) snakeData.contract_category   = dc.category;
+      if (dc.startDate        !== undefined) snakeData.contract_start_date = dc.startDate;
+      if (dc.isIndexed        !== undefined) snakeData.is_indexed          = dc.isIndexed;
+      if (dc.indexingProgress !== undefined) snakeData.indexing_progress   = dc.indexingProgress;
+      if (dc.lastAnalysisId   !== undefined) snakeData.last_analysis_id    = dc.lastAnalysisId;
+      if (dc.currentStep      !== undefined) snakeData.current_step        = dc.currentStep;
+      if (dc.continuousSync   !== undefined) snakeData.continuous_sync     = dc.continuousSync;
+      if (dc.continuousSyncStarted !== undefined) snakeData.continuous_sync_started = dc.continuousSyncStarted;
+      if (dc.continuousSyncStopped !== undefined) snakeData.continuous_sync_stopped = dc.continuousSyncStopped;
+      if (dc.deploymentBlock  !== undefined) snakeData.deployment_block    = dc.deploymentBlock;
+    }
+
+    // All other top-level fields (completed, logo, etc.)
+    const skip = new Set(['socialLinks','defaultContract']);
     for (const [key, value] of Object.entries(data)) {
-      if (jsonbFields.includes(key)) {
-        jsonbData[key] = value;
-      } else {
-        regularData[key] = value;
+      if (!skip.has(key)) {
+        const snakeKey = key.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`);
+        snakeData[snakeKey] = value;
       }
     }
-    
-    // Convert regular fields to snake_case
-    const snakeData = toSnakeCase(regularData);
-    
-    // Add JSONB fields as-is (they'll be stored as JSON)
-    if (jsonbData.socialLinks) snakeData.social_links = JSON.stringify(jsonbData.socialLinks);
-    if (jsonbData.defaultContract) snakeData.default_contract = JSON.stringify(jsonbData.defaultContract);
-    
-    // Remove fields that shouldn't be updated manually
+
+    // Remove internal fields
     delete snakeData.id;
     delete snakeData.user_id;
     delete snakeData.created_at;
     delete snakeData.updated_at;
-    
-    const fields = Object.keys(snakeData)
-      .map((key, i) => `${key} = $${i + 2}`)
-      .join(', ');
-    
+
+    if (Object.keys(snakeData).length === 0) return null;
+
+    const fields = Object.keys(snakeData).map((key, i) => `${key} = $${i + 2}`).join(', ');
     const values = Object.values(snakeData);
 
     const result = await query(`
@@ -971,5 +1006,540 @@ export class PostgresChatMessageStorage {
   static async getRecentContext(sessionId, limit = 10) {
     const messages = await this.findBySessionId(sessionId, limit);
     return messages.slice(-limit);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Metrics
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresMetricsStorage {
+  static async get(userId) {
+    const r = await query('SELECT data FROM metrics WHERE user_id = $1', [userId]);
+    return r.rows[0]?.data || {};
+  }
+  static async save(userId, data) {
+    await query(`INSERT INTO metrics(user_id, data) VALUES($1,$2)
+      ON CONFLICT(user_id) DO UPDATE SET data=$2, updated_at=NOW()`,
+      [userId, JSON.stringify(data)]);
+  }
+}
+
+export class PostgresMetricsHistoryStorage {
+  static async get(userId) {
+    const r = await query('SELECT date, snapshot FROM metrics_history WHERE user_id=$1 ORDER BY date ASC', [userId]);
+    return r.rows.map(row => ({ date: row.date.toISOString().slice(0,10), ...row.snapshot }));
+  }
+  static async append(userId, snapshot) {
+    const date = new Date().toISOString().slice(0,10);
+    await query(`INSERT INTO metrics_history(user_id, date, snapshot) VALUES($1,$2,$3)
+      ON CONFLICT(user_id, date) DO UPDATE SET snapshot=$3`,
+      [userId, date, JSON.stringify(snapshot)]);
+    // Keep last 90 days
+    await query(`DELETE FROM metrics_history WHERE user_id=$1 AND date < NOW() - INTERVAL '90 days'`, [userId]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Live Poll
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresLivePollStorage {
+  static async get(userId) {
+    const r = await query('SELECT data, contract_address, contract_chain, last_block, active FROM live_poll WHERE user_id=$1', [userId]);
+    if (!r.rows[0]) return { lastBlock: null, updatedAt: null };
+    const row = r.rows[0];
+    return { ...row.data, contractAddress: row.contract_address, contractChain: row.contract_chain, lastBlock: row.last_block, active: row.active };
+  }
+  static async save(userId, data) {
+    await query(`INSERT INTO live_poll(user_id, contract_address, contract_chain, last_block, active, data)
+      VALUES($1,$2,$3,$4,$5,$6)
+      ON CONFLICT(user_id) DO UPDATE SET
+        contract_address=$2, contract_chain=$3, last_block=$4, active=$5, data=$6, updated_at=NOW()`,
+      [userId, data.contractAddress||null, data.contractChain||null,
+       data.lastBlock||null, data.active||false, JSON.stringify(data)]);
+  }
+  static async getAllActive() {
+    const r = await query('SELECT user_id, data, contract_address, contract_chain, last_block FROM live_poll WHERE active=true');
+    return r.rows.map(row => ({ userId: row.user_id, ...row.data, contractAddress: row.contract_address, contractChain: row.contract_chain, lastBlock: row.last_block }));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Traction
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresTractionStorage {
+  static async get(userId) {
+    const r = await query('SELECT productivity_score, tasks, last_checked FROM traction WHERE user_id=$1', [userId]);
+    if (!r.rows[0]) return { productivityScore: 0, tasks: [], lastChecked: null, updatedAt: null };
+    return { productivityScore: r.rows[0].productivity_score, tasks: r.rows[0].tasks || [], lastChecked: r.rows[0].last_checked, updatedAt: null };
+  }
+  static async save(userId, data) {
+    await query(`INSERT INTO traction(user_id, productivity_score, tasks, last_checked)
+      VALUES($1,$2,$3,$4)
+      ON CONFLICT(user_id) DO UPDATE SET productivity_score=$2, tasks=$3, last_checked=$4, updated_at=NOW()`,
+      [userId, data.productivityScore||0, JSON.stringify(data.tasks||[]), data.lastChecked||null]);
+    return data;
+  }
+  static async syncTasks(userId, generatedTasks) {
+    const store = await this.get(userId);
+    const existingMap = Object.fromEntries((store.tasks||[]).map(t => [t.id, t]));
+    const failingIds = new Set(generatedTasks.map(t => t.id));
+    const syncedFailing = generatedTasks.map(t => {
+      const existing = existingMap[t.id];
+      const userResolved = existing?.resolvedBy === 'user';
+      return { ...t, status: userResolved ? 'resolved' : 'open', autoGreen: false,
+        resolvedAt: existing?.resolvedAt||null, userFeedback: existing?.userFeedback||null,
+        resolvedBy: existing?.resolvedBy||null, pendingConfirmation: userResolved };
+    });
+    const confirmedResolved = (store.tasks||[])
+      .filter(t => t.resolvedBy === 'user' && !failingIds.has(t.id))
+      .map(t => ({ ...t, pendingConfirmation: false, autoGreen: true }));
+    store.tasks = [...syncedFailing, ...confirmedResolved];
+    const resolved = store.tasks.filter(t => t.status === 'resolved').length;
+    store.productivityScore = store.tasks.length ? Math.round((resolved/store.tasks.length)*100) : 0;
+    store.lastChecked = new Date().toISOString();
+    return this.save(userId, store);
+  }
+  static async resolveTask(userId, taskId, { resolvedBy='auto', userFeedback=null } = {}) {
+    const store = await this.get(userId);
+    const task = (store.tasks||[]).find(t => t.id === taskId);
+    if (!task) return null;
+    task.status = 'resolved'; task.autoGreen = resolvedBy==='auto';
+    task.resolvedAt = new Date().toISOString(); task.resolvedBy = resolvedBy; task.userFeedback = userFeedback;
+    const resolved = store.tasks.filter(t => t.status==='resolved').length;
+    store.productivityScore = Math.round((resolved/store.tasks.length)*100);
+    await this.save(userId, store);
+    return task;
+  }
+  static async reopenTask(userId, taskId) {
+    const store = await this.get(userId);
+    const task = (store.tasks||[]).find(t => t.id === taskId);
+    if (!task) return null;
+    task.status = 'open'; task.autoGreen = false; task.resolvedAt = null; task.resolvedBy = null;
+    const resolved = store.tasks.filter(t => t.status==='resolved').length;
+    store.productivityScore = Math.round((resolved/store.tasks.length)*100);
+    await this.save(userId, store);
+    return task;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Alert Configs
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAlertConfigStorage {
+  static async create(configData) {
+    const id = `alert-config-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
+    const data = { ...configData, id };
+    await query('INSERT INTO alert_configs(id, user_id, contract_id, data) VALUES($1,$2,$3,$4)',
+      [id, configData.userId, configData.contractId||null, JSON.stringify(data)]);
+    return data;
+  }
+  static async findById(id) {
+    const r = await query('SELECT data FROM alert_configs WHERE id=$1', [id]);
+    return r.rows[0]?.data || null;
+  }
+  static async findByUserId(userId) {
+    const r = await query('SELECT data FROM alert_configs WHERE user_id=$1 ORDER BY created_at DESC', [userId]);
+    return r.rows.map(row => row.data);
+  }
+  static async findByUserAndContract(userId, contractId) {
+    const r = await query('SELECT data FROM alert_configs WHERE user_id=$1 AND contract_id=$2 LIMIT 1', [userId, contractId]);
+    return r.rows[0]?.data || null;
+  }
+  static async update(id, updates) {
+    const existing = await this.findById(id);
+    if (!existing) return null;
+    const updated = { ...existing, ...updates, updatedAt: new Date().toISOString() };
+    await query('UPDATE alert_configs SET data=$2, updated_at=NOW() WHERE id=$1', [id, JSON.stringify(updated)]);
+    return updated;
+  }
+  static async delete(id) {
+    await query('DELETE FROM alert_configs WHERE id=$1', [id]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Alerts (triggered notifications)
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAlertsStorage {
+  static async findByUserId(userId) {
+    const r = await query('SELECT id, type, message, is_read, acknowledged_at, data, created_at FROM alerts WHERE user_id=$1 ORDER BY created_at DESC', [userId]);
+    return r.rows.map(row => ({ id: row.id, userId, type: row.type, message: row.message, is_read: row.is_read, acknowledged_at: row.acknowledged_at, ...row.data, created_at: row.created_at }));
+  }
+  static async create(alertData) {
+    const r = await query('INSERT INTO alerts(user_id, type, message, data) VALUES($1,$2,$3,$4) RETURNING id, created_at',
+      [alertData.userId, alertData.type||null, alertData.message||null, JSON.stringify(alertData)]);
+    return { ...alertData, id: r.rows[0].id, created_at: r.rows[0].created_at };
+  }
+  static async acknowledge(id, userId) {
+    await query('UPDATE alerts SET is_read=true, acknowledged_at=NOW() WHERE id=$1 AND user_id=$2', [id, userId]);
+  }
+  static async readAll(userId) {
+    await query('UPDATE alerts SET is_read=true WHERE user_id=$1', [userId]);
+  }
+  // Compatibility: read/write as array (used by AlertEngine inline code)
+  static async readAll_array() {
+    const r = await query('SELECT user_id, id, type, message, is_read, acknowledged_at, data, created_at FROM alerts ORDER BY created_at DESC');
+    return r.rows.map(row => ({ ...row.data, id: row.id, userId: row.user_id, is_read: row.is_read, acknowledged_at: row.acknowledged_at }));
+  }
+  static async writeAll_array(alerts) {
+    // Used only during migration — not for normal operation
+    for (const a of alerts) {
+      await query(`INSERT INTO alerts(id, user_id, type, message, is_read, data)
+        VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING`,
+        [a.id||crypto.randomUUID(), a.userId, a.type||null, a.message||null, a.is_read||false, JSON.stringify(a)]);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Agent Config
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAgentConfigStorage {
+  static async get(userId) {
+    const r = await query('SELECT data FROM agent_configs WHERE user_id=$1', [userId]);
+    return r.rows[0]?.data || null;
+  }
+  static async save(userId, data) {
+    await query(`INSERT INTO agent_configs(user_id, data) VALUES($1,$2)
+      ON CONFLICT(user_id) DO UPDATE SET data=$2, updated_at=NOW()`,
+      [userId, JSON.stringify(data)]);
+    return data;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Agent Memory
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAgentMemoryStorage {
+  static async read(userId) {
+    const r = await query('SELECT insights, resolved_issues, preferences, contract_summary FROM agent_memory WHERE user_id=$1', [userId]);
+    if (!r.rows[0]) return { insights:[], resolvedIssues:[], preferences:[], contractSummary:null, updatedAt:null };
+    const row = r.rows[0];
+    return { insights: row.insights||[], resolvedIssues: row.resolved_issues||[], preferences: row.preferences||[], contractSummary: row.contract_summary, updatedAt: null };
+  }
+  static async write(userId, data) {
+    await query(`INSERT INTO agent_memory(user_id, insights, resolved_issues, preferences, contract_summary)
+      VALUES($1,$2,$3,$4,$5)
+      ON CONFLICT(user_id) DO UPDATE SET insights=$2, resolved_issues=$3, preferences=$4, contract_summary=$5, updated_at=NOW()`,
+      [userId, JSON.stringify(data.insights||[]), JSON.stringify(data.resolvedIssues||[]),
+       JSON.stringify(data.preferences||[]), data.contractSummary||null]);
+  }
+  static async buildContext(userId) {
+    const mem = await this.read(userId);
+    const parts = [];
+    if (mem.contractSummary) parts.push(`CONTRACT SUMMARY: ${mem.contractSummary}`);
+    if (mem.insights?.length) parts.push(`PAST INSIGHTS:\n${mem.insights.slice(-5).map(i=>`- ${i}`).join('\n')}`);
+    if (mem.resolvedIssues?.length) parts.push(`RESOLVED ISSUES:\n${mem.resolvedIssues.slice(-5).map(i=>`- ${i}`).join('\n')}`);
+    if (mem.preferences?.length) parts.push(`USER PREFERENCES:\n${mem.preferences.slice(-3).map(p=>`- ${p}`).join('\n')}`);
+    return parts.length ? `\n=== AGENT MEMORY ===\n${parts.join('\n')}\n` : '';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Tasks
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAITasksStorage {
+  static async readAll() {
+    const r = await query('SELECT data FROM ai_tasks ORDER BY created_at ASC');
+    return r.rows.map(row => row.data);
+  }
+  static async findByUserId(userId) {
+    const r = await query('SELECT data FROM ai_tasks WHERE user_id=$1 ORDER BY created_at ASC', [userId]);
+    return r.rows.map(row => row.data);
+  }
+  static async upsert(task) {
+    await query(`INSERT INTO ai_tasks(id, user_id, data) VALUES($1,$2,$3)
+      ON CONFLICT(id) DO UPDATE SET data=$3, updated_at=NOW()`,
+      [task.id, task.userId, JSON.stringify(task)]);
+    return task;
+  }
+  static async writeAll(tasks) {
+    for (const t of tasks) await this.upsert(t);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Competitor Data
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresCompetitorDataStorage {
+  static async get(userId, address, chain) {
+    const r = await query('SELECT name, transactions, metrics, updated_at FROM competitor_data WHERE user_id=$1 AND address=$2 AND chain=$3',
+      [userId, address.toLowerCase(), chain]);
+    if (!r.rows[0]) return null;
+    return { id: `${address.toLowerCase()}_${chain}`, address, chain, name: r.rows[0].name, transactions: r.rows[0].transactions||[], metrics: r.rows[0].metrics||{}, lastUpdated: r.rows[0].updated_at };
+  }
+  static async save(userId, address, chain, data) {
+    await query(`INSERT INTO competitor_data(user_id, address, chain, name, transactions, metrics)
+      VALUES($1,$2,$3,$4,$5,$6)
+      ON CONFLICT(user_id, address, chain) DO UPDATE SET name=$4, transactions=$5, metrics=$6, updated_at=NOW()`,
+      [userId, address.toLowerCase(), chain, data.name||null, JSON.stringify(data.transactions||[]), JSON.stringify(data.metrics||{})]);
+  }
+  static async findByUserId(userId) {
+    const r = await query('SELECT address, chain, name, transactions, metrics, updated_at FROM competitor_data WHERE user_id=$1', [userId]);
+    return r.rows.map(row => ({ id: `${row.address}_${row.chain}`, address: row.address, chain: row.chain, name: row.name, transactions: row.transactions||[], metrics: row.metrics||{}, lastUpdated: row.updated_at }));
+  }
+  static async delete(userId, address, chain) {
+    await query('DELETE FROM competitor_data WHERE user_id=$1 AND address=$2 AND chain=$3', [userId, address.toLowerCase(), chain]);
+  }
+}
+
+export class PostgresCompetitorMetricsStorage {
+  static async get(userId) {
+    const r = await query('SELECT data FROM competitor_metrics WHERE user_id=$1', [userId]);
+    return r.rows[0]?.data || {};
+  }
+  static async save(userId, data) {
+    await query(`INSERT INTO competitor_metrics(user_id, data) VALUES($1,$2)
+      ON CONFLICT(user_id) DO UPDATE SET data=$2, updated_at=NOW()`,
+      [userId, JSON.stringify(data)]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Social Posts
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresSocialPostsStorage {
+  static async readLog(userId) {
+    const r = await query('SELECT platform, content, status, data, created_at FROM social_posts WHERE user_id=$1 ORDER BY created_at DESC', [userId]);
+    return r.rows.map(row => ({ ...row.data, platform: row.platform, content: row.content, status: row.status, createdAt: row.created_at }));
+  }
+  static async appendLog(userId, entry) {
+    await query('INSERT INTO social_posts(user_id, platform, content, status, data) VALUES($1,$2,$3,$4,$5)',
+      [userId, entry.platform||null, entry.postText||entry.content||null, entry.status||null, JSON.stringify(entry)]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Briefings
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresBriefingsStorage {
+  static async readAll() {
+    const r = await query('SELECT user_id, id, type, title, content, data, created_at FROM briefings ORDER BY created_at DESC');
+    return r.rows.map(row => ({ ...row.data, id: row.id, userId: row.user_id, type: row.type, title: row.title, content: row.content, createdAt: row.created_at }));
+  }
+  static async append(entry) {
+    await query('INSERT INTO briefings(id, user_id, type, title, content, data) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING',
+      [entry.id||`briefing-${Date.now()}`, entry.userId, entry.type||null, entry.title||null, entry.content||null, JSON.stringify(entry)]);
+  }
+  static async findByUserId(userId, type) {
+    let sql = 'SELECT user_id, id, type, title, content, data, created_at FROM briefings WHERE user_id=$1';
+    const params = [userId];
+    if (type) { sql += ' AND type=$2'; params.push(type); }
+    sql += ' ORDER BY created_at DESC';
+    const r = await query(sql, params);
+    return r.rows.map(row => ({ ...row.data, id: row.id, userId: row.user_id, type: row.type, title: row.title, content: row.content, createdAt: row.created_at }));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Advice
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAIAdviceStorage {
+  static async readAll() {
+    const r = await query('SELECT user_id, data, created_at FROM ai_advice ORDER BY created_at DESC');
+    return r.rows.map(row => ({ ...row.data, userId: row.user_id, createdAt: row.created_at }));
+  }
+  static async findByUserId(userId) {
+    const r = await query('SELECT data, created_at FROM ai_advice WHERE user_id=$1 ORDER BY created_at DESC', [userId]);
+    return r.rows.map(row => ({ ...row.data, createdAt: row.created_at }));
+  }
+  static async append(entry) {
+    await query('INSERT INTO ai_advice(user_id, data) VALUES($1,$2)', [entry.userId, JSON.stringify(entry)]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Insights
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAIInsightsStorage {
+  static async readAll() {
+    const r = await query('SELECT user_id, data, created_at FROM ai_insights ORDER BY created_at DESC');
+    return r.rows.map(row => ({ ...row.data, userId: row.user_id, createdAt: row.created_at }));
+  }
+  static async findByUserId(userId) {
+    const r = await query('SELECT data, created_at FROM ai_insights WHERE user_id=$1 ORDER BY created_at DESC', [userId]);
+    return r.rows.map(row => ({ ...row.data, createdAt: row.created_at }));
+  }
+  static async append(entry) {
+    await query('INSERT INTO ai_insights(user_id, data) VALUES($1,$2)', [entry.userId||null, JSON.stringify(entry)]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Share Tokens
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresShareTokensStorage {
+  static async readAll() {
+    const r = await query('SELECT token, contract_id, user_id, expires_at, revoked, created_at FROM share_tokens');
+    return r.rows.map(row => ({ token: row.token, contractId: row.contract_id, userId: row.user_id, expiresAt: row.expires_at, revoked: row.revoked, createdAt: row.created_at }));
+  }
+  static async append(entry) {
+    await query('INSERT INTO share_tokens(token, contract_id, user_id, expires_at, revoked) VALUES($1,$2,$3,$4,$5) ON CONFLICT(token) DO NOTHING',
+      [entry.token, entry.contractId, entry.userId, entry.expiresAt||null, entry.revoked||false]);
+  }
+  static async findByToken(token) {
+    const r = await query('SELECT token, contract_id, user_id, expires_at, revoked, created_at FROM share_tokens WHERE token=$1', [token]);
+    if (!r.rows[0]) return null;
+    const row = r.rows[0];
+    return { token: row.token, contractId: row.contract_id, userId: row.user_id, expiresAt: row.expires_at, revoked: row.revoked, createdAt: row.created_at };
+  }
+  static async revoke(token) {
+    await query('UPDATE share_tokens SET revoked=true WHERE token=$1', [token]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feedback
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresFeedbackStorage {
+  static async readAll() {
+    const r = await query('SELECT user_id, message_id, session_id, rating, note, component_type, saved_at FROM feedback ORDER BY saved_at DESC');
+    return r.rows.map(row => ({ userId: row.user_id, messageId: row.message_id, sessionId: row.session_id, rating: row.rating, note: row.note, componentType: row.component_type, savedAt: row.saved_at }));
+  }
+  static async findByUserId(userId) {
+    const r = await query('SELECT message_id, session_id, rating, note, component_type, saved_at FROM feedback WHERE user_id=$1 ORDER BY saved_at DESC', [userId]);
+    return r.rows.map(row => ({ messageId: row.message_id, sessionId: row.session_id, rating: row.rating, note: row.note, componentType: row.component_type, savedAt: row.saved_at }));
+  }
+  static async append(entry) {
+    await query('INSERT INTO feedback(user_id, message_id, session_id, rating, note, component_type) VALUES($1,$2,$3,$4,$5,$6)',
+      [entry.userId||null, entry.messageId||null, entry.sessionId||null, entry.rating||null, entry.note||null, entry.componentType||null]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Abuse Fingerprints
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAbuseFingerprintsStorage {
+  static async read() {
+    const r = await query('SELECT data FROM abuse_fingerprints WHERE id=1');
+    return r.rows[0]?.data || { fingerprints:{}, emailDomains:{}, contractAddresses:{} };
+  }
+  static async write(data) {
+    await query(`INSERT INTO abuse_fingerprints(id, data) VALUES(1,$1)
+      ON CONFLICT(id) DO UPDATE SET data=$1, updated_at=NOW()`, [JSON.stringify(data)]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Benchmarks
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresBenchmarksStorage {
+  static async read() {
+    const r = await query('SELECT data FROM benchmarks WHERE id=1');
+    return r.rows[0]?.data || {};
+  }
+  static async write(data) {
+    await query(`INSERT INTO benchmarks(id, data) VALUES(1,$1)
+      ON CONFLICT(id) DO UPDATE SET data=$1, updated_at=NOW()`, [JSON.stringify(data)]);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Learnings
+// ─────────────────────────────────────────────────────────────────────────────
+export class PostgresAILearningsStorage {
+  static async getAll() {
+    const r = await query('SELECT task_id, feedback, metric_before, metric_after, chain, contract_type, saved_at FROM ai_learnings ORDER BY saved_at ASC');
+    return r.rows.map(row => ({ taskId: row.task_id, feedback: row.feedback, metricBefore: row.metric_before, metricAfter: row.metric_after, chain: row.chain, contractType: row.contract_type, savedAt: row.saved_at }));
+  }
+  static async append(entry) {
+    await query('INSERT INTO ai_learnings(task_id, feedback, metric_before, metric_after, chain, contract_type) VALUES($1,$2,$3,$4,$5,$6)',
+      [entry.taskId||null, entry.feedback||null, entry.metricBefore ? JSON.stringify(entry.metricBefore) : null,
+       entry.metricAfter ? JSON.stringify(entry.metricAfter) : null, entry.chain||'ethereum', entry.contractType||'unknown']);
+  }
+  static async getForTask(taskId) {
+    const r = await query('SELECT * FROM ai_learnings WHERE task_id=$1 ORDER BY saved_at ASC', [taskId]);
+    return r.rows.map(row => ({ taskId: row.task_id, feedback: row.feedback, metricBefore: row.metric_before, metricAfter: row.metric_after, chain: row.chain, contractType: row.contract_type, savedAt: row.saved_at }));
+  }
+}
+
+export class PostgresFunctionAnalyticsStorage {
+  static async get(contractAddress, chain, type) {
+    const r = await query('SELECT data FROM function_analytics WHERE contract_address=$1 AND chain=$2 AND type=$3',
+      [contractAddress, chain, type]);
+    return r.rows[0]?.data || [];
+  }
+  static async save(contractAddress, chain, type, data) {
+    await query(`INSERT INTO function_analytics(contract_address, chain, type, data)
+      VALUES($1,$2,$3,$4)
+      ON CONFLICT(contract_address, chain, type) DO UPDATE SET data=$4, updated_at=NOW()`,
+      [contractAddress, chain, type, JSON.stringify(data)]);
+  }
+  static async delete(contractAddress, chain) {
+    await query('DELETE FROM function_analytics WHERE contract_address=$1 AND chain=$2', [contractAddress, chain]);
+  }
+}
+
+export class PostgresFunnelStorage {
+  static async getFunnels(contractId) {
+    const r = await query('SELECT id, name, steps, created_at FROM funnels WHERE contract_id=$1', [contractId]);
+    return r.rows.map(row => ({ id: row.id, contractId, name: row.name, steps: row.steps, createdAt: row.created_at }));
+  }
+  static async saveFunnel(contractId, name, steps) {
+    const id = `${contractId}-${Date.now()}`;
+    await query('INSERT INTO funnels(id, contract_id, name, steps) VALUES($1,$2,$3,$4)',
+      [id, contractId, name, JSON.stringify(steps)]);
+    return { id, contractId, name, steps, createdAt: new Date().toISOString() };
+  }
+  static async getFunnel(funnelId) {
+    const r = await query('SELECT id, contract_id, name, steps, created_at FROM funnels WHERE id=$1', [funnelId]);
+    if (!r.rows[0]) return null;
+    return { id: r.rows[0].id, contractId: r.rows[0].contract_id, name: r.rows[0].name, steps: r.rows[0].steps, createdAt: r.rows[0].created_at };
+  }
+  static async getFunctionMappings(contractId) {
+    const r = await query('SELECT signature, display_name FROM function_mappings WHERE contract_id=$1', [contractId]);
+    return r.rows.map(row => ({ contractId, signature: row.signature, displayName: row.display_name }));
+  }
+  static async saveFunctionMapping(contractId, signature, displayName) {
+    await query(`INSERT INTO function_mappings(contract_id, signature, display_name)
+      VALUES($1,$2,$3)
+      ON CONFLICT(contract_id, signature) DO UPDATE SET display_name=$3, updated_at=NOW()`,
+      [contractId, signature, displayName]);
+    return { contractId, signature, displayName };
+  }
+}
+
+export class PostgresCompetitorAnalysesStorage {
+  static async get(competitorId) {
+    const r = await query('SELECT data FROM competitor_analyses WHERE id=$1', [competitorId]);
+    return r.rows[0]?.data || null;
+  }
+  static async save(competitorId, data) {
+    await query(`INSERT INTO competitor_analyses(id, address, chain, status, data)
+      VALUES($1,$2,$3,$4,$5)
+      ON CONFLICT(id) DO UPDATE SET status=$4, data=$5, updated_at=NOW()`,
+      [competitorId, data.address||'', data.chain||'ethereum', data.status||'pending', JSON.stringify(data)]);
+  }
+  static async readAll() {
+    const r = await query('SELECT id, data FROM competitor_analyses');
+    return Object.fromEntries(r.rows.map(row => [row.id, row.data]));
+  }
+}
+
+export class PostgresWalletEnrichmentStorage {
+  static async getCache(contractAddress, chain) {
+    const r = await query('SELECT wallet_address, data FROM wallet_enrichment WHERE contract_address=$1 AND chain=$2',
+      [contractAddress, chain]);
+    return Object.fromEntries(r.rows.map(row => [row.wallet_address, row.data]));
+  }
+  static async saveWallet(contractAddress, chain, walletAddress, data) {
+    await query(`INSERT INTO wallet_enrichment(contract_address, chain, wallet_address, data, enriched_at)
+      VALUES($1,$2,$3,$4,NOW())
+      ON CONFLICT(contract_address, chain, wallet_address) DO UPDATE SET data=$4, enriched_at=NOW()`,
+      [contractAddress, chain, walletAddress.toLowerCase(), JSON.stringify(data)]);
+  }
+}
+
+export class PostgresWalletPipelineStorage {
+  static async readQueue(contractAddress, chain) {
+    const r = await query('SELECT queue FROM wallet_pipeline WHERE contract_address=$1 AND chain=$2',
+      [contractAddress, chain]);
+    return r.rows[0]?.queue || { pending: [], processing: [], dlq: [] };
+  }
+  static async writeQueue(contractAddress, chain, q) {
+    await query(`INSERT INTO wallet_pipeline(contract_address, chain, queue)
+      VALUES($1,$2,$3)
+      ON CONFLICT(contract_address, chain) DO UPDATE SET queue=$3, updated_at=NOW()`,
+      [contractAddress, chain, JSON.stringify(q)]);
   }
 }

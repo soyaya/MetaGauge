@@ -32,13 +32,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         // Initialize from local storage on mount
+        if (typeof window === 'undefined') { setIsLoading(false); return; }
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
 
         if (storedToken && storedUser) {
             try {
-                setToken(storedToken);
-                setUser(JSON.parse(storedUser));
+                // Check token expiry without a library — JWT payload is base64 encoded
+                const payload = JSON.parse(atob(storedToken.split('.')[1]));
+                const isExpired = payload.exp && payload.exp * 1000 < Date.now();
+                if (isExpired) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                } else {
+                    setToken(storedToken);
+                    setUser(JSON.parse(storedUser));
+                }
             } catch (e) {
                 console.error("Failed to parse stored user", e);
                 localStorage.removeItem('token');
@@ -71,10 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = () => {
         setToken(null);
         setUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('pending_token');
-        window.location.href = '/';
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('pending_token');
+        }
+        router.push('/');
     };
 
     const value = {

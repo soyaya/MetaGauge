@@ -8,32 +8,68 @@ import { ComponentTypes, ChartTypes } from '../api/models/ChatSession.js';
 import { AnalysisStorage } from '../api/database/fileStorage.js';
 import MetricsContextService from './MetricsContextService.js';
 
+function getApiKeys() {
+  const keys = [];
+  if (process.env.GEMINI_API_KEY) keys.push(process.env.GEMINI_API_KEY);
+  for (let i = 2; i <= 10; i++) {
+    const k = process.env[`GEMINI_API_KEY_${i}`];
+    if (k) keys.push(k);
+  }
+  return keys;
+}
+
 // Rate limiting store (in production, use Redis or similar)
 const chatRateLimitStore = new Map();
 
 class ChatAIService {
   constructor() {
-    this.genAI = null;
+    this.keys = [];
+    this.currentKeyIndex = 0;
+    this.clients = {};
     this.enabled = null;
     this.initialized = false;
   }
 
-  /**
-   * Initialize the service lazily
-   */
   initialize() {
     if (this.initialized) return;
-
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn('GEMINI_API_KEY not configured - Chat AI features will be disabled');
+    this.keys = getApiKeys();
+    if (this.keys.length === 0) {
+      console.warn('No GEMINI_API_KEY configured - Chat AI features will be disabled');
       this.enabled = false;
       this.initialized = true;
       return;
     }
-
-    this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     this.enabled = true;
     this.initialized = true;
+  }
+
+  _getClient(idx) {
+    const key = this.keys[idx % this.keys.length];
+    if (!this.clients[key]) this.clients[key] = new GoogleGenAI({ apiKey: key });
+    return this.clients[key];
+  }
+
+  async _generateWithFallback(params) {
+    this.initialize();
+    let lastErr;
+    for (let attempt = 0; attempt < this.keys.length; attempt++) {
+      const idx = (this.currentKeyIndex + attempt) % this.keys.length;
+      try {
+        const result = await this._getClient(idx).models.generateContent(params);
+        this.currentKeyIndex = idx;
+        return result;
+      } catch (err) {
+        lastErr = err;
+        const msg = err?.message || '';
+        if (msg.includes('403') || msg.includes('429') || msg.includes('PERMISSION_DENIED') ||
+            msg.includes('API_KEY') || msg.includes('blocked') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('SERVICE_DISABLED') || msg.includes('has not been used') || msg.includes('is disabled')) {
+          console.warn(`[ChatAIService] Key ${idx + 1}/${this.keys.length} failed, trying next...`);
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastErr;
   }
 
   /**
@@ -76,7 +112,7 @@ class ChatAIService {
     try {
       const prompt = this.buildChatPrompt(userMessage, sessionContext);
       
-      const response = await this.genAI.models.generateContent({
+      const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite',
         contents: [{ text: prompt }],
         generationConfig: {
@@ -365,86 +401,45 @@ GUIDELINES:
    */
   async generateSuggestedQuestions(contractContext) {
     const { contractData, analysisData } = contractContext;
-    
-    // Business metrics focused questions
-    const businessMetricQuestions = [
-      "What's the total value locked (TVL) in this contract?",
-      "Show me the revenue and fee generation trends",
-      "What's the daily active user (DAU) count and growth rate?",
-      "How much transaction volume does this contract process monthly?",
-      "What's the average transaction size and frequency?",
-      "Show me the user acquisition and retention metrics",
-      "What's the contract's market share compared to competitors?",
-      "How efficient is the gas usage and what are the cost implications?",
-      "What's the user lifetime value (LTV) and engagement patterns?",
-      "Show me the seasonal trends and usage patterns"
+    const txs = analysisData?.results?.target?.transactions || [];
+    const hasData = txs.length > 0;
+
+    // Base questions always available
+    const base = [
+      "Who are my highest value customers by LTV?",
+      "Which wallets are at risk of churning?",
+      "What patterns do you see in my user behavior?",
+      "Give me a growth strategy based on my data",
+      "What is my revenue forecast for the next 30 days?",
+      "Show me my feature adoption funnel",
+      "When are my peak usage hours?",
+      "Who are my smart money wallets?",
+      "What viral patterns do you see?",
+      "How do I compare to my competitors?",
     ];
 
-    const performanceQuestions = [
-      "What's the overall performance of this contract?",
-      "Show me the transaction volume trends with charts",
-      "How does this contract compare to competitors?",
-      "What are the key performance indicators (KPIs)?",
-      "Show me the growth metrics and projections"
-    ];
-
-    const analyticsQuestions = [
-      "Who are the top users and whale addresses?",
-      "What's the user distribution and segmentation?",
-      "Show me transaction patterns and behavior analysis",
-      "What are the peak usage times and patterns?",
-      "Analyze the contract's network effects"
-    ];
-
-    const securityQuestions = [
-      "Are there any security concerns I should know about?",
-      "What's the risk assessment for this contract?",
-      "Show me unusual transaction patterns or anomalies"
-    ];
-
-    if (!analysisData) {
+    if (!hasData) {
       return [
-        "Can you analyze this contract for me?",
-        "What business metrics are available for this contract?",
-        "Show me the key performance indicators with charts",
-        ...businessMetricQuestions.slice(0, 4),
-        ...performanceQuestions.slice(0, 3)
+        "Analyze this contract for me",
+        "What data do you have on this contract?",
+        "How do I get more users?",
+        ...base.slice(0, 5),
       ];
     }
 
-    // Generate context-specific questions based on available data
-    const contextQuestions = [];
-    
-    if (analysisData.results?.target?.transactions > 0) {
-      contextQuestions.push(...businessMetricQuestions.slice(0, 3));
-      contextQuestions.push("Show me transaction patterns and volume trends");
-      contextQuestions.push("What's the transaction success rate and efficiency?");
-    }
+    // Data-driven questions based on what's actually in the analysis
+    const dynamic = [];
+    const uniqueUsers = new Set(txs.map(t => t.from)).size;
+    const failedTxs = txs.filter(t => !t.status).length;
+    const failRate = txs.length ? Math.round(failedTxs / txs.length * 100) : 0;
 
-    if (analysisData.results?.target?.behavior?.userCount > 0) {
-      contextQuestions.push("Analyze user acquisition and retention rates");
-      contextQuestions.push("What's the user engagement and activity metrics?");
-      contextQuestions.push("Show me user segmentation and behavior patterns");
-    }
+    if (uniqueUsers > 0)  dynamic.push(`I have ${uniqueUsers} wallets — who are the top 10% by value?`);
+    if (failRate > 5)     dynamic.push(`My failure rate is ${failRate}% — what's causing it?`);
+    if (uniqueUsers > 10) dynamic.push("Which of my users are about to churn?");
+    if (txs.length > 50)  dynamic.push("Show me a chart of my transaction volume over time");
+    if (uniqueUsers > 20) dynamic.push("What does my user retention cohort look like?");
 
-    if (analysisData.results?.competitors?.length > 0) {
-      contextQuestions.push("Compare business metrics with competitors");
-      contextQuestions.push("What's our competitive advantage and market position?");
-      contextQuestions.push("Show me market share and growth comparison");
-    }
-
-    // Combine all questions and return up to 10
-    const allQuestions = [
-      ...contextQuestions,
-      ...businessMetricQuestions,
-      ...performanceQuestions,
-      ...analyticsQuestions,
-      ...securityQuestions
-    ];
-
-    // Remove duplicates and return up to 10 questions
-    const uniqueQuestions = [...new Set(allQuestions)];
-    return uniqueQuestions.slice(0, 10);
+    return [...dynamic, ...base].slice(0, 10);
   }
 
   /**

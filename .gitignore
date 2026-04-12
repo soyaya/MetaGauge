@@ -45,3 +45,35 @@ pids/
 # Temp files
 tmp/
 temp/
+
+# User data — never commit
+data/users/
+data/analyses.json
+data/analyses.json.backup*
+data/contracts.json
+data/contracts.json.backup*
+data/chat_sessions.json
+data/chat_sessions.json.backup*
+data/chat_messages.json
+data/chat_messages.json.backup*
+data/alerts.json
+data/ai-tasks.json
+data/ai_assignments.json
+data/ai_insights.json
+data/abuse-fingerprints.json
+data/briefings.json
+data/social-posts/
+data/wallet-enrichment/
+data/wallet-pipeline/
+data/function-analytics/
+data/users.json
+data/users.json.backup*
+data/ai-knowledge/user-learnings.json
+data/ai-knowledge/chain-learnings.json
+data/ai-knowledge/feedback.json
+
+# Server logs
+server.log
+analysis-debug.log
+*.backup
+*.backup3

@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface UsersTabProps { analysisResults: any }
 
-import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY } from '@/lib/chart-colors';
+import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 const COLORS = CHART_COLORS;
 
 export function UsersTab({ analysisResults }: UsersTabProps) {
@@ -104,12 +104,12 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={classData} cx="50%" cy="50%" outerRadius={80} dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}%`} labelLine={false}>
+                  <Pie data={classData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={3} strokeWidth={0}>
                     {classData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
-                  <Tooltip />
-                </PieChart>
+                  <Tooltip {...TOOLTIP_STYLE} />
+                <Legend wrapperStyle={{ fontSize: "11px", color: "hsl(var(--foreground))" }} />
+                  </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -119,12 +119,12 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
           <CardHeader><CardTitle className="text-sm">Engagement Scores</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={engagementData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="metric" tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v: any) => `${v}%`} />
-                <Bar dataKey="score" fill={CHART_PRIMARY} radius={[4,4,0,0]} />
+              <BarChart data={engagementData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid {...GRID_STYLE} />
+                <XAxis dataKey="metric" {...AXIS_STYLE} />
+                <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} {...AXIS_STYLE} />
+                <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => `${v}%`} />
+                <Bar dataKey="score" fill={CHART_PRIMARY} radius={[4,4,0,0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

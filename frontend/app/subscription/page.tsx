@@ -47,6 +47,8 @@ function BillingPage() {
   }
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) return;
     load()
     if (searchParams.get('success') === '1') {
       toast({ title: '✅ Payment successful! Credits added to your account.' })
@@ -54,7 +56,7 @@ function BillingPage() {
     if (searchParams.get('cancelled') === '1') {
       toast({ title: 'Payment cancelled', variant: 'destructive' })
     }
-  }, [])
+  }, [authLoading, isAuthenticated])
 
   const handleTopup = async () => {
     const amt = parseFloat(topupAmt)

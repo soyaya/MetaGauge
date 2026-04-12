@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/ui/header"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
-import { User, Mail, Shield, Activity, Save, CheckCircle, AlertCircle, Loader2, KeyRound } from "lucide-react"
+import { User, Mail, Shield, Activity, Save, CheckCircle, AlertCircle, Loader2, KeyRound, Twitter, Linkedin } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 
@@ -72,6 +72,99 @@ function ChangePasswordForm() {
   )
 }
 
+function SocialAccountsCard() {
+  const { toast } = useToast()
+  const [connected, setConnected] = useState<any>({ twitter: { connected: false }, linkedin: { connected: false } })
+  const [open, setOpen] = useState<'twitter' | 'linkedin' | null>(null)
+  const [fields, setFields] = useState<any>({})
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api.get('/api/users/social-credentials').then(setConnected).catch(() => {})
+  }, [])
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      await api.put('/api/users/social-credentials', fields)
+      const updated = await api.get('/api/users/social-credentials')
+      setConnected(updated)
+      setOpen(null); setFields({})
+      toast({ title: 'Social account connected' })
+    } catch { toast({ title: 'Failed to save', variant: 'destructive' }) }
+    finally { setSaving(false) }
+  }
+
+  const disconnect = async (platform: string) => {
+    await api.delete(`/api/users/social-credentials/${platform}`).catch(() => {})
+    setConnected((p: any) => ({ ...p, [platform]: { connected: false } }))
+    toast({ title: `${platform} disconnected` })
+  }
+
+  return (
+    <Card>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Twitter className="h-5 w-5" />Social Accounts</CardTitle>
+        <CardDescription>Connect your accounts so the agent posts to your pages</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Twitter */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Twitter className="h-4 w-4" />
+            <span className="text-sm font-medium">Twitter / X</span>
+            {connected.twitter?.connected && <Badge className="text-xs bg-green-100 text-green-700">Connected</Badge>}
+          </div>
+          {connected.twitter?.connected
+            ? <Button size="sm" variant="outline" onClick={() => disconnect('twitter')}>Disconnect</Button>
+            : <Button size="sm" variant="outline" onClick={() => setOpen('twitter')}>Connect</Button>}
+        </div>
+        {open === 'twitter' && (
+          <div className="space-y-2 p-3 border rounded-lg bg-muted/40">
+            {[['twitterApiKey','API Key'],['twitterApiSecret','API Secret'],['twitterAccessToken','Access Token'],['twitterAccessSecret','Access Secret']].map(([k,l]) => (
+              <div key={k} className="space-y-1">
+                <Label className="text-xs">{l}</Label>
+                <Input type="password" value={fields[k]||''} onChange={e => setFields((p:any)=>({...p,[k]:e.target.value}))} />
+              </div>
+            ))}
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" onClick={save} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Save'}</Button>
+              <Button size="sm" variant="outline" onClick={() => { setOpen(null); setFields({}) }}>Cancel</Button>
+            </div>
+          </div>
+        )}
+
+        <Separator />
+
+        {/* LinkedIn */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Linkedin className="h-4 w-4" />
+            <span className="text-sm font-medium">LinkedIn</span>
+            {connected.linkedin?.connected && <Badge className="text-xs bg-green-100 text-green-700">Connected</Badge>}
+          </div>
+          {connected.linkedin?.connected
+            ? <Button size="sm" variant="outline" onClick={() => disconnect('linkedin')}>Disconnect</Button>
+            : <Button size="sm" variant="outline" onClick={() => setOpen('linkedin')}>Connect</Button>}
+        </div>
+        {open === 'linkedin' && (
+          <div className="space-y-2 p-3 border rounded-lg bg-muted/40">
+            {[['linkedinAccessToken','Access Token'],['linkedinPersonUrn','Person URN']].map(([k,l]) => (
+              <div key={k} className="space-y-1">
+                <Label className="text-xs">{l}</Label>
+                <Input type="password" value={fields[k]||''} onChange={e => setFields((p:any)=>({...p,[k]:e.target.value}))} />
+              </div>
+            ))}
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" onClick={save} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Save'}</Button>
+              <Button size="sm" variant="outline" onClick={() => { setOpen(null); setFields({}) }}>Cancel</Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function ProfilePage() {
   const { user, login, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
@@ -97,9 +190,10 @@ export default function ProfilePage() {
       setProfile(profileRes)
       setName(profileRes.name || "")
       setEmail(profileRes.email || "")
+      const subRes = await api.get('/api/subscription/status').catch(() => null)
       setUsage({
         thisMonth: profileRes.usage?.monthlyAnalysisCount || 0,
-        limit: 10, // free tier default; subscription page shows upgrade
+        limit: subRes?.limits?.monthly ?? 10,
         total: profileRes.usage?.analysisCount || 0,
         tier: String(profileRes.tier || user?.tier || 'free'),
       })
@@ -361,6 +455,8 @@ export default function ProfilePage() {
                 <ChangePasswordForm />
               </CardContent>
             </Card>
+
+            <SocialAccountsCard />
           </div>
         </div>
       </div>

@@ -7,12 +7,12 @@ import { Loader2 } from 'lucide-react';
 import { MetricInfo } from '@/components/ui/metric-info';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
-  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
 
 interface MetricsTabProps { analysisResults: any }
 
-import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY } from '@/lib/chart-colors';
+import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 const COLORS = CHART_COLORS;
 const NA = <span className="text-muted-foreground text-sm italic">Requires protocol-specific data</span>;
 
@@ -139,12 +139,12 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
             <CardHeader><CardTitle className="text-sm">Behavior Scores</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={behaviorData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize:11 }} />
-                  <YAxis />
-                  <Tooltip formatter={(v:any) => `${v}%`} />
-                  <Bar dataKey="value" fill={CHART_PRIMARY} radius={[4,4,0,0]} />
+                <BarChart data={behaviorData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid {...GRID_STYLE} />
+                  <XAxis dataKey="name" {...AXIS_STYLE} />
+                  <YAxis {...AXIS_STYLE} />
+                  <Tooltip {...TOOLTIP_STYLE} formatter={(v:any) => `${v}%`} />
+                  <Bar dataKey="value" fill={CHART_PRIMARY} radius={[4,4,0,0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
               <p className="text-xs text-muted-foreground mt-1">Risk Tolerance &amp; Bot Activity require mempool data</p>
@@ -156,11 +156,11 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
-                    <Pie data={classData} cx="50%" cy="50%" outerRadius={75} dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`} labelLine={false}>
+                    <Pie data={classData} cx="50%" cy="50%" innerRadius={45} outerRadius={75} dataKey="value" paddingAngle={3} strokeWidth={0}>
                       {classData.map((_:any, i:number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip {...TOOLTIP_STYLE} />
+                  <Legend wrapperStyle={{ fontSize: "11px", color: "hsl(var(--foreground))" }} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -225,11 +225,11 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
                 <CardHeader><CardTitle className="text-sm">Feature First Use</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={160}>
-                    <BarChart data={featureData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis dataKey="name" type="category" width={90} tick={{ fontSize:11 }} />
-                      <Tooltip />
+                    <BarChart data={featureData} layout="vertical" margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                      <CartesianGrid {...GRID_STYLE} />
+                      <XAxis type="number" {...AXIS_STYLE} />
+                      <YAxis dataKey="name" type="category" width={90} {...AXIS_STYLE} />
+                      <Tooltip {...TOOLTIP_STYLE} />
                       <Bar dataKey="value" fill={CHART_SECONDARY} radius={[0,4,4,0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -260,12 +260,12 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={160}>
-                <BarChart data={retBars}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} />
-                  <Tooltip formatter={(v:any)=>`${v}%`} />
-                  <Bar dataKey="value" fill={CHART_PRIMARY} radius={[4,4,0,0]} minPointSize={3} />
+                <BarChart data={retBars} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid {...GRID_STYLE} />
+                  <XAxis dataKey="name" {...AXIS_STYLE} />
+                  <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} {...AXIS_STYLE} />
+                  <Tooltip {...TOOLTIP_STYLE} formatter={(v:any)=>`${v}%`} />
+                  <Bar dataKey="value" fill={CHART_PRIMARY} radius={[4,4,0,0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             )}

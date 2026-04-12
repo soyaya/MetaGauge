@@ -1,28 +1,17 @@
-/**
- * Traction & Insights API
- * Powers the /analyzer page — investor-ready traction data
- */
 import express from 'express';
-import { AnalysisStorage, UserStorage, MetricsHistoryStorage } from '../database/index.js';
+import { AnalysisStorage, UserStorage, MetricsHistoryStorage, AlertsStorage, CompetitorDataStorage } from '../database/index.js';
+import { getTraction, syncTasks, resolveTask, reopenTask, getLearningsForTask, saveLearning } from '../database/TractionStorage.js';
 import { buildFullReportFromAnalysis } from './onboarding.js';
 import { priceService } from '../../services/PriceService.js';
-import path from 'path';
-import fs from 'fs/promises';
 
 const router = express.Router();
 
-// ── Helper: load competitor data ─────────────────────────────────────────────
+async function loadAlerts(userId) {
+  try { return await AlertsStorage.findByUserId(userId); } catch { return []; }
+}
+
 async function loadCompetitors(userId) {
-  const dir = path.join('./data', 'users', userId, 'competitors');
-  const files = await fs.readdir(dir).catch(() => []);
-  const competitors = [];
-  for (const file of files.filter(f => f.endsWith('.json') && !f.endsWith('.backup'))) {
-    try {
-      const c = JSON.parse(await fs.readFile(path.join(dir, file), 'utf8'));
-      competitors.push(c);
-    } catch { /* skip */ }
-  }
-  return competitors;
+  try { return await CompetitorDataStorage.findByUserId(userId); } catch { return []; }
 }
 
 // ── OPS Score calculator ──────────────────────────────────────────────────────
@@ -33,8 +22,9 @@ function calculateOPS(fr, alerts = []) {
   const bounceRate    = fr.defiMetrics?.bounceRate || 0;
   const botPct        = fr.userQualityMetrics?.botPct || 0;
   const churnRate     = fr.retentionMetrics?.churnRate || 0;
+  const d7Retention   = fr.retentionMetrics?.d7Retention || 0;
 
-  // Pillar 1 — Feature Stability (25%): success rate + low failure
+  // Pillar 1 — Feature Stability (25%): success rate + low bot activity
   const featureStability = Math.min(100, successRate * 0.7 + (100 - botPct) * 0.3);
 
   // Pillar 2 — Response to Alerts (25%): based on unresolved alerts
@@ -44,12 +34,13 @@ function calculateOPS(fr, alerts = []) {
   // Pillar 3 — Resolution Efficiency (20%): low churn + low bounce
   const resolutionScore = Math.max(0, 100 - churnRate * 0.5 - bounceRate * 0.3);
 
-  // Pillar 4 — Task Completion (15%): activation rate proxy
-  const taskScore = activationRate;
+  // Pillar 4 — Task Completion (15%): D7 retention as a proxy for habit formation
+  // (distinct from overall retention — measures users who return within a week)
+  const taskScore = d7Retention;
 
-  // Pillar 5 — Operational Hygiene (15%): retention + wallet quality
+  // Pillar 5 — Operational Hygiene (15%): activation rate + wallet quality
   const walletQuality = fr.userQualityMetrics?.avgWalletQuality || 0;
-  const hygieneScore = Math.min(100, retentionRate * 0.5 + walletQuality * 0.5);
+  const hygieneScore = Math.min(100, activationRate * 0.5 + walletQuality * 0.5);
 
   const ops = Math.round(
     featureStability * 0.25 +
@@ -62,11 +53,11 @@ function calculateOPS(fr, alerts = []) {
   return {
     total: ops,
     pillars: {
-      featureStability:   Math.round(featureStability),
-      responseToAlerts:   Math.round(responseScore),
+      featureStability:     Math.round(featureStability),
+      responseToAlerts:     Math.round(responseScore),
       resolutionEfficiency: Math.round(resolutionScore),
-      taskCompletion:     Math.round(taskScore),
-      hygiene:            Math.round(hygieneScore),
+      taskCompletion:       Math.round(taskScore),
+      hygiene:              Math.round(hygieneScore),
     },
     grade: ops >= 75 ? 'green' : ops >= 50 ? 'yellow' : 'red',
     label: ops >= 75 ? 'Healthy' : ops >= 50 ? 'Moderate' : 'Needs Attention',
@@ -285,15 +276,35 @@ router.get('/tasks', async (req, res) => {
     const built = await buildFR(req.user.id);
     if (!built) return res.status(404).json({ error: 'No analysis found' });
     const { fr } = built;
-    let alerts = [];
-    try {
-      const { readFileSync, existsSync } = await import('fs');
-      if (existsSync('./data/alerts.json'))
-        alerts = JSON.parse(readFileSync('./data/alerts.json','utf8')).filter(a => a.userId === req.user.id);
-    } catch {}
+    const alerts = await loadAlerts(req.user.id);
     const ops   = calculateOPS(fr, alerts);
-    const tasks = generateTasks(fr, ops);
-    res.json({ tasks, total: tasks.length, high: tasks.filter(t=>t.priority==='high').length, medium: tasks.filter(t=>t.priority==='medium').length });
+    const generated = generateTasks(fr, ops);
+
+    // Sync into persistent store (preserves resolution state)
+    const store = await syncTasks(req.user.id, generated);
+
+    // Merge AI-created tasks from ai-tasks.json
+    const { AITaskManager } = await import('../../services/AITaskManager.js');
+    const aiTasks = await AITaskManager.getActiveTasks(req.user.id);
+    const mergedTasks = [
+      ...store.tasks,
+      ...aiTasks.map(t => ({
+        id: t.id, title: t.goal, pillar: 'AI', description: t.rationale || '',
+        action: `Target: ${t.targetMetric} → ${t.targetValue}`, metric: t.targetMetric,
+        current: t.baselineValue, target: t.targetValue, priority: 'high',
+        status: t.status === 'active' ? 'open' : t.status,
+        source: 'ai_agent', deadline: t.deadline,
+      })),
+    ];
+
+    res.json({
+      tasks: mergedTasks,
+      productivityScore: store.productivityScore,
+      total:    mergedTasks.length,
+      resolved: mergedTasks.filter(t => t.status === 'resolved').length,
+      open:     mergedTasks.filter(t => t.status === 'open').length,
+      high:     mergedTasks.filter(t => t.priority === 'high' && t.status === 'open').length,
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -352,34 +363,84 @@ router.get('/metrics', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── GET /api/traction/tasks/:taskId/recommendation — AI recommendation ────────
+// ── GET /api/traction/tasks/:taskId/recommendation ───────────────────────────
 router.get('/tasks/:taskId/recommendation', async (req, res) => {
   try {
     const built = await buildFR(req.user.id);
     if (!built) return res.status(404).json({ error: 'No analysis found' });
-    const { fr } = built;
-    let alerts = [];
-    try {
-      const { readFileSync, existsSync } = await import('fs');
-      if (existsSync('./data/alerts.json'))
-        alerts = JSON.parse(readFileSync('./data/alerts.json','utf8')).filter(a => a.userId === req.user.id);
-    } catch {}
-    const ops   = calculateOPS(fr, alerts);
-    const tasks = generateTasks(fr, ops);
-    const task  = tasks.find(t => t.id === req.params.taskId);
+    const { fr, contract } = built;
+    const alerts = await loadAlerts(req.user.id);
+    const ops  = calculateOPS(fr, alerts);
+    const task = generateTasks(fr, ops).find(t => t.id === req.params.taskId);
     if (!task) return res.json({ resolved: true, recommendation: 'This metric is on track — no action needed.' });
 
-    let recommendation = task.action; // default rule-based
+    // Check AI learnings store first
+    const learnings = await getLearningsForTask(task.id);
+    let recommendation = task.action;
     try {
-      const GeminiAIService = (await import('../../services/GeminiAIService.js')).default;
-      const gemini = new GeminiAIService();
-      const prompt = `A blockchain project has this problem: "${task.description}"
-Current value: ${task.current}${task.unit||''}. Target: ${task.target}${task.unit||''}.
-Give 3 specific, actionable steps the project owner can take to fix this. Be concise and practical. Format as numbered list.`;
-      recommendation = await gemini.generateContent(prompt);
-    } catch { /* use default */ }
+      const AgentService = (await import('../../services/AgentService.js')).default;
+      const prompt = learnings.length
+        ? `Give 3 concise actionable steps to fix: "${task.description}" (now: ${task.current}, target: ${task.target}).\nWhat worked before:\n${learnings.slice(-3).map(l => `- "${l.feedback}" (${l.metricBefore}→${l.metricAfter})`).join('\n')}`
+        : `Give 3 concise actionable steps to fix: "${task.description}" (now: ${task.current}, target: ${task.target}). Numbered list.`;
+      const result = await AgentService.run(req.user.id, prompt, { contractAddress: contract?.targetContract?.address, chain: contract?.targetContract?.chain, source: 'traction' });
+      recommendation = result.content || recommendation;
+    } catch {}
 
-    res.json({ taskId: task.id, title: task.title, resolved: false, recommendation, current: task.current, target: task.target });
+    res.json({ taskId: task.id, title: task.title, recommendation, current: task.current, target: task.target, learningSamples: learnings.length });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── POST /api/traction/tasks/:taskId/resolve — user marks task done ───────────
+router.post('/tasks/:taskId/resolve', async (req, res) => {
+  try {
+    const { feedback } = req.body;
+    if (!feedback?.trim()) return res.status(400).json({ error: 'Feedback is required' });
+
+    const built = await buildFR(req.user.id);
+    if (!built) return res.status(404).json({ error: 'No analysis found' });
+    const { fr, contract } = built;
+    const alerts = await loadAlerts(req.user.id);
+
+    const ops  = calculateOPS(fr, alerts);
+    const task = generateTasks(fr, ops).find(t => t.id === req.params.taskId);
+
+    // Save to AI learnings
+    await saveLearning({
+      taskId:       req.params.taskId,
+      feedback:     feedback.trim(),
+      metricBefore: task?.current ?? null,
+      metricAfter:  task?.target  ?? null,
+      chain:        contract.chain,
+      contractType: contract.type || 'unknown',
+    });
+
+    // Mark resolved in traction store
+    const resolved = await resolveTask(req.user.id, req.params.taskId, { resolvedBy: 'user', userFeedback: feedback.trim() });
+    if (!resolved) return res.status(404).json({ error: 'Task not found in store' });
+
+    const store = await getTraction(req.user.id);
+    res.json({ task: resolved, productivityScore: store.productivityScore, message: 'Task marked resolved. Thank you for your feedback!' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/traction/productivity — productivity score + breakdown ────────────
+router.get('/productivity', async (req, res) => {
+  try {
+    const store = await getTraction(req.user.id);
+    const tasks = store.tasks || [];
+    res.json({
+      productivityScore: store.productivityScore,
+      total:    tasks.length,
+      resolved: tasks.filter(t => t.status === 'resolved').length,
+      open:     tasks.filter(t => t.status === 'open').length,
+      byPillar: tasks.reduce((acc, t) => {
+        if (!acc[t.pillar]) acc[t.pillar] = { total: 0, resolved: 0 };
+        acc[t.pillar].total++;
+        if (t.status === 'resolved') acc[t.pillar].resolved++;
+        return acc;
+      }, {}),
+      lastChecked: store.lastChecked,
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -388,12 +449,7 @@ router.get('/ops', async (req, res) => {
   try {
     const built = await buildFR(req.user.id);
     if (!built) return res.status(404).json({ error: 'No analysis found' });
-    let alerts = [];
-    try {
-      const { readFileSync, existsSync } = await import('fs');
-      if (existsSync('./data/alerts.json'))
-        alerts = JSON.parse(readFileSync('./data/alerts.json','utf8')).filter(a => a.userId === req.user.id);
-    } catch {}
+    const alerts = await loadAlerts(req.user.id);
     const ops = calculateOPS(built.fr, alerts);
     res.json(ops);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -446,17 +502,12 @@ router.get('/dashboard', async (req, res) => {
     const competitors = await loadCompetitors(req.user.id);
 
     // Load alerts for OPS
-    let alerts = [];
-    try {
-      const { readFileSync, existsSync } = await import('fs');
-      if (existsSync('./data/alerts.json')) {
-        alerts = JSON.parse(readFileSync('./data/alerts.json','utf8'))
-          .filter(a => a.userId === req.user.id);
-      }
-    } catch {}
+    const alerts = await loadAlerts(req.user.id);
 
     const ops      = calculateOPS(fr, alerts);
-    const tasks    = generateTasks(fr, ops);
+    const generated = generateTasks(fr, ops);
+    const tractionStore = await syncTasks(req.user.id, generated);
+    const tasks    = tractionStore.tasks;
     const traction = buildTractionSummary(fr, competitors, ethPrice);
 
     // Feature insights
@@ -488,6 +539,7 @@ router.get('/dashboard', async (req, res) => {
       contract: { name: contract.name, address: contract.address, chain: contract.chain },
       ops,
       tasks,
+      productivityScore: tractionStore.productivityScore,
       traction,
       featureInsights,
       growth,
@@ -496,6 +548,7 @@ router.get('/dashboard', async (req, res) => {
       gasAnalysis: fr.gasAnalysis,
       retentionMetrics: fr.retentionMetrics,
       activationMetrics: fr.activationMetrics,
+      defiMetrics: fr.defiMetrics,
       userQuality: fr.userQualityMetrics,
       users: fr.users?.slice(0,10) || [],
       generatedAt: new Date().toISOString(),
@@ -524,64 +577,42 @@ router.get('/dashboard', async (req, res) => {
   }
 });
 
-// ── Task check endpoint — re-evaluate a task against live data ────────────────
+// ── POST /api/traction/tasks/:taskId/check — re-check live metric ─────────────
 router.post('/tasks/:taskId/check', async (req, res) => {
   try {
-    const user = await UserStorage.findById(req.user.id);
-    if (!user?.onboarding?.defaultContract?.address) return res.status(404).json({ error: 'No contract' });
+    const built = await buildFR(req.user.id);
+    if (!built) return res.status(404).json({ error: 'No analysis' });
 
-    const allAnalyses = await AnalysisStorage.findByUserId(req.user.id);
-    const latest = allAnalyses
-      .filter(a => a.status === 'completed' && a.metadata?.isDefaultContract)
-      .sort((a,b) => new Date(b.completedAt||b.createdAt) - new Date(a.completedAt||a.createdAt))[0];
-    if (!latest) return res.status(404).json({ error: 'No analysis' });
-
-    const txs     = latest.results?.target?.transactions || [];
-    const metrics = latest.results?.target?.metrics || {};
-    const contract= latest.results?.target?.contract || user.onboarding.defaultContract;
-    const ethPrice= await priceService.getPrice('eth').catch(() => 2500);
-    const fr = buildFullReportFromAnalysis(txs, metrics, { ...contract, _ethPriceUSD: ethPrice });
-
-    let alerts = [];
-    try {
-      const { readFileSync, existsSync } = await import('fs');
-      if (existsSync('./data/alerts.json'))
-        alerts = JSON.parse(readFileSync('./data/alerts.json','utf8')).filter(a => a.userId === req.user.id);
-    } catch {}
-
-    const ops   = calculateOPS(fr, alerts);
-    const tasks = generateTasks(fr, ops);
-    const task  = tasks.find(t => t.id === req.params.taskId);
+    const { fr, contract } = built;
+    const ops  = calculateOPS(fr, await loadAlerts(req.user.id));
+    const task = generateTasks(fr, ops).find(t => t.id === req.params.taskId);
 
     if (!task) {
-      // Task not found in failing list = it's resolved!
-      return res.json({
-        resolved: true,
-        message: '✅ This metric is now on track. Task resolved.',
-        aiGuidance: 'Great work! Keep monitoring to ensure it stays healthy.',
-      });
+      // Metric now passing — auto-resolve and clear pendingConfirmation
+      await resolveTask(req.user.id, req.params.taskId, { resolvedBy: 'auto' });
+      const store = await getTraction(req.user.id);
+      return res.json({ resolved: true, productivityScore: store.productivityScore, aiGuidance: 'Great work! This metric is now on track.' });
     }
 
-    // Task still failing — generate AI guidance
+    // Still failing — only reopen auto-resolved tasks (never touch user-resolved)
+    const store = await getTraction(req.user.id);
+    const stored = (store.tasks || []).find(t => t.id === req.params.taskId);
+    if (stored?.resolvedBy === 'auto') {
+      await reopenTask(req.user.id, req.params.taskId);
+    }
+
     let aiGuidance = task.action;
     try {
-      const GeminiAIService = (await import('../../services/GeminiAIService.js')).default;
-      const gemini = new GeminiAIService();
-      const prompt = `A blockchain project has this problem: "${task.description}"
-Current value: ${task.current}. Target: ${task.target}.
-Give 2-3 specific, actionable steps the project owner can take on-chain or in their product to fix this. Be concise and practical.`;
-      aiGuidance = await gemini.generateContent(prompt);
-    } catch { /* use default action */ }
+      const AgentService = (await import('../../services/AgentService.js')).default;
+      const result = await AgentService.run(req.user.id,
+        `Blockchain project issue: "${task.description}" (now: ${task.current}, target: ${task.target}). Give 2 concise steps to fix it.`,
+        { contractAddress: contract?.targetContract?.address, chain: contract?.targetContract?.chain, source: 'traction' }
+      );
+      aiGuidance = result.content || aiGuidance;
+    } catch {}
 
-    res.json({
-      resolved: false,
-      task,
-      aiGuidance,
-      message: `Still failing — ${task.description}`,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    res.json({ resolved: false, pendingConfirmation: stored?.resolvedBy === 'user', task, aiGuidance });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── POST /api/traction/send-report — email selected sections as PDF ───────────
@@ -595,12 +626,7 @@ router.post('/send-report', async (req, res) => {
     if (!built) return res.status(404).json({ error: 'No analysis found' });
     const { fr, contract, user } = built;
 
-    let alerts = [];
-    try {
-      const { readFileSync, existsSync } = await import('fs');
-      if (existsSync('./data/alerts.json'))
-        alerts = JSON.parse(readFileSync('./data/alerts.json','utf8')).filter(a => a.userId === req.user.id);
-    } catch {}
+    const alerts = await loadAlerts(req.user.id);
 
     const ops   = calculateOPS(fr, alerts);
     const tasks = generateTasks(fr, ops);
@@ -683,24 +709,18 @@ router.get('/activity', async (req, res) => {
     }
 
     // 2. Alerts
-    try {
-      const { readFileSync, existsSync } = await import('fs');
-      if (existsSync('./data/alerts.json')) {
-        const alerts = JSON.parse(readFileSync('./data/alerts.json', 'utf8'))
-          .filter(a => a.userId === req.user.id);
-        for (const a of alerts) {
-          events.push({
-            id: `alert-${a.id}`,
-            type: 'alert',
-            title: a.title,
-            detail: a.message,
-            status: a.is_read ? 'read' : 'unread',
-            severity: a.severity,
-            ts: a.createdAt,
-          });
-        }
-      }
-    } catch {}
+    const alertItems = await loadAlerts(req.user.id);
+    for (const a of alertItems) {
+      events.push({
+        id: `alert-${a.id}`,
+        type: 'alert',
+        title: a.title,
+        detail: a.message,
+        status: a.is_read ? 'read' : 'unread',
+        severity: a.severity,
+        ts: a.createdAt,
+      });
+    }
 
     // 3. Metrics snapshots (daily)
     const history = await MetricsHistoryStorage.get(req.user.id);
@@ -718,12 +738,8 @@ router.get('/activity', async (req, res) => {
 
     // 4. Competitor indexing events
     try {
-      const { readdir, readFile } = await import('fs/promises');
-      const { join } = await import('path');
-      const compDir = join('./data', 'users', req.user.id, 'competitors');
-      const files = await readdir(compDir).catch(() => []);
-      for (const f of files.filter(f => f.endsWith('.json') && !f.endsWith('.backup'))) {
-        const c = JSON.parse(await readFile(join(compDir, f), 'utf8'));
+      const competitors = await CompetitorDataStorage.findByUserId(req.user.id);
+      for (const c of competitors) {
         events.push({
           id: `competitor-${c.id}`,
           type: 'competitor',
@@ -739,6 +755,45 @@ router.get('/activity', async (req, res) => {
     events.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
     res.json({ events, total: events.length });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── GET /api/traction/health — score health check for monitoring ──────────────
+router.get('/health', async (req, res) => {
+  try {
+    const built = await buildFR(req.user.id);
+    if (!built) return res.status(404).json({ status: 'no_data', message: 'No completed analysis found. Complete onboarding first.' });
+
+    const { fr, contract } = built;
+    const alerts = await loadAlerts(req.user.id);
+    const ops = calculateOPS(fr, alerts);
+    const ret = fr.retentionMetrics || {};
+    const gas = fr.gasAnalysis || {};
+    const qual = fr.userQualityMetrics || {};
+
+    const checks = [
+      { name: 'OPS Score',          value: ops.total,                  unit: '/100', ok: ops.total >= 50,  target: 50 },
+      { name: 'Feature Stability',  value: ops.pillars.featureStability, unit: '/100', ok: ops.pillars.featureStability >= 70, target: 70 },
+      { name: 'Alert Response',     value: ops.pillars.responseToAlerts, unit: '/100', ok: ops.pillars.responseToAlerts >= 75, target: 75 },
+      { name: 'D7 Retention',       value: ret.d7Retention || 0,       unit: '%',    ok: (ret.d7Retention||0) >= 10, target: 10 },
+      { name: 'Churn Rate',         value: ret.churnRate || 0,         unit: '%',    ok: (ret.churnRate||0) <= 30,   target: 30, lowerBetter: true },
+      { name: 'Failed Txs',         value: gas.failedTransactions || 0, unit: '',    ok: (gas.failedTransactions||0) === 0, target: 0, lowerBetter: true },
+      { name: 'Avg Gas Cost',       value: gas.averageGasCostUSD || 0, unit: '$',    ok: (gas.averageGasCostUSD||0) <= 0.5, target: 0.5, lowerBetter: true },
+      { name: 'Bot Activity',       value: qual.botPct || 0,           unit: '%',    ok: (qual.botPct||0) <= 5,      target: 5, lowerBetter: true },
+      { name: 'Wallet Quality',     value: qual.avgWalletQuality || 0, unit: '/100', ok: (qual.avgWalletQuality||0) >= 65, target: 65 },
+    ];
+
+    const passing = checks.filter(c => c.ok).length;
+    const status  = passing === checks.length ? 'healthy' : passing >= checks.length * 0.7 ? 'degraded' : 'unhealthy';
+
+    res.json({
+      status,
+      contract: { name: contract.name, address: contract.address, chain: contract.chain },
+      ops: { score: ops.total, label: ops.label, grade: ops.grade },
+      checks,
+      summary: { passing, total: checks.length, score: Math.round((passing / checks.length) * 100) },
+      timestamp: new Date().toISOString(),
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

@@ -1,0 +1,44 @@
+{
+  "id": "alert-config-1775753136858-qx5fhjiwr",
+  "userId": "605bb44d-0d92-423f-ba26-65a3e7d5e7ca",
+  "contractId": "test",
+  "enabled": true,
+  "categories": {
+    "security": true,
+    "performance": true,
+    "liquidity": true,
+    "anomaly": true,
+    "growth": true
+  },
+  "severityLevels": {
+    "critical": true,
+    "high": true,
+    "medium": true,
+    "low": false
+  },
+  "thresholds": {
+    "retentionRate": {
+      "min": 20
+    }
+  },
+  "notifications": {
+    "inApp": true,
+    "email": false,
+    "webhook": false,
+    "webhookUrl": null
+  },
+  "schedule": {
+    "realTime": true,
+    "daily": false,
+    "weekly": false,
+    "dailyTime": "09:00",
+    "weeklyDay": "monday"
+  },
+  "competitorAlerts": {
+    "volumeSpike": false,
+    "userGrowth": false,
+    "tvlChange": false
+  },
+  "createdAt": "2026-04-09T16:45:36.858Z",
+  "updatedAt": "2026-04-09T16:45:36.858Z"
+}

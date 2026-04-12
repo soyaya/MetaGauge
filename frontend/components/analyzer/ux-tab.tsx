@@ -7,12 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Award, Clock, AlertTriangle, TrendingUp, Target, Users } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
-  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
 
 interface UxTabProps { analysisResults: any }
 
-import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY } from '@/lib/chart-colors';
+import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 const COLORS = CHART_COLORS;
 
 export function UxTab({ analysisResults }: UxTabProps) {
@@ -190,10 +190,10 @@ export function UxTab({ analysisResults }: UxTabProps) {
               <CardContent>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={featureData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="feature" type="category" width={90} tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: any) => [`${v} users`, 'Count']} />
+                    <CartesianGrid {...GRID_STYLE} />
+                    <XAxis type="number" {...AXIS_STYLE} />
+                    <YAxis dataKey="feature" type="category" width={90} {...AXIS_STYLE} />
+                    <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => `${v} users`} />
                     <Bar dataKey="count" fill={CHART_PRIMARY} radius={[0,4,4,0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -211,11 +211,11 @@ export function UxTab({ analysisResults }: UxTabProps) {
           <CardContent>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={retentionBars}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} />
-                <Tooltip formatter={(v:any)=>`${v}%`} />
-                <Bar dataKey="value" fill={CHART_SECONDARY} radius={[4,4,0,0]} />
+                <CartesianGrid {...GRID_STYLE} />
+                <XAxis dataKey="name" {...AXIS_STYLE} />
+                <YAxis domain={[0,100]} tickFormatter={v=>`${v}%`} {...AXIS_STYLE} />
+                <Tooltip {...TOOLTIP_STYLE} formatter={(v:any)=>`${v}%`} />
+                <Bar dataKey="value" fill={CHART_SECONDARY} radius={[4,4,0,0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
             {ret.d1Retention === 0 && ret.d7Retention === 0 && (
@@ -230,12 +230,12 @@ export function UxTab({ analysisResults }: UxTabProps) {
             <CardContent>
               <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
-                  <Pie data={lifecycleData} cx="50%" cy="50%" outerRadius={70} dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`} labelLine={false}>
+                  <Pie data={lifecycleData} cx="50%" cy="50%" innerRadius={35} outerRadius={70} dataKey="value" paddingAngle={3} strokeWidth={0}>
                     {lifecycleData.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
                   </Pie>
-                  <Tooltip />
-                </PieChart>
+                  <Tooltip {...TOOLTIP_STYLE} />
+                <Legend wrapperStyle={{ fontSize: "11px", color: "hsl(var(--foreground))" }} />
+                  </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>

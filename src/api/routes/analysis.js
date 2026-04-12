@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { ContractStorage, AnalysisStorage, UserStorage } from '../database/index.js';
+import { ContractStorage, AnalysisStorage, UserStorage, AlertConfigStorage } from '../database/index.js';
 import { EnhancedAnalyticsEngine as AnalyticsEngine } from '../../services/EnhancedAnalyticsEngine.js';
 import { requireTier } from '../middleware/auth.js';
 import GeminiAIService from '../../services/GeminiAIService.js';
@@ -46,6 +46,11 @@ router.post('/start', async (req, res) => {
   try {
     const { configId, configurationId, contractId, analysisType = 'single' } = req.body;
     const userId = req.user.id;
+
+    const VALID_ANALYSIS_TYPES = ['single', 'full', 'quick', 'competitive', 'quick-index'];
+    if (!VALID_ANALYSIS_TYPES.includes(analysisType)) {
+      return res.status(400).json({ error: 'Invalid analysisType', message: `Must be one of: ${VALID_ANALYSIS_TYPES.join(', ')}` });
+    }
 
     // Support multiple parameter names
     const actualConfigId = configId || configurationId || contractId;
@@ -396,11 +401,9 @@ router.post('/:id/interpret', async (req, res) => {
     // Generate AI interpretation
     const interpretation = await GeminiAIService.interpretAnalysis(analysis, analysis.analysisType, req.user.id);
 
-    // Store interpretation in analysis record
-    await AnalysisStorage.update(analysis.id, {
-      aiInterpretation: interpretation,
-      lastInterpretedAt: new Date().toISOString()
-    });
+    // Store interpretation inside existing results JSONB to avoid missing column
+    const updatedResults = { ...(analysis.results || {}), aiInterpretation: interpretation, lastInterpretedAt: new Date().toISOString() };
+    await AnalysisStorage.update(analysis.id, { results: updatedResults });
 
     res.json({
       analysisId: analysis.id,
@@ -601,8 +604,8 @@ router.post('/:id/alerts', async (req, res) => {
     }
 
     // Load user's alert configuration
-    const AlertConfigurationStorage = (await import('../database/AlertConfigurationStorage.js')).default;
-    const configs = await AlertConfigurationStorage.findByUserId(req.user.id);
+    
+    const configs = await AlertConfigStorage.findByUserId(req.user.id);
     const userConfig = configs.find(c => !c.contractId || c.contractId === analysis.configId);
 
     const alerts = await GeminiAIService.generateRealTimeAlerts(

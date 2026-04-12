@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertTriangle, TrendingUp, Users, Zap } from 'lucide-react';
 import {
   PieChart, Pie, Cell, BarChart, Bar,
-  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
 
 interface WalletAnalyticsTabProps {
@@ -16,7 +16,7 @@ interface WalletAnalyticsTabProps {
   chain: string;
 }
 
-import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY } from '@/lib/chart-colors';
+import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 const COLORS = CHART_COLORS;
 const NA_BADGE = <Badge variant="outline" className="text-xs text-muted-foreground">Requires external indexer</Badge>;
 
@@ -109,7 +109,7 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
           </CardHeader>
           <CardContent className="space-y-2">
             {alerts.map((a: any, i: number) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-white border border-amber-200 rounded-lg">
+              <div key={i} className="flex items-start gap-3 p-3 bg-card border border-amber-200 dark:border-amber-800 rounded-lg">
                 <span className="text-red-500 font-bold text-sm mt-0.5">⚠</span>
                 <div>
                   <p className="text-sm font-medium">{a.metric}: <span className="text-red-600">{a.value}</span></p>
@@ -152,13 +152,12 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
                       { name: 'Active', value: activeWallets.length },
                       { name: 'Dormant', value: dormantWallets.length },
                     ]}
-                    cx="50%" cy="50%" outerRadius={75} dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`} labelLine={false}
-                  >
+                    cx="50%" cy="50%" innerRadius={40} outerRadius={75} dataKey="value" paddingAngle={3} strokeWidth={0}>
                     <Cell fill={CHART_SECONDARY} /><Cell fill={CHART_SECONDARY} />
                   </Pie>
-                  <Tooltip />
-                </PieChart>
+                  <Tooltip {...TOOLTIP_STYLE} />
+                <Legend wrapperStyle={{ fontSize: "11px", color: "hsl(var(--foreground))" }} />
+                  </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -304,10 +303,10 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={features.slice(0, 8)} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
+                <CartesianGrid {...GRID_STYLE} />
+                <XAxis type="number" {...AXIS_STYLE} />
                 <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 11 }} />
-                <Tooltip />
+                <Tooltip {...TOOLTIP_STYLE} />
                 <Bar dataKey="txCount" fill={CHART_PRIMARY} radius={[0,4,4,0]} name="Transactions" />
               </BarChart>
             </ResponsiveContainer>
@@ -321,12 +320,12 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
-                  <Pie data={features.slice(0,6)} cx="50%" cy="50%" outerRadius={75} dataKey="txCount"
-                    label={({ name, value }) => `${name}: ${value}`} labelLine={false}>
+                  <Pie data={features.slice(0,6)} cx="50%" cy="50%" innerRadius={40} outerRadius={75} dataKey="txCount" paddingAngle={3} strokeWidth={0}>
                     {features.slice(0,6).map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
-                  <Tooltip />
-                </PieChart>
+                  <Tooltip {...TOOLTIP_STYLE} />
+                <Legend wrapperStyle={{ fontSize: "11px", color: "hsl(var(--foreground))" }} />
+                  </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>

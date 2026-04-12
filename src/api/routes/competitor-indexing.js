@@ -6,29 +6,17 @@
  *   data/users/{userId}/competitor_metrics.json          — side-by-side comparison
  */
 
-import { UserStorage, AnalysisStorage, LivePollStorage, MetricsStorage } from '../database/index.js';
-import { writeJsonFile, readJsonFile } from '../database/fileStorage.js';
-import path from 'path';
-import fs from 'fs/promises';
+import { UserStorage, AnalysisStorage, LivePollStorage, MetricsStorage, CompetitorDataStorage, CompetitorMetricsStorage } from '../database/index.js';
 
 const HISTORY_LIMIT = 50;
-const CHUNK_SIZE    = 100;   // small chunks — high-volume contracts have thousands of logs per 1000 blocks
+const CHUNK_SIZE    = 100;
 const LIVE_POLL_MS  = 30_000;
-const LOG_TIMEOUT   = 15000; // 15s per chunk
-const DATA_DIR      = './data';
-
-function competitorFile(userId, competitorId) {
-  return path.join(DATA_DIR, 'users', userId, 'competitors', `${competitorId}.json`);
-}
-function competitorMetricsFile(userId) {
-  return path.join(DATA_DIR, 'users', userId, 'competitor_metrics.json');
-}
+const LOG_TIMEOUT   = 15000;
 
 function getRpcUrls(chain) {
   const map = {
     ethereum: [process.env.ETHEREUM_RPC_URL1, process.env.ETHEREUM_RPC_URL2, process.env.ETHEREUM_RPC_URL3].filter(Boolean),
     starknet: [process.env.STARKNET_RPC_URL1, process.env.STARKNET_RPC_URL2].filter(Boolean),
-    lisk:     [process.env.LISK_RPC_URL1, process.env.LISK_RPC_URL2].filter(Boolean),
   };
   const urls = map[chain?.toLowerCase()] || map.ethereum;
   return urls.length ? urls : ['https://ethereum-rpc.publicnode.com'];
@@ -64,36 +52,16 @@ async function getRpcClient(chain, rpcUrls) {
  * Reads all competitor files + user's own metrics.
  */
 async function rebuildComparisonMetrics(userId) {
-  const competitorsDir = path.join(DATA_DIR, 'users', userId, 'competitors');
-  let competitorFiles = [];
   try {
-    competitorFiles = await fs.readdir(competitorsDir);
-  } catch { return; }
-
-  const competitors = [];
-  for (const file of competitorFiles.filter(f => f.endsWith('.json') && !f.endsWith('.backup'))) {
-    try {
-      const data = JSON.parse(await fs.readFile(path.join(competitorsDir, file), 'utf8'));
-      competitors.push(data);
-    } catch { /* skip corrupt file */ }
-  }
-
-  const userMetrics = await MetricsStorage.get(userId);
-
-  const comparison = {
-    updatedAt: new Date().toISOString(),
-    user: userMetrics,
-    competitors: competitors.map(c => ({
-      id: c.id,
-      name: c.name,
-      address: c.address,
-      chain: c.chain,
-      metrics: c.metrics,
-      lastUpdated: c.lastUpdated,
-    })),
-  };
-
-  await writeJsonFile(competitorMetricsFile(userId), comparison);
+    const competitors = await CompetitorDataStorage.findByUserId(userId);
+    const userMetrics = await MetricsStorage.get(userId);
+    const comparison = {
+      updatedAt: new Date().toISOString(),
+      user: userMetrics,
+      competitors: competitors.map(c => ({ id: c.id, name: c.name, address: c.address, chain: c.chain, metrics: c.metrics, lastUpdated: c.lastUpdated })),
+    };
+    await CompetitorMetricsStorage.save(userId, comparison);
+  } catch { /* skip */ }
 }
 
 /**
@@ -103,9 +71,6 @@ async function rebuildComparisonMetrics(userId) {
 export async function indexCompetitor(userId, competitor) {
   const { id: competitorId, address, chain, name } = competitor;
   console.log(`🏁 Indexing competitor ${name} (${address}) for user ${userId}`);
-
-  // Ensure competitors dir exists
-  await fs.mkdir(path.join(DATA_DIR, 'users', userId, 'competitors'), { recursive: true });
 
   const rpcUrls = getRpcUrls(chain);
   let rpcClient, currentBlock;
@@ -186,14 +151,13 @@ export async function indexCompetitor(userId, competitor) {
   const metrics = calculateMetrics(collectedTxs);
   const historicalEndBlock = currentBlock;
 
-  // Save competitor data per-user
   const competitorData = {
     id: competitorId, name, address, chain,
     metrics, transactions: collectedTxs,
     lastUpdated: new Date().toISOString(),
     blockRange: { start: scanEnd + 1, end: historicalEndBlock },
   };
-  await writeJsonFile(competitorFile(userId, competitorId), competitorData);
+  await CompetitorDataStorage.save(userId, address, chain, competitorData);
   await rebuildComparisonMetrics(userId);
 
   console.log(`✅ Competitor ${name}: ${collectedTxs.length} historical txs saved for user ${userId}`);
@@ -242,43 +206,43 @@ export async function indexCompetitor(userId, competitor) {
       }
 
       if (newTxs.length > 0) {
-        const current = JSON.parse(await fs.readFile(competitorFile(userId, competitorId), 'utf8').catch(() => '{}'));
+        const current = await CompetitorDataStorage.get(userId, address, chain) || {};
         const allTxs = [...(current.transactions || []), ...newTxs];
         const updatedMetrics = calculateMetrics(allTxs);
-        const previousMetrics = current.metrics || {};
-
-        await writeJsonFile(competitorFile(userId, competitorId), {
+        await CompetitorDataStorage.save(userId, address, chain, {
           ...current, metrics: updatedMetrics, transactions: allTxs,
           lastUpdated: new Date().toISOString(),
           blockRange: { ...current.blockRange, end: latestBlock },
         });
-
         await rebuildComparisonMetrics(userId);
 
         // ── Auto-run competitive alert checks ────────────────────────
         try {
-          const { UserStorage, MetricsStorage } = await import('../database/index.js');
+          const { UserStorage, MetricsStorage, AlertConfigStorage } = await import('../database/index.js');
           const user = await UserStorage.findById(userId);
           const myContractAddress = user?.onboarding?.defaultContract?.address;
           const { checkCompetitorAcquisitionSpike, checkTVLOvertake, checkMomentumShift, makeAlert, saveAlert } = await import('../../services/AlertEngine.js');
 
-          // Built-in checks
-          checkCompetitorAcquisitionSpike(name, updatedMetrics.uniqueUsers, previousMetrics.uniqueUsers || 0, myContractAddress, userId);
-          const userMetrics = await MetricsStorage.get(userId);
-          if (userMetrics) checkTVLOvertake(name, Number(updatedMetrics.totalValue), Number(userMetrics.totalValue || 0), myContractAddress, userId);
-          const compGrowth = previousMetrics.transactions > 0
-            ? ((updatedMetrics.transactions - previousMetrics.transactions) / previousMetrics.transactions) * 100 : 0;
-          checkMomentumShift(name, compGrowth, 0, myContractAddress, userId);
+          const userAlertConfigs = await AlertConfigStorage.findByUserId(userId);
+          const globalCfg = userAlertConfigs.find(c => !c.type && c.enabled);
+          const competitorsEnabled = globalCfg?.categories?.competitors !== false;
+          const previousMetrics = current.metrics || {};
 
-          // User-defined threshold alerts
-          const AlertConfigurationStorage = (await import('../database/AlertConfigurationStorage.js')).default;
-          const userAlertConfigs = await AlertConfigurationStorage.findByUserId(userId);
+          if (competitorsEnabled) {
+            checkCompetitorAcquisitionSpike(name, updatedMetrics.uniqueUsers, previousMetrics.uniqueUsers || 0, myContractAddress, userId);
+            const userMetrics = await MetricsStorage.get(userId);
+            if (userMetrics) checkTVLOvertake(name, Number(updatedMetrics.totalValue), Number(userMetrics.totalValue || 0), myContractAddress, userId);
+            const compGrowth = previousMetrics.transactions > 0
+              ? ((updatedMetrics.transactions - previousMetrics.transactions) / previousMetrics.transactions) * 100 : 0;
+            checkMomentumShift(name, compGrowth, 0, myContractAddress, userId);
+          }
           for (const cfg of userAlertConfigs.filter(c => c.type === 'competitive' && c.competitorId === competitorId && c.enabled)) {
             const actual = updatedMetrics[cfg.metric];
             if (actual == null) continue;
             let fired = false;
             if (cfg.condition === 'above' && actual > cfg.threshold) fired = true;
             if (cfg.condition === 'below' && actual < cfg.threshold) fired = true;
+            const userMetrics = await MetricsStorage.get(userId);
             if (cfg.condition === 'overtakes_me' && userMetrics) fired = actual > (userMetrics[cfg.metric] ?? Infinity);
             if (fired) saveAlert(makeAlert(`competitive_threshold_${cfg.metric}`, 'medium', myContractAddress, userId,
               `Competitor Alert: ${cfg.name || cfg.metric}`,
@@ -330,7 +294,7 @@ export async function resumeCompetitorPolls(userId) {
  */
 export async function getCompetitorMetrics(userId) {
   try {
-    return JSON.parse(await fs.readFile(competitorMetricsFile(userId), 'utf8'));
+    return await CompetitorMetricsStorage.get(userId);
   } catch {
     return null;
   }

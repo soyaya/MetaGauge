@@ -1,163 +1,107 @@
-/**
- * Subscription Routes
- * Handles subscription status and usage tracking
- */
-
 import express from 'express';
 import { UserStorage } from '../database/index.js';
 import subscriptionService from '../../services/SubscriptionService.js';
+import { FREE_QUOTA, PRICING, FEATURES, LIMITS } from '../../config/pricing.js';
+import { EthereumRpcClient } from '../../services/EthereumRpcClient.js';
 
 const router = express.Router();
 
-/**
- * GET /api/subscription/status
- * Returns user's subscription status and tier information
- */
+// GET /api/subscription/status
 router.get('/status', async (req, res) => {
   try {
     const user = await UserStorage.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Get subscription status from service
-    const status = await subscriptionService.getSubscriptionStatus(req.user.id);
+    const usage   = user.usage   || {};
+    const billing = user.billing || { balance: 0 };
+    const hasBalance = (billing.balance || 0) > 0;
+
+    const monthlyAnalyses  = usage.monthlyAnalysisCount || 0;
+    const monthlyAiQueries = usage.monthlyAiQueryCount  || 0;
 
     res.json({
-      tier: user.tier || 'free',
-      tierName: getTierDisplayName(user.tier || 'free'),
-      isActive: user.isActive !== false,
-      limits: {
-        monthly: status.limits?.monthly || 10,
-        remaining: status.limits?.remaining || 10,
-        maxProjects: status.limits?.maxProjects || 1,
-        maxAlerts: status.limits?.maxAlerts || 3,
-        historicalDays: status.limits?.historicalDays || 7
+      model: 'pay-as-you-go',
+      balance: billing.balance || 0,
+      freeQuota: FREE_QUOTA,
+      freeRemaining: {
+        analyses:  Math.max(0, FREE_QUOTA.analyses  - monthlyAnalyses),
+        aiQueries: Math.max(0, FREE_QUOTA.aiQueries - monthlyAiQueries),
       },
-      usage: {
-        analysisCount: user.usage?.analysisCount || 0,
-        monthlyAnalysisCount: user.usage?.monthlyAnalysisCount || 0,
-        lastAnalysis: user.usage?.lastAnalysis || null,
-        monthlyResetDate: user.usage?.monthlyResetDate || new Date().toISOString()
+      limits: {
+        monthly:        FREE_QUOTA.analyses,
+        remaining:      Math.max(0, FREE_QUOTA.analyses - monthlyAnalyses),
+        maxProjects:    FREE_QUOTA.contracts,
+        maxAlerts:      FREE_QUOTA.alerts,
+        historicalTxs: FREE_QUOTA.historicalTxs,
+        maxMessageLength: LIMITS.maxMessageLength,
+        maxAnalysisPerDay: LIMITS.maxAnalysisPerDay,
       },
       features: {
-        aiInsights: ['pro', 'enterprise'].includes(user.tier),
-        competitiveAnalysis: ['enterprise'].includes(user.tier),
-        apiAccess: ['pro', 'enterprise'].includes(user.tier),
-        continuousSync: ['starter', 'pro', 'enterprise'].includes(user.tier)
-      }
+        basicAnalytics:      true,
+        aiInsights:          monthlyAiQueries < FREE_QUOTA.aiQueries || hasBalance,
+        competitiveAnalysis: monthlyAiQueries < FREE_QUOTA.aiQueries || hasBalance,
+        continuousSync:      hasBalance,
+        apiAccess:           hasBalance,
+        extendedHistory:     hasBalance,
+        export:              true,
+      },
+      usage: {
+        analysisCount:        usage.analysisCount        || 0,
+        monthlyAnalysisCount: monthlyAnalyses,
+        aiQueryCount:         usage.aiQueryCount         || 0,
+        monthlyAiQueryCount:  monthlyAiQueries,
+        lastAnalysis:         usage.lastAnalysis         || null,
+        monthlyResetDate:     usage.monthlyResetDate     || null,
+      },
+      pricing: PRICING,
     });
-
-  } catch (error) {
-    console.error('Subscription status error:', error);
-    res.status(500).json({
-      error: 'Failed to get subscription status',
-      message: error.message
-    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get subscription status', message: err.message });
   }
 });
 
-/**
- * GET /api/subscription/usage
- * Returns detailed usage statistics
- */
+// GET /api/subscription/usage
 router.get('/usage', async (req, res) => {
   try {
     const usage = await subscriptionService.getUsage(req.user.id);
     res.json(usage);
-  } catch (error) {
-    console.error('Subscription usage error:', error);
-    res.status(500).json({
-      error: 'Failed to get usage statistics',
-      message: error.message
-    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get usage', message: err.message });
   }
 });
 
-/**
- * POST /api/subscription/verify
- * Verifies subscription payment and updates user tier
- */
+// POST /api/subscription/verify — verify on-chain payment and credit balance
 router.post('/verify', async (req, res) => {
   try {
     const { transactionHash, chain = 'ethereum' } = req.body;
+    if (!transactionHash) return res.status(400).json({ error: 'transactionHash required' });
 
-    if (!transactionHash) {
-      return res.status(400).json({
-        error: 'Missing transaction hash',
-        message: 'Transaction hash is required for verification'
-      });
+    const rpcUrls = [process.env.ETHEREUM_RPC_URL, process.env.ETHEREUM_RPC_URL_FALLBACK].filter(Boolean);
+    const rpc = new EthereumRpcClient(rpcUrls);
+    const tx = await rpc.getTransaction(transactionHash);
+    if (!tx) return res.status(400).json({ error: 'Transaction not found on chain' });
+
+    const PAYMENT_ADDRESSES = {
+      [process.env.PAYMENT_ADDRESS || '']: true,
+    };
+    const toAddr = (tx.to || '').toLowerCase();
+    if (!PAYMENT_ADDRESSES[toAddr]) {
+      return res.status(400).json({ error: 'Transaction recipient does not match payment address' });
     }
 
-    // Verify the transaction (placeholder - implement actual verification)
-    const verification = await verifySubscriptionPayment(transactionHash, chain);
-    
-    if (!verification.valid) {
-      return res.status(400).json({
-        error: 'Invalid transaction',
-        message: verification.reason || 'Transaction could not be verified'
-      });
-    }
+    // Convert wei value to ETH, then to USD using a rough rate
+    const ethValue = Number(BigInt(tx.value || '0')) / 1e18;
+    const ethPriceUSD = parseFloat(process.env.ETH_PRICE_USD || '2500');
+    const amountUSD = Number((ethValue * ethPriceUSD).toFixed(2));
 
-    // Update user subscription
-    const user = await UserStorage.findById(req.user.id);
-    const updatedUser = await UserStorage.update(req.user.id, {
-      tier: verification.tier,
-      subscriptionTier: verification.tier,
-      subscriptionExpiry: verification.expiryDate,
-      lastPayment: {
-        transactionHash,
-        amount: verification.amount,
-        tier: verification.tier,
-        date: new Date().toISOString(),
-        chain
-      }
-    });
+    if (amountUSD < 0.01) return res.status(400).json({ error: 'Payment amount too small' });
 
-    res.json({
-      success: true,
-      message: 'Subscription verified and updated',
-      tier: verification.tier,
-      expiryDate: verification.expiryDate,
-      user: {
-        id: updatedUser.id,
-        tier: updatedUser.tier,
-        subscriptionTier: updatedUser.subscriptionTier
-      }
-    });
+    const result = await subscriptionService.topUp(req.user.id, amountUSD);
 
-  } catch (error) {
-    console.error('Subscription verification error:', error);
-    res.status(500).json({
-      error: 'Failed to verify subscription',
-      message: error.message
-    });
+    res.json({ success: true, credited: amountUSD, balance: result.balance });
+  } catch (err) {
+    res.status(500).json({ error: 'Verification failed', message: err.message });
   }
 });
-
-// Helper functions
-function getTierDisplayName(tier) {
-  const tierNames = {
-    free: 'Free',
-    starter: 'Starter',
-    pro: 'Pro',
-    enterprise: 'Enterprise'
-  };
-  return tierNames[tier] || 'Free';
-}
-
-async function verifySubscriptionPayment(transactionHash, chain) {
-  // Placeholder implementation
-  // In production, this would verify the transaction on-chain
-  
-  // For now, return a mock verification
-  return {
-    valid: true,
-    tier: 'starter',
-    amount: '0.01',
-    expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-    reason: null
-  };
-}
 
 export default router;

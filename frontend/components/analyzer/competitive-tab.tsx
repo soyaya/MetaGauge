@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, TrendingUp, TrendingDown, Users, Activity, Zap, Target, Trash2, Brain, Bell } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { CHART_COLORS } from '@/lib/chart-colors';
+import { CHART_COLORS, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 
 // Vivid glowing colors for competitors (index 0 = your contract, 1+ = competitors)
 const CONTRACT_COLORS = [
@@ -103,10 +103,12 @@ export function CompetitiveTab({ analysisResults }: CompetitiveTabProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {insights.map((ins: any, i: number) => (
             <div key={i} className={`flex items-start gap-3 p-4 rounded-lg border ${
-              ins.type === 'good' ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'
+              ins.type === 'good'
+                ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
+                : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800'
             }`}>
               {ins.type === 'good' ? <TrendingUp className="h-5 w-5 text-green-600 shrink-0 mt-0.5" /> : <TrendingDown className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />}
-              <p className="text-sm">{ins.msg}</p>
+              <p className={`text-sm font-medium ${ins.type === 'good' ? 'text-green-900 dark:text-green-100' : 'text-amber-900 dark:text-amber-100'}`}>{ins.msg}</p>
             </div>
           ))}
         </div>
@@ -122,16 +124,16 @@ export function CompetitiveTab({ analysisResults }: CompetitiveTabProps) {
 
       {/* Strengths & Weaknesses */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-green-200 bg-green-50/30">
-          <CardHeader><CardTitle className="text-sm text-green-700 flex items-center gap-2"><TrendingUp className="h-4 w-4" />Strengths</CardTitle></CardHeader>
+        <Card className="border-green-200 dark:border-green-800 bg-green-50/30 dark:bg-green-950/20">
+          <CardHeader><CardTitle className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2"><TrendingUp className="h-4 w-4" />Strengths</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            {strengths.length ? strengths.map((s: string, i: number) => <p key={i} className="text-sm text-green-800 bg-white rounded p-2 border border-green-200">{s}</p>) : <p className="text-xs text-muted-foreground">Add competitors to see strengths</p>}
+            {strengths.length ? strengths.map((s: string, i: number) => <p key={i} className="text-sm text-green-900 dark:text-green-100 bg-green-100/50 dark:bg-green-900/30 rounded p-2 border border-green-200 dark:border-green-800">{s}</p>) : <p className="text-xs text-muted-foreground">Add competitors to see strengths</p>}
           </CardContent>
         </Card>
-        <Card className="border-amber-200 bg-amber-50/30">
-          <CardHeader><CardTitle className="text-sm text-amber-700 flex items-center gap-2"><Target className="h-4 w-4" />Growth Opportunities</CardTitle></CardHeader>
+        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/20">
+          <CardHeader><CardTitle className="text-sm text-amber-700 dark:text-amber-300 flex items-center gap-2"><Target className="h-4 w-4" />Growth Opportunities</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            {weaknesses.length ? weaknesses.map((w: string, i: number) => <p key={i} className="text-sm text-amber-800 bg-white rounded p-2 border border-amber-200">{w}</p>) : <p className="text-xs text-muted-foreground">Add competitors to see opportunities</p>}
+            {weaknesses.length ? weaknesses.map((w: string, i: number) => <p key={i} className="text-sm text-amber-900 dark:text-amber-100 bg-amber-100/50 dark:bg-amber-900/30 rounded p-2 border border-amber-200 dark:border-amber-800">{w}</p>) : <p className="text-xs text-muted-foreground">Add competitors to see opportunities</p>}
           </CardContent>
         </Card>
       </div>
@@ -201,7 +203,7 @@ function RadarChartCard({ data, me, competitors }: any) {
             {competitors.map((c: any, i: number) => (
               <Radar key={c.name} name={c.name} dataKey={c.name} stroke={CONTRACT_COLORS[(i+1)%CONTRACT_COLORS.length].hex} fill={CONTRACT_COLORS[(i+1)%CONTRACT_COLORS.length].hex} fillOpacity={0.25} strokeWidth={2} />
             ))}
-            <Legend /><Tooltip />
+            <Legend /><Tooltip {...TOOLTIP_STYLE} />
           </RadarChart>
         </ResponsiveContainer>
       </CardContent>
@@ -222,9 +224,9 @@ function BarChartCard({ data, me, competitors }: any) {
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={barData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
-            <YAxis domain={[0,100]} /><Tooltip /><Legend />
+            <CartesianGrid {...GRID_STYLE} />
+            <XAxis dataKey="metric" {...AXIS_STYLE} />
+            <YAxis domain={[0,100]} /><Tooltip {...TOOLTIP_STYLE} /><Legend />
             {allNames.map((n: string, i: number) => <Bar key={n} dataKey={n} fill={CONTRACT_COLORS[i%CONTRACT_COLORS.length].hex} radius={[4,4,0,0]} />)}
           </BarChart>
         </ResponsiveContainer>
@@ -238,7 +240,7 @@ function CompetitorsList({ competitors, onRemove }: any) {
     <div>
       <h3 className="text-sm font-semibold mb-4 flex items-center gap-2"><Users className="h-4 w-4" />Indexed Competitors ({competitors.length})</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {competitors.map((c: any, i: number) => <CompetitorCard key={i} competitor={c} colorIndex={i + 1} onRemove={onRemove} />)}
+        {competitors.map((c: any, i: number) => <CompetitorCard key={c.address || c.id || i} competitor={c} colorIndex={i + 1} onRemove={onRemove} />)}
       </div>
     </div>
   );

@@ -1,18 +1,12 @@
-/**
- * Simple AI Service - Personalized insights using user's contract data
- */
 import GeminiAIService from './GeminiAIService.js';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 
-const INSIGHTS_FILE = './data/ai_insights.json';
-
-function readInsights() {
-  if (!existsSync(INSIGHTS_FILE)) return [];
-  try { return JSON.parse(readFileSync(INSIGHTS_FILE, 'utf8')); } catch { return []; }
+async function readInsights() {
+  const { AIInsightsStorage } = await import('../api/database/index.js');
+  return AIInsightsStorage.readAll();
 }
-
-function writeInsights(insights) {
-  writeFileSync(INSIGHTS_FILE, JSON.stringify(insights, null, 2), 'utf8');
+async function writeInsights(entry) {
+  const { AIInsightsStorage } = await import('../api/database/index.js');
+  return AIInsightsStorage.append(entry);
 }
 
 export class SimpleAIService {
@@ -45,10 +39,7 @@ export class SimpleAIService {
         type: 'daily'
       };
 
-      const allInsights = readInsights();
-      allInsights.unshift(insight);
-      writeInsights(allInsights);
-
+      await writeInsights(insight);
       return insight;
     } catch (error) {
       console.error('Daily insights generation failed:', error);
@@ -300,11 +291,11 @@ Keep each insight under 50 words and make them specific to this contract's data.
       }
 
       // Store assignments
-      const allAssignments = this.readAssignments();
+      const allAssignments = await this.readAssignments();
       assignments.forEach(assignment => {
         allAssignments.unshift(assignment);
       });
-      this.writeAssignments(allAssignments);
+      await this.writeAssignments(allAssignments);
 
       return assignments;
     } catch (error) {
@@ -318,19 +309,17 @@ Keep each insight under 50 words and make them specific to this contract's data.
    */
   async completeAssignment(userId, assignmentId) {
     try {
-      const assignments = this.readAssignments();
+      const assignments = await this.readAssignments();
       const assignment = assignments.find(a => a.id === assignmentId && a.userId === userId);
       
       if (!assignment) return null;
 
-      // Mark as completed
       assignment.status = 'completed';
       assignment.completedAt = new Date().toISOString();
       
-      // Record the improvement for AI learning
       await this.recordImprovement(userId, assignment);
       
-      this.writeAssignments(assignments);
+      await this.writeAssignments(assignments);
       return assignment;
     } catch (error) {
       console.error('Complete assignment failed:', error);
@@ -360,9 +349,9 @@ Keep each insight under 50 words and make them specific to this contract's data.
         }
       };
 
-      const improvements = this.readImprovements();
+      const improvements = await this.readImprovements();
       improvements.unshift(improvement);
-      this.writeImprovements(improvements);
+      await this.writeImprovements(improvements);
 
       // Use this data to improve future assignments for other users
       await this.updateAILearning(improvement);
@@ -379,7 +368,7 @@ Keep each insight under 50 words and make them specific to this contract's data.
   async updateAILearning(improvement) {
     try {
       // Analyze successful patterns
-      const improvements = this.readImprovements();
+      const improvements = await this.readImprovements();
       const similarImprovements = improvements.filter(i => 
         i.category === improvement.category && 
         i.metricTarget === improvement.metricTarget
@@ -409,7 +398,7 @@ Keep each insight under 50 words and make them specific to this contract's data.
    */
   async sendCompletionNotification(userId, assignmentId) {
     try {
-      const assignments = this.readAssignments();
+      const assignments = await this.readAssignments();
       const assignment = assignments.find(a => a.id === assignmentId);
       
       if (!assignment) return;
@@ -447,55 +436,54 @@ Keep each insight under 50 words and make them specific to this contract's data.
     }
   }
 
-  // Helper methods for assignments
-  readAssignments() {
-    const file = './data/ai_assignments.json';
-    if (!existsSync(file)) return [];
-    try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return []; }
+  // Helper methods for assignments — backed by AITasksStorage
+  async readAssignments() {
+    const { AITasksStorage } = await import('../api/database/index.js');
+    return AITasksStorage.readAll();
   }
-
-  writeAssignments(assignments) {
-    writeFileSync('./data/ai_assignments.json', JSON.stringify(assignments, null, 2), 'utf8');
+  async writeAssignments(assignments) {
+    const { AITasksStorage } = await import('../api/database/index.js');
+    return AITasksStorage.writeAll(assignments);
   }
-
-  readImprovements() {
-    const file = './data/ai_improvements.json';
-    if (!existsSync(file)) return [];
-    try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return []; }
+  async readImprovements() {
+    const { AILearningsStorage } = await import('../api/database/index.js');
+    return AILearningsStorage.readAll();
   }
-
-  writeImprovements(improvements) {
-    writeFileSync('./data/ai_improvements.json', JSON.stringify(improvements, null, 2), 'utf8');
+  async writeImprovements(improvements) {
+    const { AILearningsStorage } = await import('../api/database/index.js');
+    return AILearningsStorage.writeAll(improvements);
   }
 
   calculateAverageTime(improvements) {
-    // Mock calculation
-    return '1.5 weeks';
+    if (!improvements.length) return 'unknown';
+    // timeToComplete is stored as e.g. "2 weeks" — just return the most common value
+    const counts = {};
+    improvements.forEach(i => { counts[i.learningData?.timeToComplete] = (counts[i.learningData?.timeToComplete] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'unknown';
   }
 
   calculateSuccessRate(improvements) {
-    // Mock calculation
-    return 85;
+    if (!improvements.length) return 0;
+    const completed = improvements.filter(i => i.completedAt).length;
+    return Math.round((completed / improvements.length) * 100);
   }
 
   extractPatterns(improvements) {
-    // Mock pattern extraction
-    return ['user_engagement', 'gas_optimization', 'growth_strategies'];
+    return [...new Set(improvements.map(i => i.category).filter(Boolean))];
   }
 
   updateAssignmentTemplates(category, learnings) {
-    // Mock template update
     console.log(`📚 Updated ${category} assignment templates with new learnings`);
   }
 
   async getUserById(userId) {
-    // Mock user lookup
-    return { email: 'user@example.com' };
+    const { UserStorage } = await import('../api/database/index.js');
+    return UserStorage.findById(userId);
   }
 
   // Get user's insights
-  getUserInsights(userId, limit = 10) {
-    const insights = readInsights();
+  async getUserInsights(userId, limit = 10) {
+    const insights = await readInsights();
     return insights
       .filter(insight => insight.userId === userId)
       .slice(0, limit);

@@ -4,18 +4,16 @@
  * Tasks are on-chain goals — completion is verified by metric changes.
  */
 
-import fs from 'fs/promises';
-import path from 'path';
 import crypto from 'crypto';
 import { checkAllAlerts } from './AlertEngine.js';
 
-const TASKS_FILE = path.resolve('./data/ai-tasks.json');
-
 async function readTasks() {
-  try { return JSON.parse(await fs.readFile(TASKS_FILE, 'utf8')); } catch { return []; }
+  const { AITasksStorage } = await import('../api/database/index.js');
+  return AITasksStorage.readAll();
 }
 async function writeTasks(tasks) {
-  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
+  const { AITasksStorage } = await import('../api/database/index.js');
+  await AITasksStorage.writeAll(tasks);
 }
 
 export class AITaskManager {
@@ -24,6 +22,9 @@ export class AITaskManager {
    */
   static async createTask({ userId, contractId, contractAddress, chain, goal, targetMetric, targetValue, deadlineDays = 14, rationale }) {
     const tasks = await readTasks();
+    // Deduplicate — skip if active task for same user+metric already exists
+    const exists = tasks.find(t => t.userId === userId && t.targetMetric === targetMetric && t.status === 'active');
+    if (exists) return exists;
     const task = {
       id: `task-${crypto.randomUUID().slice(0, 8)}`,
       userId,
@@ -139,17 +140,20 @@ export class AITaskManager {
       createdAt: new Date().toISOString(),
     };
 
-    // Write to alerts file
-    const ALERTS_FILE = path.resolve('./data/alerts.json');
-    let alerts = [];
-    try { alerts = JSON.parse(await fs.readFile(ALERTS_FILE, 'utf8')); } catch {}
-    alerts.unshift(alertData);
-    await fs.writeFile(ALERTS_FILE, JSON.stringify(alerts, null, 2));
+    // Write alert to DB
+    const { AlertsStorage } = await import('../api/database/index.js');
+    await AlertsStorage.create(alertData);
 
     // Push via WebSocket
     if (wsManager) {
       wsManager.emitProgress(task.userId, { type: 'alert', alert: alertData });
     }
+
+    // Send email notification
+    try {
+      const { EmailAutomation } = await import('./EmailAutomation.js');
+      await EmailAutomation.sendTaskAlert(task.userId, task, type);
+    } catch {}
   }
 
   static async dismissTask(taskId, userId) {
