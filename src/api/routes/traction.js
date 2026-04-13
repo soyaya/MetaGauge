@@ -274,7 +274,10 @@ async function buildFR(userId) {
 router.get('/tasks', async (req, res) => {
   try {
     const built = await buildFR(req.user.id);
-    if (!built) return res.status(404).json({ error: 'No analysis found' });
+    if (!built) {
+      // Return empty tasks instead of 404
+      return res.json([]);
+    }
     const { fr } = built;
     const alerts = await loadAlerts(req.user.id);
     const ops   = calculateOPS(fr, alerts);
@@ -312,7 +315,15 @@ router.get('/tasks', async (req, res) => {
 router.get('/metrics', async (req, res) => {
   try {
     const built = await buildFR(req.user.id);
-    if (!built) return res.status(404).json({ error: 'No analysis found' });
+    if (!built) {
+      // Return empty metrics instead of 404
+      return res.json({
+        retention: { rate: 0, cohorts: [] },
+        activation: { rate: 0, funnel: [] },
+        gas: { efficiency: 0, trends: [] },
+        quality: { score: 0, segments: [] }
+      });
+    }
     const { fr } = built;
     const ret = fr.retentionMetrics || {};
     const act = fr.activationMetrics || {};
