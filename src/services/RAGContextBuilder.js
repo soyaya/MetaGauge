@@ -113,6 +113,37 @@ export class RAGContextBuilder {
       }
     } catch {}
 
+    // 6b. Pattern profile — accumulated trends
+    try {
+      const { PatternProfileService } = await import('./PatternProfileService.js');
+      const profile = await PatternProfileService.get(userId);
+      if (profile) {
+        sections.push(`\n=== HISTORICAL PATTERN PROFILE ===`);
+        sections.push(`Summary: ${profile.summary}`);
+        sections.push(`Growth: ${profile.growth?.direction} (${profile.growth?.rate > 0 ? '+' : ''}${profile.growth?.rate}% overall, current ${profile.growth?.current} users)`);
+        sections.push(`Retention trend: ${profile.retention?.direction} (avg ${profile.retention?.avg}%)`);
+        sections.push(`Churn trend: ${profile.churn?.direction} (current ${profile.churn?.current}%)`);
+        sections.push(`User quality: ${profile.userQuality?.quality} (whale ${profile.userQuality?.avgWhaleRatio}%, bot ${profile.userQuality?.avgBotRatio}%)`);
+        if (profile.milestones?.length) sections.push(`Milestones reached: ${profile.milestones.join(', ')}`);
+        sections.push(`Data points: ${profile.dataPoints} analyses`);
+
+        // Predictions
+        const p = profile.predictions;
+        if (p) {
+          sections.push(`\n=== PREDICTIONS (next 30 days) ===`);
+          sections.push(`Users: ${p.next30Days.users.current} → ${p.next30Days.users.value} (${p.next30Days.users.changePct > 0 ? '+' : ''}${p.next30Days.users.changePct}%)`);
+          sections.push(`Retention: ${p.next30Days.retentionRate.current}% → ${p.next30Days.retentionRate.value}%`);
+          sections.push(`Churn risk: ${p.churnRisk.level} (score ${p.churnRisk.score}/100)`);
+          sections.push(`Growth score: ${p.growthScore.score}/100 (${p.growthScore.label})`);
+          if (Object.keys(p.timeToMilestone || {}).length) {
+            const [key, val] = Object.entries(p.timeToMilestone)[0];
+            sections.push(`Next milestone: ${key.replace('_', ' ')} in ~${val.days} days (${val.date})`);
+          }
+          sections.push(`Prediction confidence: ${p.confidence}`);
+        }
+      }
+    } catch {}
+
     // 7. Role instruction
     sections.push(`
     // 7. Role instruction

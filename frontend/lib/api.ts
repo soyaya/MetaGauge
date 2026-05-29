@@ -473,6 +473,9 @@ export const api = {
     analyze: async (body: { contractAddress: string; chain: string }) =>
       apiRequest('/api/agent/analyze', { method: 'POST', body: JSON.stringify(body) }),
 
+    chat: async (body: { message: string; contractAddress?: string; chain?: string; sessionHistory?: any[] }) =>
+      apiRequest('/api/agent/chat', { method: 'POST', body: JSON.stringify(body) }),
+
     feedback: async (body: { messageId: string; sessionId?: string; rating: number; note?: string; componentType?: string }) =>
       apiRequest('/api/agent/feedback', { method: 'POST', body: JSON.stringify(body) }),
 
@@ -481,6 +484,33 @@ export const api = {
 
     getDigest: async (type: string = 'daily') =>
       apiRequest(`/api/agent/digest?type=${type}`),
+
+    getConfig: async () =>
+      apiRequest('/api/agent/config'),
+
+    updateConfig: async (body: { enabled?: boolean; permissions?: Record<string, boolean> }) =>
+      apiRequest('/api/agent/config', { method: 'PUT', body: JSON.stringify(body) }),
+
+    getPredictions: async () =>
+      apiRequest('/api/predictions'),
+
+    refreshPredictions: async () =>
+      apiRequest('/api/predictions/refresh', { method: 'POST' }),
+
+    getBusinessIntelligence: async (section: string = 'all') =>
+      apiRequest(`/api/agent/business-intelligence?section=${section}`),
+
+    getOnchainRisk: async (contractAddress: string, chain: string = 'ethereum') =>
+      apiRequest(`/api/agent/onchain-risk?contractAddress=${contractAddress}&chain=${chain}`),
+
+    getGithubIntelligence: async (url: string) =>
+      apiRequest(`/api/agent/github?url=${encodeURIComponent(url)}`),
+
+    getSentiment: async (contractAddress: string, chain: string = 'ethereum', twitterHandle?: string) =>
+      apiRequest(`/api/agent/sentiment?contractAddress=${contractAddress}&chain=${chain}${twitterHandle ? `&twitterHandle=${twitterHandle}` : ''}`),
+
+    getIntelligenceScores: async () =>
+      apiRequest('/api/agent/intelligence-scores'),
   },
 
   indexing: {

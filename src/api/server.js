@@ -29,7 +29,7 @@ import { initializeIndexerRoutes } from './routes/indexer.js';
 import analyzerRoutes from './routes/analyzer.js';
 import functionsRoutes from './routes/functions.js';
 import alertRoutes from './routes/alerts.js';
-import billingRoutes, { stripeWebhookHandler } from './routes/billing.js';
+import billingRoutes, { paystackWebhookHandler, flutterwaveWebhookHandler } from './routes/billing.js';
 import supportRoutes from './routes/support.js';
 import metricsRoutes from './routes/metrics.js';
 import dashboardRoutes from './routes/dashboard.js';
@@ -40,6 +40,7 @@ import monitoringRoutes from './routes/monitoring.js';
 import indexingRoutes from './routes/indexing.js';
 import { resumeLivePoll } from './routes/trigger-indexing.js';
 import agentRoutes from './routes/agent.js';
+import predictionsRoutes from './routes/predictions.js';
 
 // Import middleware
 import { authenticateToken, verifyToken } from './middleware/auth.js';
@@ -52,6 +53,7 @@ import { initializeDatabase, AnalysisStorage } from './database/index.js';
 // Import streaming indexer
 import { initializeStreamingIndexer } from '../indexer/index.js';
 import { WebSocketManager } from '../indexer/services/WebSocketManager.js';
+import { connectMongo } from './database/mongo.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -152,8 +154,10 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Stripe webhook — must be BEFORE express.json() to get raw body
-app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), stripeWebhookHandler);
+// Paystack webhook — must be BEFORE express.json() to get raw body
+app.post('/api/paystack-webhook', express.raw({ type: 'application/json' }), paystackWebhookHandler);
+// Flutterwave webhook — must be BEFORE express.json() to get raw body
+app.post('/api/flutterwave-webhook', express.raw({ type: 'application/json' }), flutterwaveWebhookHandler);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -194,21 +198,16 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Simple test endpoint
+// Simple test endpoint — dev only
+if (process.env.NODE_ENV !== 'production') {
 app.get('/test', (req, res) => {
-  console.log('[TEST] Test endpoint hit');
   res.json({ message: 'Server is responding', timestamp: new Date().toISOString() });
 });
 
-// Test POST endpoint
 app.post('/test-post', (req, res) => {
-  console.log('[TEST] POST endpoint hit with body:', req.body);
-  res.json({ 
-    message: 'POST received', 
-    body: req.body,
-    timestamp: new Date().toISOString() 
-  });
+  res.json({ message: 'POST received', body: req.body, timestamp: new Date().toISOString() });
 });
+} // end dev-only
 
 // API Documentation
 app.get('/', (req, res) => {
@@ -238,6 +237,7 @@ app.use('/api/contracts', authenticateToken, contractRoutes);
 app.use('/api/analysis', authenticateToken, analysisRoutes);
 app.use('/api/analysis', authenticateToken, quickScanRoutes);
 app.use('/api/analyzer', authenticateToken, analyzerRoutes);
+app.use('/api/functions/wallet-analytics', authenticateToken, walletAnalyticsRouter);
 app.use('/api/functions', authenticateToken, functionsRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/chat', authenticateToken, chatRoutes);
@@ -258,10 +258,9 @@ app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 app.use('/api/traction', authenticateToken, tractionRoutes);
 
 app.use('/api/agent', authenticateToken, agentRoutes);
+app.use('/api/predictions', authenticateToken, predictionsRoutes);
 
 app.use('/api/competitive', authenticateToken, competitiveRouter);
-
-app.use('/api/functions/wallet-analytics', authenticateToken, walletAnalyticsRouter);
 
 app.use('/api/monitoring', authenticateToken, monitoringRoutes);
 
@@ -286,6 +285,9 @@ async function startServer() {
   try {
     // Initialize file-based storage
     await initializeDatabase();
+
+    // Connect MongoDB (optional — won't block startup if unavailable)
+    await connectMongo();
 
     // Resume live polling for all users who had active polls before restart
     try {
@@ -352,6 +354,8 @@ async function startServer() {
       console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
       console.log(`🔌 WebSocket: ws://localhost:${PORT}/ws`);
       console.log(`💾 Using file-based storage in ./data directory`);
+      if (!process.env.PAYSTACK_SECRET_KEY) console.warn('⚠️  PAYSTACK_SECRET_KEY not set — Paystack top-ups will not work');
+      if (!process.env.PAYMENT_ADDRESS) console.warn('⚠️  PAYMENT_ADDRESS not set — on-chain payment verification will reject all transactions');
       
       // Initialize indexer asynchronously after server is ready
       initializeIndexerAsync().catch(err => {

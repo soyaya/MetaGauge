@@ -4,19 +4,27 @@
  */
 
 export const FREE_QUOTA = {
-  analyses:             3,    // free analyses per month
-  aiQueries:            3,    // free AI queries (chat + insights) per month
-  contracts:            1,    // free contracts
-  alerts:               3,    // free alert configs
-  historicalTxs:        50,   // free transactions of historical data
+  analyses:             3,     // free analyses per month
+  aiQueries:            3,     // free AI queries (chat + insights) per month
+  contracts:            1,     // free contracts
+  alerts:               3,     // free alert configs
+  historicalTxs:        50,    // free transactions of historical data
   continuousMonitoring: false, // continuous sync requires balance
 };
 
 export const PRICING = {
-  perAnalysis:          0.10,  // $ per analysis after free quota
-  perAiQuery:           0.05,  // $ per AI query after free quota
+  // Per-use costs (after free quota)
+  perAnalysis:          0.10,  // $ per analysis
+  perAiQuery:           0.05,  // $ per AI query
   perContractDayActive: 0.10,  // $ per contract per day of continuous monitoring (~$3/mo)
+  perContractMonth:     3.00,  // $ per contract per month (display only)
   perAlertEmail:        0.01,  // $ per alert email delivered
+
+  // Free quota — duplicated here so frontend gets everything from one endpoint
+  freeAnalyses:         FREE_QUOTA.analyses,
+  freeAiQueries:        FREE_QUOTA.aiQueries,
+  freeContracts:        FREE_QUOTA.contracts,
+  freeAlerts:           FREE_QUOTA.alerts,
 };
 
 export const FEATURES = {
@@ -24,15 +32,14 @@ export const FEATURES = {
   aiInsights:          true,   // gated by aiQueries quota/balance
   competitiveAnalysis: true,   // gated by aiQueries quota/balance
   export:              true,
-  // Requires balance > 0
-  continuousSync:      'balance',  // charged at PRICING.perContractMonth
+  continuousSync:      'balance',
   apiAccess:           'balance',
-  extendedHistory:     'balance',  // beyond FREE_QUOTA.historicalTxs
+  extendedHistory:     'balance',
 };
 
 export const LIMITS = {
-  maxContractsFree:    FREE_QUOTA.contracts,
-  maxAlertsFree:       FREE_QUOTA.alerts,
-  maxMessageLength:    4000,   // chars per chat message
-  maxAnalysisPerDay:   20,     // hard cap regardless of balance
+  maxContractsFree:  FREE_QUOTA.contracts,
+  maxAlertsFree:     FREE_QUOTA.alerts,
+  maxMessageLength:  4000,
+  maxAnalysisPerDay: 20,
 };

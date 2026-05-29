@@ -5,6 +5,7 @@
 
 import { WalletEnrichmentStorage, WalletPipelineStorage } from '../api/database/index.js';
 import { RpcRequestQueue } from './RpcRequestQueue.js';
+import { getRpcUrls } from '../config/env.js';
 
 const CACHE_TTL   = 30 * 60 * 1000;
 const BATCH_SIZE  = 3;
@@ -51,9 +52,7 @@ export async function consume(contractAddress, chain) {
   activeConsumers.add(key);
 
   try {
-    const rpcUrls = chain.toLowerCase() === 'starknet'
-      ? [process.env.STARKNET_RPC_URL1, process.env.STARKNET_RPC_URL2].filter(Boolean)
-      : [process.env.ETHEREUM_RPC_URL1, process.env.ETHEREUM_RPC_URL2, process.env.ETHEREUM_RPC_URL3].filter(Boolean);
+    const rpcUrls = getRpcUrls(chain);
 
     let rpc;
     if (chain.toLowerCase() === 'starknet') {

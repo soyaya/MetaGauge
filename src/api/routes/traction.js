@@ -3,6 +3,7 @@ import { AnalysisStorage, UserStorage, MetricsHistoryStorage, AlertsStorage, Com
 import { getTraction, syncTasks, resolveTask, reopenTask, getLearningsForTask, saveLearning } from '../database/TractionStorage.js';
 import { buildFullReportFromAnalysis } from './onboarding.js';
 import { priceService } from '../../services/PriceService.js';
+import subscriptionService from '../../services/SubscriptionService.js';
 
 const router = express.Router();
 
@@ -389,12 +390,15 @@ router.get('/tasks/:taskId/recommendation', async (req, res) => {
     const learnings = await getLearningsForTask(task.id);
     let recommendation = task.action;
     try {
-      const AgentService = (await import('../../services/AgentService.js')).default;
-      const prompt = learnings.length
-        ? `Give 3 concise actionable steps to fix: "${task.description}" (now: ${task.current}, target: ${task.target}).\nWhat worked before:\n${learnings.slice(-3).map(l => `- "${l.feedback}" (${l.metricBefore}→${l.metricAfter})`).join('\n')}`
-        : `Give 3 concise actionable steps to fix: "${task.description}" (now: ${task.current}, target: ${task.target}). Numbered list.`;
-      const result = await AgentService.run(req.user.id, prompt, { contractAddress: contract?.targetContract?.address, chain: contract?.targetContract?.chain, source: 'traction' });
-      recommendation = result.content || recommendation;
+      const charge = await subscriptionService.charge(req.user.id, 'ai_query');
+      if (charge.allowed) {
+        const AgentService = (await import('../../services/AgentService.js')).default;
+        const prompt = learnings.length
+          ? `Give 3 concise actionable steps to fix: "${task.description}" (now: ${task.current}, target: ${task.target}).\nWhat worked before:\n${learnings.slice(-3).map(l => `- "${l.feedback}" (${l.metricBefore}→${l.metricAfter})`).join('\n')}`
+          : `Give 3 concise actionable steps to fix: "${task.description}" (now: ${task.current}, target: ${task.target}). Numbered list.`;
+        const result = await AgentService.run(req.user.id, prompt, { contractAddress: contract?.address, chain: contract?.chain, source: 'traction' });
+        recommendation = result.content || recommendation;
+      }
     } catch {}
 
     res.json({ taskId: task.id, title: task.title, recommendation, current: task.current, target: task.target, learningSamples: learnings.length });
@@ -614,12 +618,15 @@ router.post('/tasks/:taskId/check', async (req, res) => {
 
     let aiGuidance = task.action;
     try {
-      const AgentService = (await import('../../services/AgentService.js')).default;
-      const result = await AgentService.run(req.user.id,
-        `Blockchain project issue: "${task.description}" (now: ${task.current}, target: ${task.target}). Give 2 concise steps to fix it.`,
-        { contractAddress: contract?.targetContract?.address, chain: contract?.targetContract?.chain, source: 'traction' }
-      );
-      aiGuidance = result.content || aiGuidance;
+      const charge = await subscriptionService.charge(req.user.id, 'ai_query');
+      if (charge.allowed) {
+        const AgentService = (await import('../../services/AgentService.js')).default;
+        const result = await AgentService.run(req.user.id,
+          `Blockchain project issue: "${task.description}" (now: ${task.current}, target: ${task.target}). Give 2 concise steps to fix it.`,
+          { contractAddress: contract?.address, chain: contract?.chain, source: 'traction' }
+        );
+        aiGuidance = result.content || aiGuidance;
+      }
     } catch {}
 
     res.json({ resolved: false, pendingConfirmation: stored?.resolvedBy === 'user', task, aiGuidance });
@@ -641,7 +648,8 @@ router.post('/send-report', async (req, res) => {
 
     const ops   = calculateOPS(fr, alerts);
     const tasks = generateTasks(fr, ops);
-    const traction = buildTractionSummary(fr, await loadCompetitors(req.user.id), 2500);
+    const ethPrice = await priceService.getPrice('eth').catch(() => 2500);
+    const traction = buildTractionSummary(fr, await loadCompetitors(req.user.id), ethPrice);
 
     // Generate PDF
     const { generateTractionPDF } = await import('../../services/TractionPDFGenerator.js');

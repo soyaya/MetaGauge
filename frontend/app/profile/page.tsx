@@ -192,10 +192,14 @@ export default function ProfilePage() {
       setEmail(profileRes.email || "")
       const subRes = await api.get('/api/subscription/status').catch(() => null)
       setUsage({
-        thisMonth: profileRes.usage?.monthlyAnalysisCount || 0,
-        limit: subRes?.limits?.monthly ?? 10,
-        total: profileRes.usage?.analysisCount || 0,
-        tier: String(profileRes.tier || user?.tier || 'free'),
+        thisMonth:      profileRes.usage?.monthlyAnalysisCount || 0,
+        limit:          subRes?.freeQuota?.analyses ?? 3,
+        freeRemaining:  subRes?.freeRemaining?.analyses ?? 3,
+        total:          profileRes.usage?.analysisCount || 0,
+        state:          subRes?.state || 'free',
+        balance:        subRes?.balance || 0,
+        canContinue:    subRes?.canContinue ?? true,
+        resetsOn:       subRes?.resetsOn || null,
       })
     } catch {
       toast({ title: "Failed to load profile", variant: "destructive" })
@@ -360,8 +364,16 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <Label className="text-sm font-medium">Plan</Label>
-                    <div className="mt-1">
-                      <Badge variant="outline">{usage?.tier || user?.tier || 'Free'}</Badge>
+                    <div className="mt-1 flex items-center gap-2">
+                      {usage?.state === 'paid'
+                        ? <Badge className="bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400 border-0">Paid</Badge>
+                        : !usage?.canContinue
+                          ? <Badge variant="destructive">Quota exhausted</Badge>
+                          : <Badge variant="outline">Free</Badge>
+                      }
+                      {usage?.balance > 0 && (
+                        <span className="text-xs text-muted-foreground">${usage.balance.toFixed(2)} balance</span>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -432,9 +444,15 @@ export default function ProfilePage() {
                     <div>
                       <div className="flex justify-between text-sm mb-1">
                         <span>This month</span>
-                        <span className="font-medium">{usage.thisMonth} / {usage.limit === -1 ? '∞' : usage.limit}</span>
+                        <span className="font-medium">{usage.thisMonth} / {usage.limit} free</span>
                       </div>
-                      <Progress value={usage.limit > 0 ? Math.min((usage.thisMonth / usage.limit) * 100, 100) : 0} className="h-2" />
+                      <Progress value={Math.min((usage.thisMonth / usage.limit) * 100, 100)} className="h-2" />
+                      {usage.resetsOn && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Resets {new Date(usage.resetsOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          {usage.balance > 0 && ` · $${usage.balance.toFixed(2)} balance for pay-as-you-go`}
+                        </p>
+                      )}
                     </div>
                     <Separator />
                     <div className="flex justify-between text-sm">

@@ -7,9 +7,22 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
-import { UserStorage } from '../database/index.js';
+import { UserStorage, AgentConfigStorage } from '../database/index.js';
 import AbuseDetectionService from '../../services/AbuseDetectionService.js';
 import { generateToken, authenticateToken } from '../middleware/auth.js';
+
+const DEFAULT_AGENT_CONFIG = (userId) => ({
+  userId,
+  enabled: true,
+  permissions: {
+    regressionAlerts:  true,   // email on metric drops
+    sendDigests:       true,   // daily/weekly email digest
+    createTasks:       true,   // auto-create improvement tasks
+    autoAnalyze:       true,   // weekly auto-analysis
+    checkCompetitors:  false,  // off by default — user opts in
+    postSocial:        false,  // off by default — user opts in
+  },
+});
 
 const router = express.Router();
 
@@ -181,6 +194,9 @@ router.post('/register', async (req, res) => {
     console.log('[AUTH] Saving user to storage...');
     const user = await UserStorage.create(userData);
     console.log('[AUTH] User created successfully:', user.id);
+
+    // Create default agent config so automations fire immediately
+    AgentConfigStorage.save(user.id, DEFAULT_AGENT_CONFIG(user.id)).catch(() => {});
 
     // Generate JWT token
     console.log('[AUTH] Generating JWT token...');
@@ -395,6 +411,7 @@ router.post('/oauth/google', async (req, res) => {
         oauthId: googleUser.id,
         usage: { analysisCount: 0, monthlyAnalysisCount: 0, lastAnalysis: null, monthlyResetDate: new Date().toISOString() },
       });
+      AgentConfigStorage.save(user.id, DEFAULT_AGENT_CONFIG(user.id)).catch(() => {});
     }
 
     const token = generateToken(user);
@@ -512,6 +529,7 @@ router.post('/oauth/github', async (req, res) => {
         oauthId: githubUser.id.toString(),
         usage: { analysisCount: 0, monthlyAnalysisCount: 0, lastAnalysis: null, monthlyResetDate: new Date().toISOString() },
       });
+      AgentConfigStorage.save(user.id, DEFAULT_AGENT_CONFIG(user.id)).catch(() => {});
     }
 
     const token = generateToken(user);

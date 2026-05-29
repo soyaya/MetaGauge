@@ -83,12 +83,16 @@ export class EthereumRpcClient {
 
             const data = await response.json();
 
-            // Normalise gateway wrapper: { status, result: { jsonrpc, result, id }, message }
-            // The actual RPC result is nested at data.result.result
+            // Detect non-standard error responses (e.g. gateway returning { statusCode, error, message })
+            if (data.statusCode && data.error && !data.jsonrpc) {
+              throw new Error(`Gateway error: ${data.message || data.error}`);
+            }
+
+            // Normalise gateway wrapper: { status, result: { jsonrpc, result, error, id }, message }
             if (data.status === 'success' && data.result?.jsonrpc === '2.0') {
-              // Unwrap — treat as standard JSON-RPC from here
-              data.result = data.result.result;
-              data.error  = data.result?.error ?? null;
+              const inner = data.result;
+              data.error  = inner.error ?? null;
+              data.result = inner.result;  // may be undefined if inner has error
             }
             
             if (data.error) {

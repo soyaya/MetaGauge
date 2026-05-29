@@ -9,6 +9,7 @@ import { EmailAutomation } from './EmailAutomation.js';
 import { getTraction } from '../api/database/TractionStorage.js';
 import { AITaskManager } from './AITaskManager.js';
 import { isAgentPermitted } from './AgentService.js';
+import { PatternProfileService } from './PatternProfileService.js';
 
 let wsManager = null;
 
@@ -77,6 +78,47 @@ export class ProactiveAgent {
         // Observe AI tasks — auto-complete or mark overdue
         const currentMetrics = latest.results?.target?.metrics || {};
         await AITaskManager.observeAllTasks(user.id, currentMetrics, wsManager).catch(() => {});
+
+        // ── On-chain risk check ───────────────────────────────────────────────
+        const contract = user.onboarding?.defaultContract;
+        if (contract?.address && contract?.chain === 'ethereum') {
+          try {
+            const { OnChainRiskAnalyzer } = await import('./OnChainRiskAnalyzer.js');
+            const { saveAlert, makeAlert } = await import('./AlertEngine.js');
+            const { AlertsStorage } = await import('../api/database/index.js');
+            const risk = await OnChainRiskAnalyzer.analyze(contract.address, contract.chain);
+            if (risk.signals?.length > 0) {
+              const existing = await AlertsStorage.findByUserId(user.id).catch(() => []);
+              const recentTypes = new Set(existing.filter(a => Date.now() - new Date(a.createdAt||a.created_at).getTime() < 3600000).map(a => a.type));
+              if (!recentTypes.has('onchain_risk')) {
+                const alert = makeAlert('onchain_risk', 'high', contract.address, user.id, 'On-Chain Risk Detected', risk.signals[0]);
+                await saveAlert(alert);
+                if (wsManager) wsManager.emitProgress(user.id, { type: 'alert', alert });
+              }
+            }
+          } catch {}
+        }
+
+        // ── Sentiment check ───────────────────────────────────────────────────
+        if (contract?.address) {
+          try {
+            const { SentimentAnalyzer } = await import('./SentimentAnalyzer.js');
+            const { saveAlert, makeAlert } = await import('./AlertEngine.js');
+            const { AlertsStorage } = await import('../api/database/index.js');
+            const sentiment = await SentimentAnalyzer.analyze(contract.address, contract.chain || 'ethereum');
+            if (sentiment.sentimentScore != null && sentiment.sentimentScore < 35) {
+              const existing = await AlertsStorage.findByUserId(user.id).catch(() => []);
+              const recentTypes = new Set(existing.filter(a => Date.now() - new Date(a.createdAt||a.created_at).getTime() < 3600000).map(a => a.type));
+              if (!recentTypes.has('sentiment_negative')) {
+                const alert = makeAlert('sentiment_negative', 'medium', contract.address, user.id,
+                  'Negative Sentiment Detected',
+                  `Community sentiment dropped to ${sentiment.sentimentScore}/100 (${sentiment.direction})`);
+                await saveAlert(alert);
+                if (wsManager) wsManager.emitProgress(user.id, { type: 'alert', alert });
+              }
+            }
+          } catch {}
+        }
 
         // BI pattern alerts
         const txs = latest.results?.target?.transactions || [];
@@ -158,10 +200,14 @@ export class ProactiveAgent {
         if (!isAgentPermitted(user.id, 'autoAnalyze')) continue;
         const contract = user.onboarding?.defaultContract;
         if (!contract?.address) continue;
+        const profile = await PatternProfileService.get(user.id);
+        const profileContext = profile
+          ? `\n\nUser pattern profile:\n- ${profile.summary}\n- Growth: ${profile.growth?.direction} (${profile.growth?.rate}%)\n- Retention trend: ${profile.retention?.direction} (avg ${profile.retention?.avg}%)\n- Churn trend: ${profile.churn?.direction}\n- User quality: ${profile.userQuality?.quality}\n- Milestones reached: ${(profile.milestones || []).join(', ') || 'none'}`
+          : '';
         const { default: AgentService } = await import('./AgentService.js');
         await AgentService.run(
           user.id,
-          'Analyze this contract. Identify all failing or underperforming metrics. For each one, call create_task with a specific target value and 14-day deadline.',
+          `Analyze this contract. Identify all failing or underperforming metrics. For each one, call create_task with a specific target value and 14-day deadline.${profileContext}`,
           { contractAddress: contract.address, chain: contract.chain || 'ethereum', source: 'proactive' }
         );
         console.log(`🤖 Auto-tasks generated for user ${user.id}`);

@@ -18,6 +18,7 @@ let UserStorage, ContractStorage, AnalysisStorage,
     SocialPostsStorage, BriefingsStorage, AIAdviceStorage,
     AIInsightsStorage, ShareTokensStorage, FeedbackStorage,
     AbuseFingerprintsStorage, BenchmarksStorage, AILearningsStorage,
+    PatternProfileStorage, MilestoneStorage,
     FunctionAnalyticsStorage, FunnelStorage, CompetitorAnalysesStorage,
     WalletEnrichmentStorage, WalletPipelineStorage;
 
@@ -49,6 +50,8 @@ if (DATABASE_TYPE === 'postgres') {
   AbuseFingerprintsStorage = pg.PostgresAbuseFingerprintsStorage;
   BenchmarksStorage        = pg.PostgresBenchmarksStorage;
   AILearningsStorage       = pg.PostgresAILearningsStorage;
+  PatternProfileStorage    = pg.PostgresPatternProfileStorage;
+  MilestoneStorage         = pg.PostgresMilestoneStorage;
   FunctionAnalyticsStorage = pg.PostgresFunctionAnalyticsStorage;
   FunnelStorage            = pg.PostgresFunnelStorage;
   CompetitorAnalysesStorage= pg.PostgresCompetitorAnalysesStorage;
@@ -424,6 +427,7 @@ export {
   SocialPostsStorage, BriefingsStorage, AIAdviceStorage,
   AIInsightsStorage, ShareTokensStorage, FeedbackStorage,
   AbuseFingerprintsStorage, BenchmarksStorage, AILearningsStorage,
+  PatternProfileStorage, MilestoneStorage,
   FunctionAnalyticsStorage, FunnelStorage, CompetitorAnalysesStorage,
   WalletEnrichmentStorage, WalletPipelineStorage,
 };

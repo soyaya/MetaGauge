@@ -91,13 +91,17 @@ function SignupForm() {
       })
 
       // Send OTP — use the registration token just for this call, don't persist it
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/send-verification`, {
+      const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/send-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${result.token}`,
         },
       })
+      if (!verifyRes.ok) {
+        const err = await verifyRes.json().catch(() => ({}))
+        throw new Error(err.message || 'Failed to send verification email. Please try again.')
+      }
 
       // Store token temporarily so verify page can call resend — but don't login() yet
       // Full login happens after OTP is verified

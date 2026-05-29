@@ -165,6 +165,9 @@ export class PostgresUserStorage {
   }
 
   static async update(id, updates) {
+    // Work on a copy — never mutate the caller's object
+    updates = { ...updates };
+
     // Handle nested objects separately
     if (updates.onboarding) {
       await this.updateOnboarding(id, updates.onboarding);
@@ -1541,5 +1544,31 @@ export class PostgresWalletPipelineStorage {
       VALUES($1,$2,$3)
       ON CONFLICT(contract_address, chain) DO UPDATE SET queue=$3, updated_at=NOW()`,
       [contractAddress, chain, JSON.stringify(q)]);
+  }
+}
+
+export class PostgresPatternProfileStorage {
+  static async get(userId) {
+    const r = await query('SELECT profile FROM pattern_profiles WHERE user_id=$1', [userId]);
+    return r.rows[0]?.profile || null;
+  }
+  static async save(userId, profile) {
+    await query(`INSERT INTO pattern_profiles(user_id, profile, updated_at)
+      VALUES($1,$2,NOW())
+      ON CONFLICT(user_id) DO UPDATE SET profile=$2, updated_at=NOW()`,
+      [userId, JSON.stringify(profile)]);
+  }
+}
+
+export class PostgresMilestoneStorage {
+  static async getReached(userId) {
+    const r = await query('SELECT milestone FROM milestone_events WHERE user_id=$1', [userId]);
+    return r.rows.map(r => r.milestone);
+  }
+  static async markReached(userId, milestone) {
+    await query(
+      'INSERT INTO milestone_events(user_id, milestone) VALUES($1,$2) ON CONFLICT DO NOTHING',
+      [userId, milestone]
+    );
   }
 }

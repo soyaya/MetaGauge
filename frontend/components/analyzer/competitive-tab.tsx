@@ -253,6 +253,7 @@ function CompetitorCard({ competitor, colorIndex, onRemove }: any) {
   const [insightLoading, setInsightLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [confirmRemove, setConfirmRemove] = useState(false);
 
   useEffect(() => {
     api.competitive.getAlerts()
@@ -283,11 +284,11 @@ function CompetitorCard({ competitor, colorIndex, onRemove }: any) {
           <div className="flex items-center gap-2">
             <Badge className={`text-xs ${color.badge}`}>{competitor.chain}</Badge>
             <button onClick={async () => {
-              if (!confirm(`Remove ${competitor.name}?`)) return;
+              if (!confirmRemove) { setConfirmRemove(true); return; }
               try { await api.competitive.removeCompetitor(compId); onRemove(); }
               catch (e: any) { alert('Failed: ' + e.message); }
-            }} className="text-red-500 hover:text-red-700" title="Remove">
-              <Trash2 className="h-3.5 w-3.5" />
+            }} onBlur={() => setConfirmRemove(false)} className={`text-xs px-2 py-0.5 rounded ${confirmRemove ? 'bg-red-500 text-white' : 'text-red-500 hover:text-red-700'}`} title="Remove">
+              {confirmRemove ? 'Confirm?' : <Trash2 className="h-3.5 w-3.5" />}
             </button>
           </div>
         </div>

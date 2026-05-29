@@ -7,20 +7,14 @@
  */
 
 import { UserStorage, AnalysisStorage, LivePollStorage, MetricsStorage, CompetitorDataStorage, CompetitorMetricsStorage } from '../database/index.js';
+import { getRpcUrls } from '../../config/env.js';
 
 const HISTORY_LIMIT = 50;
 const CHUNK_SIZE    = 100;
 const LIVE_POLL_MS  = 30_000;
 const LOG_TIMEOUT   = 15000;
 
-function getRpcUrls(chain) {
-  const map = {
-    ethereum: [process.env.ETHEREUM_RPC_URL1, process.env.ETHEREUM_RPC_URL2, process.env.ETHEREUM_RPC_URL3].filter(Boolean),
-    starknet: [process.env.STARKNET_RPC_URL1, process.env.STARKNET_RPC_URL2].filter(Boolean),
-  };
-  const urls = map[chain?.toLowerCase()] || map.ethereum;
-  return urls.length ? urls : ['https://ethereum-rpc.publicnode.com'];
-}
+// getRpcUrls imported from ../../config/env.js above
 
 function calculateMetrics(transactions) {
   const uniqueUsers  = new Set(transactions.map(tx => tx.from)).size;

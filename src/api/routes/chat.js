@@ -354,8 +354,19 @@ router.post('/sessions/:sessionId/messages', async (req, res) => {
       });
     }
 
-    // Soft charge — log but don't block chat
-    try { await subscriptionService.charge(userId, 'ai_query'); } catch {}
+    // Hard charge — block if quota exceeded and no balance
+    const charge = await subscriptionService.charge(userId, 'ai_query');
+    if (!charge.allowed) {
+      return res.status(402).json({
+        error: charge.reason === 'quota_exceeded' ? 'Free quota exhausted' : 'Insufficient balance',
+        message: charge.reason === 'quota_exceeded'
+          ? 'You\'ve used your free AI queries for this month. Top up at /subscription to continue.'
+          : `This query costs $0.05. Your balance is $${charge.balance}. Top up at /subscription.`,
+        balance: charge.balance,
+        required: charge.required,
+        reason: charge.reason,
+      });
+    }
 
     // Save user message
     const userMessage = await ChatMessageStorage.create({

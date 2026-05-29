@@ -45,7 +45,7 @@ export function QuickScanProgress({ contractAddress, chain, contractName = "Cont
 
     const pollInterval = setInterval(async () => {
       try {
-        const response = await api.get(`/analysis/${analysisId}/status`)
+        const response = await api.get(`/api/analysis/${analysisId}/status`)
         const data = response.data
 
         setProgress(data.progress || 0)
@@ -81,7 +81,7 @@ export function QuickScanProgress({ contractAddress, chain, contractName = "Cont
       setLogs([])
       setResults(null)
 
-      const response = await api.post("/analysis/quick-scan", {
+      const response = await api.post("/api/analysis/quick-scan", {
         contractAddress,
         chain,
         contractName

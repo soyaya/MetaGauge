@@ -8,6 +8,8 @@ import { ContractStorage, AnalysisStorage, UserStorage, AlertConfigStorage } fro
 import { EnhancedAnalyticsEngine as AnalyticsEngine } from '../../services/EnhancedAnalyticsEngine.js';
 import { requireTier } from '../middleware/auth.js';
 import GeminiAIService from '../../services/GeminiAIService.js';
+import subscriptionService from '../../services/SubscriptionService.js';
+import { FREE_QUOTA, LIMITS } from '../../config/pricing.js';
 
 const router = express.Router();
 
@@ -71,29 +73,17 @@ router.post('/start', async (req, res) => {
       });
     }
 
-    // Check refresh rate limit
-    if (user.usage.lastAnalysis) {
-      const refreshRate = user.subscription?.limits?.dataRefreshRate || 24; // hours
-      const hoursSinceLastAnalysis = (Date.now() - new Date(user.usage.lastAnalysis)) / (1000 * 60 * 60);
-      
-      if (hoursSinceLastAnalysis < refreshRate) {
-        const hoursRemaining = Math.ceil(refreshRate - hoursSinceLastAnalysis);
-        return res.status(429).json({
-          error: 'Refresh rate limit',
-          message: `Please wait ${hoursRemaining} hour(s) before running another analysis`,
-          hoursRemaining,
-          nextAllowedTime: new Date(new Date(user.usage.lastAnalysis).getTime() + refreshRate * 60 * 60 * 1000)
-        });
-      }
-    }
-
-    // Simple rate limiting check
-    const monthlyLimit = user.tier === 'free' ? 10 : user.tier === 'pro' ? 100 : -1;
-    if (monthlyLimit !== -1 && user.usage.monthlyAnalysisCount >= monthlyLimit) {
-      return res.status(400).json({
-        error: 'Analysis limit exceeded',
-        message: `You have reached your monthly analysis limit for ${user.tier} tier`,
-        usage: user.usage
+    // Check quota via SubscriptionService (single source of truth)
+    const charge = await subscriptionService.charge(userId, 'analysis');
+    if (!charge.allowed) {
+      return res.status(402).json({
+        error: charge.reason === 'quota_exceeded' ? 'Free quota exhausted' : 'Insufficient balance',
+        message: charge.reason === 'quota_exceeded'
+          ? `You've used your ${FREE_QUOTA.analyses} free analyses for this month. Top up to continue.`
+          : `This analysis costs $${charge.required}. Your balance is $${charge.balance}. Please top up.`,
+        balance: charge.balance,
+        required: charge.required,
+        reason: charge.reason,
       });
     }
 
@@ -399,6 +389,18 @@ router.post('/:id/interpret', async (req, res) => {
     }
 
     // Generate AI interpretation
+    const aiCharge = await subscriptionService.charge(req.user.id, 'ai_query');
+    if (!aiCharge.allowed) {
+      return res.status(402).json({
+        error: aiCharge.reason === 'quota_exceeded' ? 'Free AI quota exhausted' : 'Insufficient balance',
+        message: aiCharge.reason === 'quota_exceeded'
+          ? `You've used your ${FREE_QUOTA.aiQueries} free AI queries for this month. Top up to continue.`
+          : `This query costs $${aiCharge.required}. Your balance is $${aiCharge.balance}. Please top up.`,
+        balance: aiCharge.balance,
+        required: aiCharge.required,
+        reason: aiCharge.reason,
+      });
+    }
     const interpretation = await GeminiAIService.interpretAnalysis(analysis, analysis.analysisType, req.user.id);
 
     // Store interpretation inside existing results JSONB to avoid missing column
@@ -460,6 +462,16 @@ router.get('/:id/quick-insights', async (req, res) => {
       });
     }
 
+    const aiCharge = await subscriptionService.charge(req.user.id, 'ai_query');
+    if (!aiCharge.allowed) {
+      return res.status(402).json({
+        error: aiCharge.reason === 'quota_exceeded' ? 'Free AI quota exhausted' : 'Insufficient balance',
+        message: aiCharge.reason === 'quota_exceeded'
+          ? `You've used your ${FREE_QUOTA.aiQueries} free AI queries for this month. Top up to continue.`
+          : `This query costs $${aiCharge.required}. Your balance is $${aiCharge.balance}. Please top up.`,
+        balance: aiCharge.balance, required: aiCharge.required, reason: aiCharge.reason,
+      });
+    }
     const insights = await GeminiAIService.generateQuickInsights(analysis, req.user.id);
 
     res.json({
@@ -1067,12 +1079,7 @@ async function performAnalysis(analysisId, config, user, analysisType) {
       }]
     });
 
-    // Update user usage
-    await UserStorage.update(user.id, {
-      'usage.analysisCount': (user.usage.analysisCount || 0) + 1,
-      'usage.monthlyAnalysisCount': (user.usage.monthlyAnalysisCount || 0) + 1,
-      'usage.lastAnalysis': new Date().toISOString()
-    });
+    // Usage already incremented by subscriptionService.charge() above
 
     // Update config stats
     await ContractStorage.update(config.id, {

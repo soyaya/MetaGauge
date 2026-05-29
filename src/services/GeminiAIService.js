@@ -88,6 +88,10 @@ class GeminiAIService {
     
     if (!record || now > record.resetTime) {
       rateLimitStore.set(userId, { count: 1, resetTime: now + windowMs });
+      // Evict expired entries
+      for (const [k, v] of rateLimitStore) {
+        if (now > v.resetTime) rateLimitStore.delete(k);
+      }
       return true;
     }
     

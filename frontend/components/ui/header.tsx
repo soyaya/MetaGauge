@@ -3,15 +3,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
-import { BarChart3, Menu, X, Bell, User, LogOut, Zap, ChevronDown, Sun, Moon } from 'lucide-react';
+import { BarChart3, Menu, X, Bell, User, LogOut, Zap, ChevronDown, Sun, Moon, Code2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 const NAV_AUTH = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/analyzer',  label: 'Traction' },
-  { href: '/alerts',    label: 'Alerts' },
-  { href: '/chat',      label: 'AI Chat' },
-  { href: '/developers', label: 'API' },
+  { href: '/dashboard',  label: 'Dashboard' },
+  { href: '/analyzer',   label: 'Analytics' },
+  { href: '/chat',       label: 'AI Chat' },
+  { href: '/alerts',     label: 'Alerts' },
 ];
 const NAV_PUBLIC = [
   { href: '/', label: 'Home' },
@@ -123,7 +122,7 @@ export function Header() {
             {isAuthenticated ? (
               <>
                 {/* Notifications icon with badge */}
-                <Link href={openTasks > 0 ? '/analyzer' : '/alerts'}
+                <Link href={openTasks > 0 ? '/agent' : '/alerts'}
                   className="w-9 h-9 rounded-lg hidden sm:flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all relative"
                   title={openTasks > 0 ? `${openTasks} open tasks` : 'Alerts'}>
                   <Bell className="w-4 h-4" />
@@ -160,6 +159,9 @@ export function Header() {
                         </Link>
                         <Link href="/subscription" className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted/60 transition-colors">
                           <Zap className="w-4 h-4 text-muted-foreground" />Billing
+                        </Link>
+                        <Link href="/developers" className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted/60 transition-colors">
+                          <Code2 className="w-4 h-4 text-muted-foreground" />Developer API
                         </Link>
                         <div className="border-t border-border mt-1 pt-1">
                           <button
@@ -209,11 +211,14 @@ export function Header() {
             ))}
             {isAuthenticated ? (
               <>
-                <Link href="/alerts" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all">
-                  <Bell className="w-4 h-4" />Alerts
-                </Link>
                 <Link href="/profile" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all">
                   <User className="w-4 h-4" />Profile
+                </Link>
+                <Link href="/subscription" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all">
+                  <Zap className="w-4 h-4" />Billing
+                </Link>
+                <Link href="/developers" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all">
+                  <Code2 className="w-4 h-4" />Developer API
                 </Link>
                 <button onClick={logout} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all">
                   <LogOut className="w-4 h-4" />Sign out

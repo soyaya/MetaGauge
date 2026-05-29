@@ -5,6 +5,7 @@
 
 import { findAll } from '../api/database/CompetitorStorage.js';
 import { CompetitorAnalysesStorage } from '../api/database/index.js';
+import { getRpcUrls } from '../config/env.js';
 
 let _wsManager = null;
 let _reindexInterval = null;
@@ -26,10 +27,10 @@ export async function indexCompetitor(competitor) {
     let client;
     if (competitor.chain === 'starknet') {
       const { default: StarknetRpcClient } = await import('./StarknetRpcClient.js');
-      client = new StarknetRpcClient();
+      client = new StarknetRpcClient(getRpcUrls('starknet'));
     } else {
       const { default: EthereumRpcClient } = await import('./EthereumRpcClient.js');
-      client = new EthereumRpcClient();
+      client = new EthereumRpcClient(getRpcUrls('ethereum'));
     }
 
     const txData = await client.getTransactionsByAddress(competitor.address, null, null);

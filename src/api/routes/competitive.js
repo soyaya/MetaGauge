@@ -2,6 +2,7 @@ import express from 'express';
 import { UserStorage, AnalysisStorage, AlertConfigStorage, CompetitorDataStorage, LivePollStorage } from '../database/index.js';
 import { buildFullReportFromAnalysis } from './onboarding.js';
 import { functionDecoder } from '../../services/FunctionSignatureDecoder.js';
+import subscriptionService from '../../services/SubscriptionService.js';
 
 export const competitiveRouter = express.Router();
 
@@ -294,7 +295,9 @@ competitiveRouter.get('/insight/:competitorId', async (req, res) => {
     // Build insight using Gemini if available, else rule-based
     let insight;
     try {
-      const GeminiAIService = (await import('../../services/GeminiAIService.js')).default;
+      const charge = await subscriptionService.charge(req.user.id, 'ai_query');
+      if (charge.allowed) {
+        const GeminiAIService = (await import('../../services/GeminiAIService.js')).default;
       const gemini = new GeminiAIService();
       const prompt = `Compare these two blockchain contracts and give 3-5 actionable insights:
 
@@ -311,8 +314,9 @@ COMPETITOR (${compBenchmark.name}):
 - Avg Gas Cost: $${compBenchmark.avgGasCostUSD}, Wallet Quality: ${compBenchmark.walletQuality}/100
 
 Give specific, actionable insights. Be concise.`;
-      const text = await gemini.generateContent(prompt);
-      insight = { source: 'ai', text };
+        const text = await gemini.generateContent(prompt);
+        insight = { source: 'ai', text };
+      }
     } catch {
       // Rule-based fallback
       const lines = [];

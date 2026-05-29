@@ -3,6 +3,7 @@ import { UserStorage } from '../database/index.js';
 import subscriptionService from '../../services/SubscriptionService.js';
 import { FREE_QUOTA, PRICING, FEATURES, LIMITS } from '../../config/pricing.js';
 import { EthereumRpcClient } from '../../services/EthereumRpcClient.js';
+import { getEthereumRpcUrls } from '../../config/env.js';
 
 const router = express.Router();
 
@@ -14,37 +15,34 @@ router.get('/status', async (req, res) => {
 
     const usage   = user.usage   || {};
     const billing = user.billing || { balance: 0 };
-    const hasBalance = (billing.balance || 0) > 0;
+    const balance = billing.balance || 0;
 
     const monthlyAnalyses  = usage.monthlyAnalysisCount || 0;
     const monthlyAiQueries = usage.monthlyAiQueryCount  || 0;
 
+    const freeAnalysesLeft  = Math.max(0, FREE_QUOTA.analyses  - monthlyAnalyses);
+    const freeAiLeft        = Math.max(0, FREE_QUOTA.aiQueries - monthlyAiQueries);
+
+    // state: 'free' = no balance, 'paid' = has balance
+    const state = balance > 0 ? 'paid' : 'free';
+
+    // canContinue: true if free quota remains OR has balance
+    const canContinue = freeAnalysesLeft > 0 || balance > 0;
+
+    // resetsOn: 1st of next month
+    const now = new Date();
+    const resetsOn = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+
     res.json({
-      model: 'pay-as-you-go',
-      balance: billing.balance || 0,
+      state,
+      canContinue,
+      balance,
       freeQuota: FREE_QUOTA,
       freeRemaining: {
-        analyses:  Math.max(0, FREE_QUOTA.analyses  - monthlyAnalyses),
-        aiQueries: Math.max(0, FREE_QUOTA.aiQueries - monthlyAiQueries),
+        analyses:  freeAnalysesLeft,
+        aiQueries: freeAiLeft,
       },
-      limits: {
-        monthly:        FREE_QUOTA.analyses,
-        remaining:      Math.max(0, FREE_QUOTA.analyses - monthlyAnalyses),
-        maxProjects:    FREE_QUOTA.contracts,
-        maxAlerts:      FREE_QUOTA.alerts,
-        historicalTxs: FREE_QUOTA.historicalTxs,
-        maxMessageLength: LIMITS.maxMessageLength,
-        maxAnalysisPerDay: LIMITS.maxAnalysisPerDay,
-      },
-      features: {
-        basicAnalytics:      true,
-        aiInsights:          monthlyAiQueries < FREE_QUOTA.aiQueries || hasBalance,
-        competitiveAnalysis: monthlyAiQueries < FREE_QUOTA.aiQueries || hasBalance,
-        continuousSync:      hasBalance,
-        apiAccess:           hasBalance,
-        extendedHistory:     hasBalance,
-        export:              true,
-      },
+      resetsOn,
       usage: {
         analysisCount:        usage.analysisCount        || 0,
         monthlyAnalysisCount: monthlyAnalyses,
@@ -52,6 +50,12 @@ router.get('/status', async (req, res) => {
         monthlyAiQueryCount:  monthlyAiQueries,
         lastAnalysis:         usage.lastAnalysis         || null,
         monthlyResetDate:     usage.monthlyResetDate     || null,
+      },
+      limits: {
+        monthly:      FREE_QUOTA.analyses,   // kept for backward compat
+        remaining:    freeAnalysesLeft,
+        maxProjects:  FREE_QUOTA.contracts,
+        maxAlerts:    FREE_QUOTA.alerts,
       },
       pricing: PRICING,
     });
@@ -76,7 +80,7 @@ router.post('/verify', async (req, res) => {
     const { transactionHash, chain = 'ethereum' } = req.body;
     if (!transactionHash) return res.status(400).json({ error: 'transactionHash required' });
 
-    const rpcUrls = [process.env.ETHEREUM_RPC_URL, process.env.ETHEREUM_RPC_URL_FALLBACK].filter(Boolean);
+    const rpcUrls = getEthereumRpcUrls();
     const rpc = new EthereumRpcClient(rpcUrls);
     const tx = await rpc.getTransaction(transactionHash);
     if (!tx) return res.status(400).json({ error: 'Transaction not found on chain' });

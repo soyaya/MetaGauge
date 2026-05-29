@@ -7,6 +7,7 @@ import express from 'express';
 import { UserStorage, AnalysisStorage } from '../database/index.js';
 import { EthereumRpcClient } from '../../services/EthereumRpcClient.js';
 import { StarknetRpcClient } from '../../services/StarknetRpcClient.js';
+import { getRpcUrls } from '../../config/env.js';
 
 const router = express.Router();
 
@@ -186,21 +187,7 @@ router.get('/block-metrics', async (req, res) => {
 });
 
 // Helper functions
-function getRpcUrls(chain) {
-  const map = {
-    ethereum: [
-      process.env.ETHEREUM_RPC_URL1,
-      process.env.ETHEREUM_RPC_URL2,
-      process.env.ETHEREUM_RPC_URL3,
-    ].filter(Boolean),
-    starknet: [
-      process.env.STARKNET_RPC_URL1,
-      process.env.STARKNET_RPC_URL2,
-      process.env.STARKNET_RPC_URL3,
-    ].filter(Boolean),
-  };
-  return map[chain.toLowerCase()] || map.ethereum;
-}
+// getRpcUrls imported from ../../config/env.js
 
 async function findDeploymentBlock(rpcClient, contractAddress) {
   try {

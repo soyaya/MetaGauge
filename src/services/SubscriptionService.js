@@ -135,7 +135,8 @@ class SubscriptionService {
         aiQueryCount:         (usage.aiQueryCount   || 0) + (action === 'ai_query' ? quantity : 0),
         monthlyAnalysisCount: (usage.monthlyAnalysisCount || 0) + (action === 'analysis' ? quantity : 0),
         monthlyAiQueryCount:  (usage.monthlyAiQueryCount  || 0) + (action === 'ai_query' ? quantity : 0),
-        lastAnalysis: action === 'analysis' ? new Date().toISOString() : usage.lastAnalysis,
+        lastAnalysis: action === 'analysis' ? new Date().toISOString() : (usage.lastAnalysis || null),
+        lastAiQuery:  action === 'ai_query' ? new Date().toISOString() : (usage.lastAiQuery  || null),
       },
       billing: {
         ...billing,
@@ -144,6 +145,13 @@ class SubscriptionService {
         transactions: [...(billing.transactions || []).slice(-99), tx],
       },
     });
+
+    // Warn user when balance drops below $1
+    if (cost > 0 && newBalance < 1 && newBalance >= 0) {
+      import('./EmailAutomation.js').then(({ EmailAutomation }) =>
+        EmailAutomation.sendRegressionAlert(userId, 'Account balance', billing.balance, newBalance)
+      ).catch(() => {});
+    }
 
     return { allowed: true, charged: cost, balance: newBalance };
   }

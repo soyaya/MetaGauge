@@ -21,13 +21,14 @@ import { UsersTab } from "@/components/analyzer/users-tab"
 import { TransactionsTab } from "@/components/analyzer/transactions-tab"
 import { UxTab } from "@/components/analyzer/ux-tab"
 import { EnhancedAIInsights } from "@/components/analyzer/enhanced-ai-insights"
+import { AgentTab } from "@/components/analyzer/agent-tab"
 import { CompetitiveTab } from "@/components/analyzer/competitive-tab"
 import { FunctionsTab } from "@/components/analyzer/functions-tab"
 
 // Import subscription components
 import { WalletAnalyticsTab } from "@/components/analyzer/wallet-analytics-tab"
 import { SubscriptionStatus } from "@/components/subscription/subscription-status"
-import { useSubscription } from "@/hooks/use-subscription"
+import { IntelligenceTab } from "@/components/analyzer/intelligence-tab"
 
 interface DefaultContractData {
   contract: {
@@ -383,7 +384,7 @@ export default function DashboardPage() {
                   {!defaultContract.indexingStatus.isIndexed && defaultContract.indexingStatus.progress > 0 && (
                     <div className="mt-4">
                       <Progress value={defaultContract.indexingStatus.progress} className="h-1.5" />
-                      <p className="text-xs text-muted-foreground mt-1">{defaultContract.indexingStatus.progress}% — fetching {defaultContract.subscription?.tier || 'free'} tier data</p>
+                      <p className="text-xs text-muted-foreground mt-1">{defaultContract.indexingStatus.progress}% — indexing contract data</p>
                     </div>
                   )}
                 </CardContent>
@@ -414,7 +415,7 @@ export default function DashboardPage() {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="overflow-x-auto pb-1">
                   <TabsList className="flex w-max min-w-full gap-1 h-auto p-1">
-                    {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Txns'],['wallets','Wallets'],['functions','Functions'],['ux','UX'],['ai-insights','AI'],['competitive','Competitive']].map(([v,l])=>(
+                    {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Txns'],['wallets','Wallets'],['functions','Functions'],['ux','UX'],['intelligence','Intelligence 🔍'],['agent','Agent 🤖'],['competitive','Competitive']].map(([v,l])=>(
                       <TabsTrigger key={v} value={v} className="text-xs whitespace-nowrap px-3 py-1.5">{l}</TabsTrigger>
                     ))}
                   </TabsList>
@@ -485,15 +486,17 @@ export default function DashboardPage() {
                   />
                 </TabsContent>
 
-                <TabsContent value="ai-insights">
-                  <EnhancedAIInsights 
-                    analysisId={defaultContract.analysisHistory.latest?.id || ''}
-                    analysisResults={{
-                      results: {
-                        target: defaultContract.fullResults?.fullReport ? defaultContract.fullResults : { fullReport: defaultContract.fullResults }
-                      }
-                    }}
+                <TabsContent value="intelligence">
+                  <IntelligenceTab
+                    contractAddress={defaultContract.contract.address}
+                    chain={defaultContract.contract.chain}
+                    githubUrl={(defaultContract.contract as any).githubUrl}
+                    twitterHandle={(defaultContract.contract as any).twitterHandle}
                   />
+                </TabsContent>
+
+                <TabsContent value="agent">
+                  <AgentTab />
                 </TabsContent>
 
                 <TabsContent value="competitive">

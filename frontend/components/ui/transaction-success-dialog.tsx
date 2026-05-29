@@ -5,7 +5,7 @@ import { CheckCircle, ExternalLink, X } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
-import { getExplorerUrl } from '@/lib/web3-config'
+import { getExplorerUrl, getExplorerName } from '@/lib/web3-config'
 
 interface TransactionSuccessDialogProps {
   isOpen: boolean
@@ -101,7 +101,7 @@ export function TransactionSuccessDialog({
               className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
             >
               <ExternalLink className="h-4 w-4" />
-              View on Lisk Sepolia Explorer
+              View on {getExplorerName(chainId)}
             </a>
           </div>
 

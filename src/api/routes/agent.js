@@ -1,6 +1,6 @@
 import express from 'express';
 import AgentService from '../../services/AgentService.js';
-import { ContractStorage, UserStorage } from '../database/index.js';
+import { ContractStorage, UserStorage, AgentConfigStorage } from '../database/index.js';
 
 const router = express.Router();
 
@@ -115,6 +115,86 @@ router.get('/business-intelligence', async (req, res) => {
       : section === 'smart_money' ? BI.detectSmartMoney(txs)
       : { error: 'Unknown section' };
     res.json({ section, txCount: txs.length, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/onchain-risk — deep on-chain risk for user's contract
+router.get('/onchain-risk', async (req, res) => {
+  try {
+    const { contractAddress, chain = 'ethereum' } = req.query;
+    const { OnChainRiskAnalyzer } = await import('../../services/OnChainRiskAnalyzer.js');
+    if (!contractAddress) return res.status(400).json({ error: 'contractAddress query param required' });
+    const result = await OnChainRiskAnalyzer.analyze(contractAddress, chain);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/github — GitHub dev health for a repo
+router.get('/github', async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url) return res.status(400).json({ error: 'url query param required' });
+    const { GitHubAnalyzer } = await import('../../services/GitHubAnalyzer.js');
+    const result = await GitHubAnalyzer.analyze(url);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/sentiment — social sentiment for user's contract
+router.get('/sentiment', async (req, res) => {
+  try {
+    const { contractAddress, chain = 'ethereum', twitterHandle } = req.query;
+    if (!contractAddress) return res.status(400).json({ error: 'contractAddress query param required' });
+    const { SentimentAnalyzer } = await import('../../services/SentimentAnalyzer.js');
+    const result = await SentimentAnalyzer.analyze(contractAddress, chain, twitterHandle || null);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/intelligence-scores — combined traction/risk/sustainability scores
+router.get('/intelligence-scores', async (req, res) => {
+  try {
+    const { AnalysisStorage } = await import('../database/index.js');
+    const { ScoringEngine } = await import('../../services/ScoringEngine.js');
+    const analyses = await AnalysisStorage.findByUserId(req.user.id);
+    const latest = analyses.find(a => a.status === 'completed');
+    if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
+    const scores = ScoringEngine.compute(null, latest);
+    res.json(scores);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/config — get user's agent automation settings
+router.get('/config', async (req, res) => {  try {
+    const cfg = await AgentConfigStorage.get(req.user.id);
+    res.json(cfg || { enabled: false, permissions: {} });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/agent/config — update automation toggles
+router.put('/config', async (req, res) => {
+  try {
+    const { enabled, permissions } = req.body;
+    const existing = await AgentConfigStorage.get(req.user.id) || { userId: req.user.id, enabled: true, permissions: {} };
+    const updated = {
+      ...existing,
+      ...(enabled !== undefined && { enabled }),
+      permissions: { ...existing.permissions, ...(permissions || {}) },
+    };
+    await AgentConfigStorage.save(req.user.id, updated);
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

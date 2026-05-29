@@ -11,7 +11,7 @@ import { ProgressiveDataFetcher } from '../../services/ProgressiveDataFetcher.js
 import { performContinuousContractSync } from './continuous-sync-improved.js';
 import { initializeStreamingIndexer } from '../../indexer/index.js';
 import SubscriptionService from '../../services/SubscriptionService.js';
-import { PRICING } from '../../config/pricing.js';
+import { PRICING, FREE_QUOTA } from '../../config/pricing.js';
 import { triggerDefaultContractIndexing } from './trigger-indexing.js';
 import { MetricsNormalizer } from '../../services/MetricsNormalizer.js';
 import { isBot } from '../../services/BotDetectionService.js';
@@ -698,8 +698,10 @@ router.get('/default-contract', async (req, res) => {
     const rawMetrics = rawTarget?.metrics || {};
     const rawTxs = rawTarget?.transactions || [];
 
+    const _ethPriceUSD = await priceService.getPrice('eth').catch(() => 2500);
     const builtFullReport = buildFullReportFromAnalysis(rawTxs, rawMetrics, {
       ...rawTarget,
+      _ethPriceUSD,
       defiMetrics:  normalizedMetrics,
       userBehavior: normalizedBehavior,
     });
@@ -835,14 +837,8 @@ router.get('/user-metrics', async (req, res) => {
       },
       usage: user.usage,
       limits: {
-        monthly: user.subscription?.isActive && user.subscription?.features?.apiCallsPerMonth 
-          ? user.subscription.features.apiCallsPerMonth 
-          : (user.tier === 'free' ? 10 : user.tier === 'pro' ? 100 : user.tier === 'starter' ? 1000 : -1),
-        remaining: user.subscription?.isActive && user.subscription?.features?.apiCallsPerMonth
-          ? Math.max(0, user.subscription.features.apiCallsPerMonth - (user.usage?.monthlyAnalysisCount || 0))
-          : (user.tier === 'free' ? Math.max(0, 10 - (user.usage?.monthlyAnalysisCount || 0)) :
-             user.tier === 'pro' ? Math.max(0, 100 - (user.usage?.monthlyAnalysisCount || 0)) : 
-             user.tier === 'starter' ? Math.max(0, 1000 - (user.usage?.monthlyAnalysisCount || 0)) : -1)
+        monthly:   FREE_QUOTA.analyses,
+        remaining: Math.max(0, FREE_QUOTA.analyses - (user.usage?.monthlyAnalysisCount || 0)),
       },
       recentAnalyses: allAnalyses
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))

@@ -9,11 +9,16 @@ import * as getMarketContext from './get_market_context.js';
 import * as getAnalyzerState from './get_analyzer_state.js';
 import * as createTask from './create_task.js';
 import * as getBusinessIntelligence from './get_business_intelligence.js';
+import * as getOnchainRisk from './get_onchain_risk.js';
+import * as getGithubIntelligence from './get_github_intelligence.js';
+import * as getIntelligenceScores from './get_intelligence_scores.js';
+import * as getSentiment from './get_sentiment.js';
 
 const ALL_TOOLS = [
   getMetrics, getTasks, getHistory, getCompetitors, getTransactions,
   resolveTask, searchLearnings, getMarketContext, getAnalyzerState, createTask,
   getBusinessIntelligence,
+  getOnchainRisk, getGithubIntelligence, getIntelligenceScores, getSentiment,
 ];
 
 export const TOOL_SCHEMAS = ALL_TOOLS.map(t => ({
