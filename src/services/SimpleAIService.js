@@ -110,9 +110,15 @@ Current Metrics:
 User Question: ${userMessage}
 
 Provide a helpful answer using their specific contract data. Keep it simple and actionable.
+Return ONLY valid JSON: { "summary": "...", "answer": "..." }
 `;
 
-      const response = await this.gemini.generateContent(prompt);
+      const raw = await this.gemini._generateWithFallback({
+        model: 'gemini-2.5-flash-lite',
+        contents: [{ text: prompt }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
+      });
+      const response = raw.text || '';
       
       return {
         id: `chat-${Date.now()}`,

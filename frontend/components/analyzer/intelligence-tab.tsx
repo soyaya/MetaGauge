@@ -48,23 +48,29 @@ function ScoreRing({ score, label, color }: { score: number; label: string; colo
 
 export function IntelligenceTab({ contractAddress, chain, githubUrl, twitterHandle }: IntelligenceTabProps) {
   const { toast } = useToast();
-  const [scores, setScores]     = useState<any>(null);
-  const [onChain, setOnChain]   = useState<any>(null);
-  const [github, setGithub]     = useState<any>(null);
+  const [scores, setScores]       = useState<any>(null);
+  const [onChain, setOnChain]     = useState<any>(null);
+  const [github, setGithub]       = useState<any>(null);
   const [sentiment, setSentiment] = useState<any>(null);
-  const [loading, setLoading]   = useState(true);
+  const [benchmarks, setBenchmarks] = useState<any>(null);
+  const [position, setPosition]   = useState<any>(null);
+  const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
     try {
-      const [s, oc, sent] = await Promise.allSettled([
+      const [s, oc, sent, bench, pos] = await Promise.allSettled([
         (api as any).agent.getIntelligenceScores(),
         (api as any).agent.getOnchainRisk(contractAddress, chain),
         (api as any).agent.getSentiment(contractAddress, chain, twitterHandle),
+        (api as any).agent.getBenchmarks(),
+        (api as any).agent.getMarketPosition(),
       ]);
-      if (s.status === 'fulfilled')    setScores(s.value);
-      if (oc.status === 'fulfilled')   setOnChain(oc.value);
-      if (sent.status === 'fulfilled') setSentiment(sent.value);
+      if (s.status === 'fulfilled')     setScores(s.value);
+      if (oc.status === 'fulfilled')    setOnChain(oc.value);
+      if (sent.status === 'fulfilled')  setSentiment(sent.value);
+      if (bench.status === 'fulfilled') setBenchmarks(bench.value);
+      if (pos.status === 'fulfilled')   setPosition(pos.value);
 
       if (githubUrl) {
         const g = await (api as any).agent.getGithubIntelligence(githubUrl).catch(() => null);
@@ -253,6 +259,101 @@ export function IntelligenceTab({ contractAddress, chain, githubUrl, twitterHand
           </CardContent>
         </Card>
       </div>
+
+      {/* Market Position */}
+      {position && !position.error && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" /> Market Position
+              <span className="text-xs font-normal text-muted-foreground capitalize">
+                {position.category} category
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className={`text-lg font-bold ${
+                  position.positionLabel === 'Top Performer' ? 'text-green-500' :
+                  position.positionLabel === 'Above Average' ? 'text-blue-500' :
+                  position.positionLabel === 'Average' ? 'text-yellow-500' : 'text-red-500'
+                }`}>{position.positionLabel}</span>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  #{position.rank} of {position.totalProtocols} tracked protocols
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold">{position.positionScore}%</div>
+                <div className="text-xs text-muted-foreground">metrics above avg</div>
+              </div>
+            </div>
+            <div className="flex gap-3 text-xs">
+              <span className="text-green-500">✓ {position.benchmarkSummary?.good} good</span>
+              <span className="text-yellow-500">→ {position.benchmarkSummary?.warn} average</span>
+              <span className="text-red-500">↓ {position.benchmarkSummary?.bad} below avg</span>
+            </div>
+            {position.protocols?.length > 1 && (
+              <div className="border-t pt-3 space-y-1.5">
+                {position.protocols.map((p: any, i: number) => (
+                  <div key={p.address || i} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground w-4">#{i + 1}</span>
+                      <span className={p.isYou ? 'font-semibold text-primary' : ''}>{p.name}</span>
+                      {p.isYou && <Badge variant="default" className="text-xs py-0">You</Badge>}
+                    </div>
+                    <span className="text-muted-foreground">{p.users?.toLocaleString()} users</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Benchmarks */}
+      {benchmarks?.benchmarks && Object.keys(benchmarks.benchmarks).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" /> Peer Benchmarks
+              <span className="text-xs font-normal text-muted-foreground capitalize">
+                vs {benchmarks.category} category
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {Object.entries(benchmarks.benchmarks).map(([key, data]: [string, any]) => {
+              const label: Record<string, string> = {
+                retentionRate7d: 'D7 Retention', retentionRate: 'Retention Rate',
+                successRate: 'Success Rate', churnRate: 'Churn Rate',
+                botRatio: 'Bot Activity', uniqueUsers: 'Unique Users',
+              };
+              const statusColor = data.status === 'good' ? 'text-green-500'
+                : data.status === 'bad' ? 'text-red-500' : 'text-yellow-500';
+              const statusIcon = data.status === 'good' ? '↑' : data.status === 'bad' ? '↓' : '→';
+              const unit = ['successRate','retentionRate7d','retentionRate','churnRate','botRatio'].includes(key) ? '%' : '';
+
+              return (
+                <div key={key} className="flex items-start justify-between gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">{label[key] || key}</span>
+                    {data.context && <p className="text-xs text-muted-foreground mt-0.5">{data.context}</p>}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className={`font-semibold ${statusColor}`}>
+                      {statusIcon} {data.value?.toFixed ? data.value.toFixed(1) : data.value}{unit}
+                    </span>
+                    {data.avg != null && (
+                      <p className="text-xs text-muted-foreground">avg {data.avg}{unit}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
     </div>
   );

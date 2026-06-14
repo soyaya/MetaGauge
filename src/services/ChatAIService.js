@@ -114,46 +114,32 @@ class ChatAIService {
     }
 
     try {
-      const prompt = this.buildChatPrompt(userMessage, sessionContext);
+      const { systemPrompt, history } = this.buildChatMessages(userMessage, sessionContext);
       
       const response = await this._generateWithFallback({
         model: 'gemini-2.5-flash-lite',
-        contents: [{ text: prompt }],
-        generationConfig: {
-          temperature: 0.4, // Slightly higher for more conversational responses
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 4096,
+        config: {
+          systemInstruction: systemPrompt,
+          generationConfig: { temperature: 0.4, topK: 40, topP: 0.95, maxOutputTokens: 4096 },
         },
+        contents: history,
       });
       
       let jsonResponse = response.text || '';
-      
-      // Clean up response - remove markdown formatting if present
       jsonResponse = jsonResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       
-      // Try to parse the JSON
       let chatResponse;
       try {
         chatResponse = JSON.parse(jsonResponse);
-      } catch (parseError) {
-        // If JSON parsing fails, try to extract JSON from the response
+      } catch {
         const jsonMatch = jsonResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           chatResponse = JSON.parse(jsonMatch[0]);
         } else {
-          // Fallback to text response
           return {
             content: jsonResponse,
-            components: [{
-              type: ComponentTypes.TEXT,
-              data: { text: jsonResponse }
-            }],
-            metadata: {
-              model: 'gemini-2.5-flash-lite',
-              processingTime: Date.now(),
-              fallback: true
-            }
+            components: [{ type: ComponentTypes.TEXT, data: { text: jsonResponse } }],
+            metadata: { model: 'gemini-2.5-flash-lite', processingTime: Date.now(), fallback: true }
           };
         }
       }
@@ -175,148 +161,55 @@ class ChatAIService {
   }
 
   /**
-   * Build comprehensive prompt for chat conversation
+   * Build system prompt + proper multi-turn conversation history for Gemini.
+   * Returns { systemPrompt, history } where history is the contents[] array.
    */
-  buildChatPrompt(userMessage, sessionContext) {
-    const { contractData, analysisData, chatHistory, contractAddress, contractChain } = sessionContext;
+  buildChatMessages(userMessage, sessionContext) {
+    const { contractData, analysisData, chatHistory = [], contractAddress, contractChain } = sessionContext;
 
-    // Get metrics context for AI
     const metrics = analysisData?.results?.target?.metrics || {};
     const metricsContext = MetricsContextService.getContextForAI(metrics);
 
-    return `
-You are an expert blockchain analyst AI assistant specializing in smart contract analysis and onchain data interpretation. You're having a conversation about the contract ${contractAddress} on ${contractChain}.
+    const systemPrompt = `You are an expert blockchain analyst AI assistant for contract ${contractAddress} on ${contractChain}.
 
 CONTEXT:
-Contract Address: ${contractAddress}
-Chain: ${contractChain}
 Contract Name: ${contractData?.name || 'Unknown'}
-
-AVAILABLE DATA:
-${JSON.stringify({
-  contractData: contractData || {},
+Available Data: ${JSON.stringify({
   latestAnalysis: analysisData?.results?.target?.fullReport || {},
-  metrics: analysisData?.results?.target?.metrics || {},
+  metrics,
   transactions: analysisData?.results?.target?.transactions || 0,
   competitors: analysisData?.results?.competitors?.length || 0
-}, null, 2)}
+})}
 ${metricsContext}
 
-IMPORTANT INSTRUCTIONS FOR METRICS:
-- When discussing any metric, ALWAYS explain what it means using the definitions provided above
-- Reference the "Good" and "Bad" ranges to provide context
-- Relate the metric values to the user's specific data
-- Provide actionable insights based on the interpretation guidelines
-- If a metric is not in the glossary, explain it in simple terms
-
-RECENT CONVERSATION:
-${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-USER MESSAGE: "${userMessage}"
-
-Respond as a knowledgeable blockchain analyst. When users ask for charts, graphs, or visual data, ALWAYS provide appropriate chart components with real or realistic sample data. Focus on creating interactive visualizations that help users understand contract performance.
-
-IMPORTANT: Return your response in the following JSON format (return ONLY valid JSON):
-
+Return ONLY valid JSON:
 {
-  "content": "Your conversational response text here",
+  "content": "Your conversational response",
   "components": [
-    {
-      "type": "text|chart|metric_card|table|alert|insight_card|recommendation|transaction_list|user_analysis|competitive_comparison",
-      "data": {
-        // Component-specific data structure
-      }
-    }
+    { "type": "text|chart|metric_card|table|alert|insight_card|recommendation", "data": {} }
   ]
 }
 
-COMPONENT TYPES AND DATA STRUCTURES:
+Component data shapes:
+- metric_card: { title, value, unit, change, trend: "up|down|neutral", description }
+- chart: { title, type: "line|bar|pie|area", data: [{label, value}], description }
+- table: { title, headers: [], rows: [[]] }
+- alert: { severity: "info|warning|error|success", title, message, actionable }
+- insight_card: { title, insight, confidence, category }
+- recommendation: { title, description, priority: "high|medium|low", impact, effort }
 
-1. TEXT: { "text": "Your text content" }
+Always include at least one component. Use charts when users ask for visual data.`;
 
-2. METRIC_CARD: {
-  "title": "Metric Name",
-  "value": "123.45",
-  "unit": "ETH|USD|%|count",
-  "change": "+5.2%",
-  "trend": "up|down|neutral",
-  "description": "Brief explanation"
-}
+    // Convert chat history to proper Gemini turn format (keep last 6 turns)
+    const history = chatHistory.slice(-6).flatMap(msg => {
+      const role = msg.role === 'assistant' ? 'model' : 'user';
+      return [{ role, parts: [{ text: String(msg.content || '') }] }];
+    });
 
-3. CHART: {
-  "title": "Chart Title",
-  "type": "line|bar|pie|area|donut",
-  "data": [
-    { "label": "Jan", "value": 100 },
-    { "label": "Feb", "value": 150 }
-  ],
-  "xAxis": "Time",
-  "yAxis": "Value",
-  "description": "Chart description"
-}
+    // Append current user message
+    history.push({ role: 'user', parts: [{ text: userMessage }] });
 
-4. TABLE: {
-  "title": "Table Title",
-  "headers": ["Column 1", "Column 2", "Column 3"],
-  "rows": [
-    ["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
-    ["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"]
-  ]
-}
-
-5. ALERT: {
-  "severity": "info|warning|error|success",
-  "title": "Alert Title",
-  "message": "Alert message",
-  "actionable": true|false
-}
-
-6. INSIGHT_CARD: {
-  "title": "Insight Title",
-  "insight": "Key insight text",
-  "confidence": 85,
-  "category": "performance|security|growth|risk"
-}
-
-7. RECOMMENDATION: {
-  "title": "Recommendation Title",
-  "description": "Detailed recommendation",
-  "priority": "high|medium|low",
-  "impact": "Expected impact",
-  "effort": "low|medium|high"
-}
-
-CHART GENERATION GUIDELINES:
-- When users ask for "charts", "graphs", or "visual data", ALWAYS include chart components
-- Use realistic sample data if actual data is not available
-- For transaction volume: use line or area charts with time series data
-- For user analysis: use bar charts or pie charts showing user segments
-- For performance metrics: use multiple metric cards with trend indicators
-- For competitive analysis: use bar charts comparing metrics
-- For security analysis: use alert components and metric cards
-- Always include descriptive titles and explanations for charts
-
-SAMPLE CHART DATA PATTERNS:
-- Transaction Volume: [{"label": "Week 1", "value": 1250}, {"label": "Week 2", "value": 1890}, ...]
-- User Growth: [{"label": "New Users", "value": 45}, {"label": "Returning", "value": 78}, ...]
-- Performance Metrics: Multiple metric_card components with different KPIs
-- Gas Usage: Line chart showing gas consumption over time
-- Token Distribution: Pie chart showing holder distribution
-
-GUIDELINES:
-- Be conversational and helpful
-- ALWAYS provide visual components when users ask for charts or data visualization
-- Use actual data from the contract analysis when available
-- If data is limited, create realistic sample data that demonstrates the concept
-- Provide actionable insights and recommendations
-- Use appropriate components to visualize data
-- Keep responses focused and relevant to the user's question
-- If asked about specific metrics, create metric cards or charts
-- For transaction analysis, use tables or charts
-- For alerts or warnings, use alert components
-- Always include at least one component in your response
-- When users ask for "charts" or "graphs", prioritize chart components over text
-`;
+    return { systemPrompt, history };
   }
 
   /**

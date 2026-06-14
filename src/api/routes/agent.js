@@ -174,6 +174,181 @@ router.get('/intelligence-scores', async (req, res) => {
   }
 });
 
+// GET /api/agent/benchmarks — metric benchmarks vs category peers
+router.get('/benchmarks', async (req, res) => {
+  try {
+    const { AnalysisStorage, ContractStorage } = await import('../database/index.js');
+    const { BenchmarkService } = await import('../../services/BenchmarkService.js');
+    const [analyses, contracts] = await Promise.all([
+      AnalysisStorage.findByUserId(req.user.id),
+      ContractStorage.findByUserId(req.user.id),
+    ]);
+    const latest = analyses.find(a => a.status === 'completed');
+    if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
+    const category = contracts[0]?.category || req.query.category || 'defi';
+    const metrics  = latest.results?.target?.metrics || {};
+    const fr       = latest.results?.target?.fullReport || {};
+    const result   = await BenchmarkService.benchmark(metrics, fr, category);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/playbooks — growth playbooks for underperforming metrics
+router.get('/playbooks', async (req, res) => {
+  try {
+    const { AnalysisStorage, ContractStorage } = await import('../database/index.js');
+    const { BenchmarkService } = await import('../../services/BenchmarkService.js');
+    const { PlaybookService } = await import('../../services/PlaybookService.js');
+    const [analyses, contracts] = await Promise.all([
+      AnalysisStorage.findByUserId(req.user.id),
+      ContractStorage.findByUserId(req.user.id),
+    ]);
+    const latest = analyses.find(a => a.status === 'completed');
+    if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
+    const category = contracts[0]?.category || 'defi';
+    const metrics  = latest.results?.target?.metrics || {};
+    const fr       = latest.results?.target?.fullReport || {};
+    const benchmarkResult = await BenchmarkService.benchmark(metrics, fr, category);
+    const playbooks = PlaybookService.getForBenchmarks(benchmarkResult);
+    res.json({ playbooks, category });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/market-position — rank in category vs competitors
+router.get('/market-position', async (req, res) => {
+  try {
+    const { AnalysisStorage, ContractStorage, CompetitorDataStorage } = await import('../database/index.js');
+    const { ScoringEngine } = await import('../../services/ScoringEngine.js');
+    const { BenchmarkService } = await import('../../services/BenchmarkService.js');
+
+    const [analyses, contracts, competitors] = await Promise.all([
+      AnalysisStorage.findByUserId(req.user.id),
+      ContractStorage.findByUserId(req.user.id),
+      CompetitorDataStorage.findByUserId(req.user.id).catch(() => []),
+    ]);
+
+    const latest   = analyses.find(a => a.status === 'completed');
+    if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
+
+    const category = contracts[0]?.category || 'defi';
+    const metrics  = latest.results?.target?.metrics || {};
+    const fr       = latest.results?.target?.fullReport || {};
+    const scores   = ScoringEngine.compute(null, latest);
+    const bench    = await BenchmarkService.benchmark(metrics, fr, category);
+
+    // Build comparison set: user + competitors
+    const allProtocols = [
+      {
+        name: contracts[0]?.name || 'Your Protocol',
+        address: contracts[0]?.address,
+        isYou: true,
+        tractionScore: scores.tractionScore,
+        riskScore: scores.riskScore,
+        users: metrics.uniqueUsers || 0,
+        txs: metrics.transactions || 0,
+      },
+      ...competitors.slice(0, 5).map(c => ({
+        name: c.name || c.address?.slice(0, 8),
+        address: c.address,
+        isYou: false,
+        tractionScore: null, // competitors don't have full scores
+        users: c.metrics?.uniqueUsers || 0,
+        txs: c.metrics?.transactions || 0,
+      })),
+    ].sort((a, b) => b.users - a.users);
+
+    const yourRank = allProtocols.findIndex(p => p.isYou) + 1;
+
+    // Compute overall position from benchmark statuses
+    const goodCount = Object.values(bench.benchmarks).filter((v) => v.status === 'good').length;
+    const total     = Object.keys(bench.benchmarks).length || 1;
+    const pctGood   = Math.round((goodCount / total) * 100);
+
+    const positionLabel = pctGood >= 80 ? 'Top Performer'
+      : pctGood >= 60 ? 'Above Average'
+      : pctGood >= 40 ? 'Average'
+      : pctGood >= 20 ? 'Below Average'
+      : 'Needs Improvement';
+
+    res.json({
+      category,
+      rank: yourRank,
+      totalProtocols: allProtocols.length,
+      positionLabel,
+      positionScore: pctGood,
+      protocols: allProtocols,
+      benchmarkSummary: {
+        good: goodCount,
+        warn: Object.values(bench.benchmarks).filter((v) => v.status === 'warn').length,
+        bad:  Object.values(bench.benchmarks).filter((v) => v.status === 'bad').length,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/lifecycle-campaigns — campaign suggestions by wallet lifecycle stage
+router.get('/lifecycle-campaigns', async (req, res) => {
+  try {
+    const { AnalysisStorage } = await import('../database/index.js');
+    const { BusinessIntelligenceEngine: BI } = await import('../../services/BusinessIntelligenceEngine.js');
+    const { LifecycleCampaignService } = await import('../../services/LifecycleCampaignService.js');
+    const analyses = await AnalysisStorage.findByUserId(req.user.id);
+    const latest   = analyses.find(a => a.status === 'completed');
+    if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
+    const txs       = latest.results?.target?.transactions || [];
+    const fr        = latest.results?.target?.fullReport   || {};
+    const biData    = txs.length ? BI.runAll(txs, 2500) : {};
+    const campaigns = LifecycleCampaignService.generate(fr, biData);
+    res.json({ campaigns, txCount: txs.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agent/at-risk-wallets — churned high-value wallets for outreach
+router.get('/at-risk-wallets', async (req, res) => {
+  try {
+    const { AnalysisStorage } = await import('../database/index.js');
+    const { BusinessIntelligenceEngine: BI } = await import('../../services/BusinessIntelligenceEngine.js');
+    const analyses = await AnalysisStorage.findByUserId(req.user.id);
+    const latest   = analyses.find(a => a.status === 'completed');
+    if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
+    const txs = latest.results?.target?.transactions || [];
+    if (!txs.length) return res.json({ wallets: [], message: 'No transaction data yet' });
+    const ethPrice = 2500;
+    const { highRisk }  = BI.computeChurnRisk(txs);
+    const { segments }  = BI.computeLTV(txs, ethPrice);
+    // Intersect: wallets that are both high churn risk AND high/mid LTV
+    const highLtvAddresses = new Set([
+      ...segments.high.map(w => w.address?.toLowerCase()),
+      ...segments.mid.map(w => w.address?.toLowerCase()),
+    ]);
+    const atRisk = highRisk
+      .filter(w => highLtvAddresses.has(w.address?.toLowerCase()))
+      .slice(0, 50)
+      .map(w => {
+        const ltvData = [...segments.high, ...segments.mid].find(l => l.address?.toLowerCase() === w.address?.toLowerCase());
+        return {
+          address: w.address,
+          daysSinceLast: w.daysSinceLast,
+          txCount: w.txCount,
+          ltv: ltvData?.ltv || 0,
+          segment: segments.high.find(l => l.address?.toLowerCase() === w.address?.toLowerCase()) ? 'high' : 'mid',
+        };
+      })
+      .sort((a, b) => b.ltv - a.ltv);
+    res.json({ wallets: atRisk, count: atRisk.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agent/config — get user's agent automation settings
 router.get('/config', async (req, res) => {  try {
     const cfg = await AgentConfigStorage.get(req.user.id);

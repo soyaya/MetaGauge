@@ -11,5 +11,44 @@
     },
     "userId": "a94fe5fd-ddbd-4f62-8d54-988128135f3c",
     "updatedAt": "2026-04-10T11:53:28.707Z"
+  },
+  {
+    "userId": "adb0de5d-0cf5-4035-a1aa-6d0055bcf9aa",
+    "enabled": true,
+    "permissions": {
+      "regressionAlerts": true,
+      "sendDigests": true,
+      "createTasks": true,
+      "autoAnalyze": true,
+      "checkCompetitors": false,
+      "postSocial": false
+    },
+    "updatedAt": "2026-06-14T11:32:42.964Z"
+  },
+  {
+    "userId": "9e45fb3e-7f15-4c56-a7fa-4f8127dbc51c",
+    "enabled": true,
+    "permissions": {
+      "regressionAlerts": true,
+      "sendDigests": true,
+      "createTasks": true,
+      "autoAnalyze": true,
+      "checkCompetitors": false,
+      "postSocial": false
+    },
+    "updatedAt": "2026-06-14T11:37:49.417Z"
+  },
+  {
+    "userId": "e8e3445a-25e3-4cde-b37d-dcc8dabcf04d",
+    "enabled": true,
+    "permissions": {
+      "regressionAlerts": true,
+      "sendDigests": true,
+      "createTasks": true,
+      "autoAnalyze": true,
+      "checkCompetitors": false,
+      "postSocial": false
+    },
+    "updatedAt": "2026-06-14T11:38:33.181Z"
   }
 ]

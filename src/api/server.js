@@ -41,6 +41,7 @@ import indexingRoutes from './routes/indexing.js';
 import { resumeLivePoll } from './routes/trigger-indexing.js';
 import agentRoutes from './routes/agent.js';
 import predictionsRoutes from './routes/predictions.js';
+import shareRoutes from './routes/share.js';
 
 // Import middleware
 import { authenticateToken, verifyToken } from './middleware/auth.js';
@@ -259,6 +260,7 @@ app.use('/api/traction', authenticateToken, tractionRoutes);
 
 app.use('/api/agent', authenticateToken, agentRoutes);
 app.use('/api/predictions', authenticateToken, predictionsRoutes);
+app.use('/api/share', shareRoutes); // mixed auth — POST requires token, GET /:token/data is public
 
 app.use('/api/competitive', authenticateToken, competitiveRouter);
 

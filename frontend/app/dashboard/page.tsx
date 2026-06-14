@@ -29,6 +29,10 @@ import { FunctionsTab } from "@/components/analyzer/functions-tab"
 import { WalletAnalyticsTab } from "@/components/analyzer/wallet-analytics-tab"
 import { SubscriptionStatus } from "@/components/subscription/subscription-status"
 import { IntelligenceTab } from "@/components/analyzer/intelligence-tab"
+import { ExportTab } from "@/components/analyzer/export-tab"
+import { PlaybooksTab } from "@/components/analyzer/playbooks-tab"
+import { WalletOutreachTab } from "@/components/analyzer/wallet-outreach-tab"
+import { LifecycleCampaignsTab } from "@/components/analyzer/lifecycle-campaigns-tab"
 
 interface DefaultContractData {
   contract: {
@@ -415,7 +419,7 @@ export default function DashboardPage() {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="overflow-x-auto pb-1">
                   <TabsList className="flex w-max min-w-full gap-1 h-auto p-1">
-                    {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Txns'],['wallets','Wallets'],['functions','Functions'],['ux','UX'],['intelligence','Intelligence 🔍'],['agent','Agent 🤖'],['competitive','Competitive']].map(([v,l])=>(
+                    {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Txns'],['wallets','Wallets'],['functions','Functions'],['ux','UX'],['intelligence','Intelligence 🔍'],['playbooks','Playbooks 📋'],['outreach','Outreach 🎯'],['campaigns','Campaigns 🚀'],['export','Export 📤'],['agent','Agent 🤖'],['competitive','Competitive']].map(([v,l])=>(
                       <TabsTrigger key={v} value={v} className="text-xs whitespace-nowrap px-3 py-1.5">{l}</TabsTrigger>
                     ))}
                   </TabsList>
@@ -493,6 +497,25 @@ export default function DashboardPage() {
                     githubUrl={(defaultContract.contract as any).githubUrl}
                     twitterHandle={(defaultContract.contract as any).twitterHandle}
                   />
+                </TabsContent>
+
+                <TabsContent value="export">
+                  <ExportTab
+                    contractAddress={defaultContract.contract.address}
+                    chain={defaultContract.contract.chain}
+                  />
+                </TabsContent>
+
+                <TabsContent value="playbooks">
+                  <PlaybooksTab />
+                </TabsContent>
+
+                <TabsContent value="outreach">
+                  <WalletOutreachTab />
+                </TabsContent>
+
+                <TabsContent value="campaigns">
+                  <LifecycleCampaignsTab />
                 </TabsContent>
 
                 <TabsContent value="agent">

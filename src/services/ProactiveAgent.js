@@ -99,7 +99,52 @@ export class ProactiveAgent {
           } catch {}
         }
 
-        // ── Sentiment check ───────────────────────────────────────────────────
+        // ── Predictive alerts ─────────────────────────────────────────────────
+        try {
+          const { PredictionEngine } = await import('./PredictionEngine.js');
+          const { saveAlert, makeAlert } = await import('./AlertEngine.js');
+          const { AlertsStorage } = await import('../api/database/index.js');
+          const predictions = await PredictionEngine.predict(user.id);
+
+          if (predictions) {
+            const existing = await AlertsStorage.findByUserId(user.id).catch(() => []);
+            const recentTypes = new Set(existing
+              .filter(a => Date.now() - new Date(a.createdAt||a.created_at).getTime() < 86400000)
+              .map(a => a.type));
+
+            // Predict: D30 retention will drop below 20%
+            const retForecast = predictions.next30Days?.retentionRate;
+            if (retForecast?.value < 20 && retForecast?.trend === 'down' && !recentTypes.has('predict_retention_drop')) {
+              const contractAddress = user.onboarding?.defaultContract?.address || '';
+              const alert = makeAlert('predict_retention_drop', 'high', contractAddress, user.id,
+                'Retention Forecast: At Risk',
+                `Retention rate is trending down and projected to reach ${retForecast.value}% in 30 days. Act now to prevent drop below 20%.`);
+              await saveAlert(alert);
+              if (wsManager) wsManager.emitProgress(user.id, { type: 'alert', alert });
+            }
+
+            // Predict: churn risk is high
+            if (predictions.churnRisk?.level === 'high' && !recentTypes.has('predict_churn_high')) {
+              const contractAddress = user.onboarding?.defaultContract?.address || '';
+              const alert = makeAlert('predict_churn_high', 'high', contractAddress, user.id,
+                'High Churn Risk Predicted',
+                `Churn risk score is ${predictions.churnRisk.score}/100. Avg churn rate ${predictions.churnRisk.avgChurn}% and rising.`);
+              await saveAlert(alert);
+              if (wsManager) wsManager.emitProgress(user.id, { type: 'alert', alert });
+            }
+
+            // Predict: user growth declining
+            const userForecast = predictions.next30Days?.users;
+            if (userForecast?.trend === 'down' && userForecast?.changePct < -15 && !recentTypes.has('predict_user_decline')) {
+              const contractAddress = user.onboarding?.defaultContract?.address || '';
+              const alert = makeAlert('predict_user_decline', 'medium', contractAddress, user.id,
+                'User Growth Declining',
+                `User count projected to drop ${Math.abs(userForecast.changePct)}% in 30 days (${userForecast.current} → ${userForecast.value}).`);
+              await saveAlert(alert);
+              if (wsManager) wsManager.emitProgress(user.id, { type: 'alert', alert });
+            }
+          }
+        } catch {}
         if (contract?.address) {
           try {
             const { SentimentAnalyzer } = await import('./SentimentAnalyzer.js');

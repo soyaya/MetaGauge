@@ -5,6 +5,7 @@ import { SimpleAIService } from './SimpleAIService.js';
 import { findAll as findAllUsers } from '../api/database/UserStorage.js';
 import { findByUserId } from '../api/database/ContractStorage.js';
 import { findAnalysisByContractId } from '../api/database/AnalysisStorage.js';
+import { MetricsHistoryStorage } from '../api/database/index.js';
 
 export class SimpleAIAutomation {
   constructor() {
@@ -90,6 +91,9 @@ export class SimpleAIAutomation {
         
         // Check for anomalies
         const alert = await this.checkContractAnomalies(user.id, contractData);
+        if (alert) {
+          console.log(`🚨 Anomaly detected for contract ${contract.name}: ${alert.message}`);
+        }
         
         // Run health check
         const healthCheck = await this.aiService.runHealthCheck(user.id, contractData);
@@ -145,24 +149,17 @@ export class SimpleAIAutomation {
   }
 
   /**
-   * Check for anomalies in contract data
+   * Check for anomalies in contract data using real historical metrics
    */
   async checkContractAnomalies(userId, contractData) {
-    // Get previous day's data (mock for now)
-    const previousData = {
-      metrics: {
-        activeUsers: (contractData.metrics.activeUsers || 0) * (0.8 + Math.random() * 0.4),
-        totalTransactions: (contractData.metrics.totalTransactions || 0) * (0.9 + Math.random() * 0.2),
-        revenue: (contractData.metrics.revenue || 0) * (0.85 + Math.random() * 0.3)
-      }
-    };
+    const history = await MetricsHistoryStorage.get(userId).catch(() => []);
+    if (history.length < 2) return null;
 
-    const alert = await this.aiService.checkForAnomalies(userId, contractData, previousData);
-    
-    if (alert) {
-      console.log(`🚨 Anomaly detected for contract ${contractData.name}: ${alert.message}`);
-      // In a real implementation, you'd send this via WebSocket or email
-    }
+    // Use the second-most-recent snapshot as "previous"
+    const previousSnapshot = history[history.length - 2];
+    const previousData = { metrics: previousSnapshot };
+
+    return this.aiService.checkForAnomalies(userId, contractData, previousData);
   }
 
   stop() {

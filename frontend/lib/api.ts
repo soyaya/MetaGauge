@@ -511,6 +511,27 @@ export const api = {
 
     getIntelligenceScores: async () =>
       apiRequest('/api/agent/intelligence-scores'),
+
+    getBenchmarks: async (category?: string) =>
+      apiRequest(`/api/agent/benchmarks${category ? `?category=${category}` : ''}`),
+
+    getPlaybooks: async () =>
+      apiRequest('/api/agent/playbooks'),
+
+    getAtRiskWallets: async () =>
+      apiRequest('/api/agent/at-risk-wallets'),
+
+    getMarketPosition: async () =>
+      apiRequest('/api/agent/market-position'),
+
+    getLifecycleCampaigns: async () =>
+      apiRequest('/api/agent/lifecycle-campaigns'),
+
+    createShareToken: async () =>
+      apiRequest('/api/share', { method: 'POST' }),
+
+    revokeShareToken: async (token: string) =>
+      apiRequest(`/api/share/${token}`, { method: 'DELETE' }),
   },
 
   indexing: {

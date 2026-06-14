@@ -35,8 +35,26 @@ export class BriefingScheduler {
 
   async generateWeeklyStrategy(userId) {
     const history = await this._getHistory(userId);
+    const competitors = await this._getCompetitors(userId);
+
+    const competitorContext = competitors.length > 0
+      ? `Competitor data: ${JSON.stringify(competitors.slice(0, 3).map(c => ({
+          name: c.name, address: c.address,
+          metrics: { users: c.metrics?.uniqueUsers, volume: c.metrics?.volume, tvl: c.metrics?.tvl }
+        }))).slice(0, 400)}`
+      : 'No competitor data available.';
+
     return this._generate(userId, 'weekly',
-      `Generate a weekly strategy brief. Use get_metrics, get_history, and get_business_intelligence tools. Include: 1) Week-over-week performance, 2) Top 3 growth opportunities, 3) Recommended focus for next week. History context: ${JSON.stringify(history).slice(0, 300)}`
+      `Generate a weekly strategy brief for ${new Date().toDateString()}. Use get_metrics, get_history, get_competitors, and get_business_intelligence tools.
+
+Structure the brief as:
+1. WEEK IN REVIEW — key metrics with week-over-week change
+2. COMPETITOR MOVEMENTS — who gained/lost users, any spikes (use real competitor data if available)
+3. TOP 3 OPPORTUNITIES — specific growth actions with estimated impact
+4. FOCUS FOR NEXT WEEK — single most important priority
+
+${competitorContext}
+History context: ${JSON.stringify(history).slice(0, 200)}`
     );
   }
 

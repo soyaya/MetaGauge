@@ -414,6 +414,26 @@ if (DATABASE_TYPE === 'postgres') {
     },
   };
 
+  PatternProfileStorage = {
+    get: async (userId) => {
+      try { return JSON.parse(await fsp.readFile(uFile(userId, 'pattern_profile.json'), 'utf8')); } catch { return null; }
+    },
+    save: async (userId, data) => {
+      await fsp.mkdir(path.join(DATA_DIR, 'users', userId), { recursive: true });
+      await fsp.writeFile(uFile(userId, 'pattern_profile.json'), JSON.stringify(data, null, 2));
+      return data;
+    },
+  };
+
+  MilestoneStorage = {
+    get: async (userId) => readJsonFile(uFile(userId, 'milestones.json'), []),
+    append: async (userId, milestone) => {
+      const all = await readJsonFile(uFile(userId, 'milestones.json'), []);
+      all.push({ ...milestone, achievedAt: new Date().toISOString() });
+      await writeJsonFile(uFile(userId, 'milestones.json'), all);
+    },
+  };
+
   console.log('✅ File storage loaded');
 }
 
