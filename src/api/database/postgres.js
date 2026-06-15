@@ -10,24 +10,35 @@ dotenv.config();
 
 const { Pool } = pg;
 
-// Database configuration
-const config = process.env.DATABASE_URL ? {
-  connectionString: process.env.DATABASE_URL,
-  max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-  ssl: { rejectUnauthorized: false },
-} : {
-  host: process.env.POSTGRES_HOST || 'localhost',
-  port: parseInt(process.env.POSTGRES_PORT) || 5432,
-  database: process.env.POSTGRES_DB || 'metagauge',
-  user: process.env.POSTGRES_USER || 'metagauge_user',
-  password: process.env.POSTGRES_PASSWORD,
-  max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-  ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false,
-};
+// Database configuration — parse DATABASE_URL manually to handle special chars in password
+function buildConfig() {
+  if (process.env.DATABASE_URL) {
+    const url = new URL(process.env.DATABASE_URL);
+    return {
+      host: url.hostname,
+      port: parseInt(url.port) || 5432,
+      database: url.pathname.slice(1),
+      user: decodeURIComponent(url.username),
+      password: decodeURIComponent(url.password),
+      max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+      ssl: { rejectUnauthorized: false },
+    };
+  }
+  return {
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: parseInt(process.env.POSTGRES_PORT) || 5432,
+    database: process.env.POSTGRES_DB || 'metagauge',
+    user: process.env.POSTGRES_USER || 'metagauge_user',
+    password: process.env.POSTGRES_PASSWORD,
+    max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+    ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  };
+}
+const config = buildConfig();
 
 // Create connection pool
 let pool = null;

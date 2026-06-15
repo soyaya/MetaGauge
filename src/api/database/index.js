@@ -453,6 +453,9 @@ export {
 };
 
 export async function initializeDatabase() {
+  // Debug: log what connection info is available
+  console.log('🔍 DB init — DATABASE_TYPE:', process.env.DATABASE_TYPE, '| DATABASE_URL set:', !!process.env.DATABASE_URL, '| POSTGRES_HOST:', process.env.POSTGRES_HOST || 'not set');
+
   if (DATABASE_TYPE === 'postgres') {
     const { testConnection } = await import('./postgres.js');
     const ok = await testConnection();
