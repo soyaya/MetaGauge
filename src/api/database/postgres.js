@@ -14,7 +14,7 @@ const { Pool } = pg;
 function buildConfig() {
   if (process.env.DATABASE_URL) {
     const url = new URL(process.env.DATABASE_URL);
-    return {
+    const cfg = {
       host: url.hostname,
       port: parseInt(url.port) || 5432,
       database: url.pathname.slice(1),
@@ -25,6 +25,8 @@ function buildConfig() {
       connectionTimeoutMillis: 10000,
       ssl: { rejectUnauthorized: false },
     };
+    console.log('🔍 PG config — host:', cfg.host, 'port:', cfg.port, 'user:', cfg.user, 'db:', cfg.database);
+    return cfg;
   }
   return {
     host: process.env.POSTGRES_HOST || 'localhost',
