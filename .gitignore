@@ -5,7 +5,7 @@
 
 # Dependencies
 node_modules/
-package-lock.json
+Dockerfile
 yarn.lock
 
 # Build outputs
