@@ -11,16 +11,22 @@ dotenv.config();
 const { Pool } = pg;
 
 // Database configuration
-const config = {
+const config = process.env.DATABASE_URL ? {
+  connectionString: process.env.DATABASE_URL,
+  max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+  ssl: { rejectUnauthorized: false },
+} : {
   host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT) || 5432,
   database: process.env.POSTGRES_DB || 'metagauge',
   user: process.env.POSTGRES_USER || 'metagauge_user',
   password: process.env.POSTGRES_PASSWORD,
-  max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 20,
+  max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS) || 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
-  ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false
+  ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false,
 };
 
 // Create connection pool
