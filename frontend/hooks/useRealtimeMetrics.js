@@ -17,7 +17,8 @@ export function useRealtimeMetrics(userId, analysisId) {
     if (!userId) return;
     
     // Connect to WebSocket
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5000/ws';
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 
+      (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/^http/, 'ws') + '/ws';
     const ws = new WebSocket(`${wsUrl}?userId=${userId}`);
     
     ws.onopen = () => {
