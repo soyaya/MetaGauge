@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // output: 'export', // Removed: use Cloudflare Pages Next.js preset instead
   typescript: {
     ignoreBuildErrors: true,
   },
