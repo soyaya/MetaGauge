@@ -16,6 +16,7 @@ const tables = [
   analysis_count INTEGER DEFAULT 0,
   monthly_analysis_count INTEGER DEFAULT 0,
   last_analysis TIMESTAMP,
+  last_login TIMESTAMP,
   monthly_reset_date TIMESTAMP DEFAULT NOW(),
   competitor_analysis_count INTEGER DEFAULT 0,
   reset_token VARCHAR(255),
