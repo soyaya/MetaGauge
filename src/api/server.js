@@ -148,6 +148,7 @@ app.use(cors({
     'http://127.0.0.1:3000',
     /^http:\/\/192\.168\.\d+\.\d+:3000$/, // Allow local network IPs
     /^http:\/\/172\.\d+\.\d+\.\d+:3000$/, // Allow WSL2 network IPs
+    /\.pages\.dev$/,   // All Cloudflare Pages preview deployments
     config.frontendUrl
   ].filter(Boolean),
   credentials: true,
