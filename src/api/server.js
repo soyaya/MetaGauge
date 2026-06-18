@@ -355,7 +355,7 @@ async function startServer() {
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
       console.log(`🔌 WebSocket: ws://localhost:${PORT}/ws`);
-      console.log(`💾 Using file-based storage in ./data directory`);
+      console.log(`💾 Storage: ${process.env.DATABASE_TYPE === 'postgres' ? 'PostgreSQL' : 'file-based (./data)'}`);
       if (!process.env.PAYSTACK_SECRET_KEY) console.warn('⚠️  PAYSTACK_SECRET_KEY not set — Paystack top-ups will not work');
       if (!process.env.PAYMENT_ADDRESS) console.warn('⚠️  PAYMENT_ADDRESS not set — on-chain payment verification will reject all transactions');
       
