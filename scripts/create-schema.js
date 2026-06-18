@@ -21,6 +21,8 @@ const tables = [
   competitor_analysis_count INTEGER DEFAULT 0,
   reset_token VARCHAR(255),
   reset_token_expiry TIMESTAMP,
+  verify_otp VARCHAR(10),
+  verify_otp_expiry BIGINT,
   subscription JSONB DEFAULT '{}',
   billing JSONB DEFAULT '{}',
   social_credentials JSONB DEFAULT '{}',
