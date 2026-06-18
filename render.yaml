@@ -16,6 +16,6 @@ services:
       - key: POSTGRES_MAX_CONNECTIONS
         value: "5"
       # Set these in Render dashboard (secrets):
-      # POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+      # DATABASE_URL (use Internal Database URL from Render Postgres)
       # JWT_SECRET, GEMINI_API_KEY, FRONTEND_URL
       # ETHEREUM_RPC_URL1, ETHEREUM_RPC_URL2
