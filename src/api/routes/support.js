@@ -2,7 +2,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import { UserStorage } from '../database/index.js';
 import GeminiAIService from '../../services/GeminiAIService.js';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '../../services/mailer.js';
 import { query } from '../database/postgres.js';
 
 const router = express.Router();
@@ -62,19 +62,11 @@ router.post('/contact', authenticateToken, async (req, res) => {
     const user = await UserStorage.findById(req.user.id);
 
     // Send email to support
-    if (process.env.SMTP_HOST) {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      });
-      await transporter.sendMail({
-        from: process.env.FROM_EMAIL,
-        to: process.env.SUPPORT_EMAIL || 'support@metagauge.io',
-        subject: `[MetaGauge Support] ${subject} — ${user?.email}`,
-        html: `<p><strong>From:</strong> ${user?.name} (${user?.email})</p><p><strong>Message:</strong></p><p>${message.trim().replace(/\n/g, '<br>')}</p>`,
-      }).catch(() => {});
-    }
+    await sendEmail({
+      to: process.env.SUPPORT_EMAIL || 'support@metagauge.io',
+      subject: `[MetaGauge Support] ${subject} — ${user?.email}`,
+      html: `<p><strong>From:</strong> ${user?.name} (${user?.email})</p><p><strong>Message:</strong></p><p>${message.trim().replace(/\n/g, '<br>')}</p>`,
+    }).catch(() => {});
 
     // Save contact message
     await query(

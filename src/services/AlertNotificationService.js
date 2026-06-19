@@ -1,18 +1,16 @@
 /**
  * AlertNotificationService
- * Delivers alerts via email (Resend API) with AI-generated messages via Gemini.
+ * Delivers alerts via email with AI-generated messages via Gemini.
  */
 
 import geminiService from './GeminiAIService.js';
 import { FREE_QUOTA } from '../config/pricing.js';
+import { sendEmail } from './mailer.js';
 
 const gemini = geminiService;
 
 export class AlertNotificationService {
-  constructor() {
-    this.resendApiKey = process.env.RESEND_API_KEY || null;
-    this.fromEmail    = process.env.ALERT_FROM_EMAIL || 'alerts@metagauge.io';
-  }
+  constructor() {}
 
   getAllowedChannels(tier) {
     const t = typeof tier === 'string' ? tier.toLowerCase() : 'free';
@@ -65,16 +63,10 @@ Be specific, mention the metric values, and suggest one action the user should t
   }
 
   async sendEmail(alert, toEmail, metrics = {}) {
-    const hasSMTP = process.env.SMTP_USER && process.env.SMTP_PASS;
-    if (!this.resendApiKey && !hasSMTP) {
-      console.log(`[Alert] Email not sent (no email provider configured): ${alert.title} → ${toEmail}`);
-      return false;
-    }
-
     try {
       const aiBody = await this.generateAIMessage(alert, metrics);
       const severityEmoji = { critical: '🚨', high: '⚠️', medium: '📊', low: 'ℹ️' }[alert.severity] || '📊';
-
+      const subject = `${severityEmoji} [MetaGauge] ${alert.title}`;
       const html = `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#1D4ED8;color:white;padding:20px;border-radius:8px 8px 0 0">
@@ -86,8 +78,7 @@ Be specific, mention the metric values, and suggest one action the user should t
             <p style="color:#374151;line-height:1.6">${aiBody}</p>
             <div style="margin-top:20px;padding:12px;background:white;border-radius:6px;border:1px solid #e5e7eb">
               <p style="margin:0;font-size:12px;color:#6b7280">
-                Contract: ${alert.contractAddress || 'N/A'} &nbsp;|&nbsp;
-                ${new Date().toLocaleString()}
+                Contract: ${alert.contractAddress || 'N/A'} &nbsp;|&nbsp; ${new Date().toLocaleString()}
               </p>
             </div>
             <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/alerts"
@@ -96,51 +87,9 @@ Be specific, mention the metric values, and suggest one action the user should t
             </a>
           </div>
         </div>`;
-
-      const subject = `${severityEmoji} [MetaGauge] ${alert.title}`;
-
-      // Try Resend first
-      if (this.resendApiKey) {
-        try {
-          const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${this.resendApiKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: this.fromEmail, to: [toEmail], subject, html }),
-          });
-          if (res.ok) {
-            console.log(`[Alert] Email sent via Resend to ${toEmail}: ${alert.title}`);
-            return true;
-          }
-          const err = await res.json().catch(() => ({}));
-          console.warn('[Alert] Resend failed, falling back to SMTP:', err);
-        } catch (e) {
-          console.warn('[Alert] Resend error, falling back to SMTP:', e.message);
-        }
-      }
-
-      // Fall back to SMTP
-      if (hasSMTP) {
-        const nodemailerPkg = await import('nodemailer');
-        const nodemailer = nodemailerPkg.default || nodemailerPkg;
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST || 'smtp.gmail.com',
-          port: Number(process.env.SMTP_PORT) || 587,
-          secure: false,
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-        await transporter.sendMail({
-          from: `"MetaGauge" <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
-          to: toEmail,
-          subject,
-          html,
-        });
-        console.log(`[Alert] Email sent via SMTP to ${toEmail}: ${alert.title}`);
-        return true;
-      }
-
-      return false;
+      return sendEmail({ to: toEmail, subject, html });
     } catch (e) {
-      console.error('[Alert] Email failed:', e.message);
+      console.error('[Alert] sendEmail failed:', e.message);
       return false;
     }
   }

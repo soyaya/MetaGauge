@@ -2,11 +2,9 @@
  * EmailService - Send briefings and alerts via email
  * Professional HTML templates with MetaGauge branding.
  */
-import nodemailerPkg from 'nodemailer';
-const nodemailer = nodemailerPkg.default || nodemailerPkg;
+import { sendEmail } from './mailer.js';
 
 const BRAND_COLOR = '#6366f1';
-const FROM = process.env.FROM_EMAIL || process.env.SMTP_USER || 'MetaGauge <noreply@metagauge.io>';
 
 function baseTemplate(content) {
   return `<!DOCTYPE html>
@@ -48,17 +46,7 @@ const SEVERITY_STYLES = {
 };
 
 export class EmailService {
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  }
+  constructor() {} // transporter now handled by mailer.js
 
   async sendAlert(to, alert) {
     const s = SEVERITY_STYLES[alert.severity] || SEVERITY_STYLES.medium;
@@ -134,13 +122,6 @@ export class EmailService {
   }
 
   async _send(to, subject, html) {
-    try {
-      await this.transporter.sendMail({ from: FROM, to, subject, html });
-      console.log(`✅ Email sent → ${to}: ${subject}`);
-      return true;
-    } catch (err) {
-      console.error('❌ Email send failed:', err.message);
-      return false;
-    }
+    return sendEmail({ to, subject, html });
   }
 }

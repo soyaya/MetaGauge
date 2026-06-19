@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import { UserStorage, AgentConfigStorage } from '../database/index.js';
 import AbuseDetectionService from '../../services/AbuseDetectionService.js';
 import { generateToken, authenticateToken } from '../middleware/auth.js';
+import { sendEmail } from '../../services/mailer.js';
 
 const DEFAULT_AGENT_CONFIG = (userId) => ({
   userId,
@@ -637,38 +638,7 @@ router.post('/forgot-password', async (req, res) => {
         </div>`;
 
       let sent = false;
-      if (process.env.RESEND_API_KEY) {
-        try {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: process.env.ALERT_FROM_EMAIL || 'noreply@metagauge.io', to: [user.email], subject: 'Reset your MetaGauge password', html }),
-          });
-          sent = true;
-        } catch (e) { console.warn('[AUTH] Resend failed:', e.message); }
-      }
-
-      if (!sent && process.env.SMTP_USER && process.env.SMTP_PASS) {
-        try {
-          const nodemailerPkg = await import('nodemailer');
-          const nodemailer = nodemailerPkg.default || nodemailerPkg;
-          const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: Number(process.env.SMTP_PORT) || 587,
-            secure: false,
-            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-          });
-          await transporter.sendMail({
-            from: `"MetaGauge" <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
-            to: user.email,
-            subject: 'Reset your MetaGauge password',
-            html,
-          });
-          sent = true;
-          console.log(`[AUTH] Password reset email sent via SMTP to ${user.email}`);
-        } catch (e) { console.error('[AUTH] SMTP reset email failed:', e.message); }
-      }
-
+      sent = await sendEmail({ to: user.email, subject: 'Reset your MetaGauge password', html });
       if (!sent) console.log(`[AUTH] Reset link (no email provider): ${resetUrl}`);
     }
     res.json({ message: 'If that email exists, a reset link has been sent.' });
@@ -707,8 +677,8 @@ router.post('/send-verification', authenticateToken, async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
     if (user.emailVerified || user.is_verified) return res.status(400).json({ message: 'Email already verified' });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
-    const expiry = Date.now() + 15 * 60 * 1000; // 15 min
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = Date.now() + 15 * 60 * 1000;
     await UserStorage.update(user.id, { verifyOtp: otp, verifyOtpExpiry: expiry });
 
     console.log(`[AUTH] Verification OTP for ${user.email}: ${otp}`);
@@ -721,54 +691,11 @@ router.post('/send-verification', authenticateToken, async (req, res) => {
         <p style="color:#6b7280;font-size:14px">Expires in 15 minutes. If you didn't sign up, ignore this email.</p>
       </div>`;
 
-    let sent = false;
-
-    // Try Resend first
-    if (process.env.RESEND_API_KEY) {
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: process.env.ALERT_FROM_EMAIL || 'noreply@metagauge.io',
-            to: [user.email],
-            subject: 'Your MetaGauge verification code',
-            html,
-          }),
-        });
-        sent = true;
-      } catch (e) {
-        console.warn('[AUTH] Resend failed, falling back to SMTP:', e.message);
-      }
-    }
-
-    // Fall back to SMTP (nodemailer)
-    if (!sent && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      try {
-        const nodemailerPkg = await import('nodemailer');
-        const nodemailer = nodemailerPkg.default || nodemailerPkg;
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST || 'smtp.gmail.com',
-          port: Number(process.env.SMTP_PORT) || 587,
-          secure: false,
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-        await transporter.sendMail({
-          from: `"MetaGauge" <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
-          to: user.email,
-          subject: 'Your MetaGauge verification code',
-          html,
-        });
-        sent = true;
-        console.log(`[AUTH] OTP sent via SMTP to ${user.email}`);
-      } catch (e) {
-        console.error('[AUTH] SMTP send failed:', e.message);
-      }
-    }
+    const sent = await sendEmail({ to: user.email, subject: 'Your MetaGauge verification code', html });
 
     const isDev = process.env.NODE_ENV !== 'production';
     res.json({
-      message: sent ? 'Verification code sent to your email' : `Dev mode — no email provider configured`,
+      message: sent ? 'Verification code sent to your email' : 'Dev mode — no email provider configured',
       ...(isDev && !sent ? { devOtp: otp } : {}),
     });
   } catch (error) {
