@@ -9,7 +9,7 @@ import { SupportWidget } from "@/components/ui/support-widget"
 
 export const metadata: Metadata = {
   title: "MetaGauge - Measure, Optimize, and Scale Your Web3 Project",
-  description: "Track feature adoption, wallet behavior, and financial health across Ethereum and Starknet",
+  description: "Track feature adoption, wallet behavior, and financial health on Ethereum",
   icons: {
     icon: [
       { url: '/favicon-light.png', sizes: '32x32', type: 'image/png', media: '(prefers-color-scheme: light)' },

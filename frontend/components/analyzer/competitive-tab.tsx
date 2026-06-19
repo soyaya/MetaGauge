@@ -169,7 +169,7 @@ function AddCompetitorButton({ form, setForm, adding, handleAdd, addMsg }: any) 
         <div className="flex gap-2">
           <Input placeholder="Name" value={form.name} onChange={e => setForm((f: any) => ({ ...f, name: e.target.value }))} className="flex-1 text-xs" />
           <select value={form.chain} onChange={e => setForm((f: any) => ({ ...f, chain: e.target.value }))} className="border rounded px-2 text-xs bg-background">
-            {['ethereum','starknet'].map(c => <option key={c} value={c}>{c}</option>)}
+            {['ethereum'].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div className="flex gap-2">

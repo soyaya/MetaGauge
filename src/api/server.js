@@ -141,6 +141,9 @@ wss.on('connection', (ws, req) => {
 // Make WebSocket server available to routes
 app.set('wss', wss);
 
+// Trust Render's proxy so rate-limiter and IP detection work correctly
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors({
   origin: [
