@@ -27,8 +27,9 @@ export class MultiChainContractIndexer extends EventEmitter {
         rpcUrls: [
           process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com',
           process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com',
-          process.env.ETHEREUM_RPC_URL3 || 'https://rpc.ankr.com/eth'
-        ],
+          process.env.ETHEREUM_RPC_URL3 || 'https://rpc.ankr.com/eth',
+          process.env.ETHEREUM_RPC_URL4,
+        ].filter(Boolean),
         clientClass: EthereumRpcClient,
         type: 'evm',
         chainId: 1

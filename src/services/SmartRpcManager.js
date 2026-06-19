@@ -17,7 +17,8 @@ export class SmartRpcManager {
     const rpcConfig = {
       ethereum: [
         { name: 'publicnode', url: process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com' },
-        { name: 'llamarpc', url: process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com' }
+        { name: 'llamarpc', url: process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com' },
+        ...(process.env.ETHEREUM_RPC_URL4 ? [{ name: 'alchemy', url: process.env.ETHEREUM_RPC_URL4 }] : []),
       ],
       starknet: [
         { name: 'publicnode', url: process.env.STARKNET_RPC_URL1 || 'https://starknet-rpc.publicnode.com' },

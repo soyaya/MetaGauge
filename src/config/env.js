@@ -29,6 +29,7 @@ export function getEthereumRpcUrls() {
     process.env.ETHEREUM_RPC_URL1,
     process.env.ETHEREUM_RPC_URL2,
     process.env.ETHEREUM_RPC_URL3,
+    process.env.ETHEREUM_RPC_URL4,
     process.env.ETHEREUM_RPC_URL,
     process.env.ETHEREUM_RPC_URL_FALLBACK,
   ].filter(Boolean);

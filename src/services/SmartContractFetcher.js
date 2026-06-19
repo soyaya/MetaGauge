@@ -34,24 +34,10 @@ export class SmartContractFetcher extends EventEmitter {
     // Provider configurations — Ethereum and Starknet only
     this.providerConfigs = {
       ethereum: [
-        {
-          name: 'publicnode',
-          url: process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com',
-          priority: 1,
-          type: 'http'
-        },
-        {
-          name: 'llamarpc',
-          url: process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com',
-          priority: 2,
-          type: 'http'
-        },
-        {
-          name: 'ankr',
-          url: process.env.ETHEREUM_RPC_URL3 || 'https://rpc.ankr.com/eth',
-          priority: 3,
-          type: 'http'
-        }
+        { name: 'publicnode', url: process.env.ETHEREUM_RPC_URL1 || 'https://ethereum-rpc.publicnode.com', priority: 1, type: 'http' },
+        { name: 'llamarpc',  url: process.env.ETHEREUM_RPC_URL2 || 'https://eth.llamarpc.com', priority: 2, type: 'http' },
+        { name: 'ankr',      url: process.env.ETHEREUM_RPC_URL3 || 'https://rpc.ankr.com/eth', priority: 3, type: 'http' },
+        ...(process.env.ETHEREUM_RPC_URL4 ? [{ name: 'alchemy', url: process.env.ETHEREUM_RPC_URL4, priority: 4, type: 'http' }] : []),
       ],
       starknet: [
         {
