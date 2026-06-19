@@ -65,8 +65,9 @@ Be specific, mention the metric values, and suggest one action the user should t
   }
 
   async sendEmail(alert, toEmail, metrics = {}) {
-    if (!this.resendApiKey) {
-      console.log(`[Alert] Email not sent (no RESEND_API_KEY): ${alert.title} → ${toEmail}`);
+    const hasSMTP = process.env.SMTP_USER && process.env.SMTP_PASS;
+    if (!this.resendApiKey && !hasSMTP) {
+      console.log(`[Alert] Email not sent (no email provider configured): ${alert.title} → ${toEmail}`);
       return false;
     }
 
@@ -96,27 +97,48 @@ Be specific, mention the metric values, and suggest one action the user should t
           </div>
         </div>`;
 
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: this.fromEmail,
-          to:   [toEmail],
-          subject: `${severityEmoji} [MetaGauge] ${alert.title}`,
-          html,
-        }),
-      });
+      const subject = `${severityEmoji} [MetaGauge] ${alert.title}`;
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error('[Alert] Resend error:', err);
-        return false;
+      // Try Resend first
+      if (this.resendApiKey) {
+        try {
+          const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${this.resendApiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: this.fromEmail, to: [toEmail], subject, html }),
+          });
+          if (res.ok) {
+            console.log(`[Alert] Email sent via Resend to ${toEmail}: ${alert.title}`);
+            return true;
+          }
+          const err = await res.json().catch(() => ({}));
+          console.warn('[Alert] Resend failed, falling back to SMTP:', err);
+        } catch (e) {
+          console.warn('[Alert] Resend error, falling back to SMTP:', e.message);
+        }
       }
-      console.log(`[Alert] Email sent to ${toEmail}: ${alert.title}`);
-      return true;
+
+      // Fall back to SMTP
+      if (hasSMTP) {
+        const nodemailerPkg = await import('nodemailer');
+        const nodemailer = nodemailerPkg.default || nodemailerPkg;
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST || 'smtp.gmail.com',
+          port: Number(process.env.SMTP_PORT) || 587,
+          secure: false,
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        });
+        await transporter.sendMail({
+          from: `"MetaGauge" <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
+          to: toEmail,
+          subject,
+          html,
+        });
+        console.log(`[Alert] Email sent via SMTP to ${toEmail}: ${alert.title}`);
+        return true;
+      }
+
+      return false;
     } catch (e) {
       console.error('[Alert] Email failed:', e.message);
       return false;

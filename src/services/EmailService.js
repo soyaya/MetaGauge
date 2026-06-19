@@ -6,7 +6,7 @@ import nodemailerPkg from 'nodemailer';
 const nodemailer = nodemailerPkg.default || nodemailerPkg;
 
 const BRAND_COLOR = '#6366f1';
-const FROM = process.env.FROM_EMAIL || 'MetaGauge <noreply@metagauge.io>';
+const FROM = process.env.FROM_EMAIL || process.env.SMTP_USER || 'MetaGauge <noreply@metagauge.io>';
 
 function baseTemplate(content) {
   return `<!DOCTYPE html>
