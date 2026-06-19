@@ -28,6 +28,8 @@ export async function sendEmail({ to, subject, html, from }) {
 
   // 1. Try Resend
   if (process.env.RESEND_API_KEY) {
+    // Use Resend's shared sender if FROM_EMAIL is not a verified Resend domain
+    const resendFrom = process.env.RESEND_FROM_EMAIL || 'MetaGauge <onboarding@resend.dev>';
     try {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -35,7 +37,7 @@ export async function sendEmail({ to, subject, html, from }) {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ from: sender, to: [to], subject, html }),
+        body: JSON.stringify({ from: resendFrom, to: [to], subject, html }),
       });
       if (res.ok) {
         console.log(`[mailer] sent via Resend → ${to}: ${subject}`);
