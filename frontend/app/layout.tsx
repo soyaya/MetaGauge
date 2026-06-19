@@ -37,6 +37,8 @@ export default function RootLayout({
             else document.documentElement.classList.add('dark');
           } catch(e) { document.documentElement.classList.add('dark'); }
         `}} />
+        {/* Preload Google Identity Services */}
+        <script src="https://accounts.google.com/gsi/client" async></script>
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider defaultTheme="dark" storageKey="metagauge-ui-theme">

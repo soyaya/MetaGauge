@@ -44,16 +44,21 @@ export function OAuthButtons({ mode = "signin", redirectTo }: { mode?: "signin" 
       }).requestAccessToken()
     }
 
-    // @ts-ignore
-    if (window.google?.accounts) {
-      initAndRequest()
-    } else {
-      const script = document.createElement('script')
-      script.src = 'https://accounts.google.com/gsi/client'
-      script.onload = initAndRequest
-      script.onerror = () => { setError("Failed to load Google"); setLoading(false) }
-      document.head.appendChild(script)
+    // Wait up to 3s for the preloaded GSI script to be ready
+    let attempts = 0
+    const tryInit = () => {
+      // @ts-ignore
+      if (window.google?.accounts) {
+        initAndRequest()
+      } else if (attempts < 30) {
+        attempts++
+        setTimeout(tryInit, 100)
+      } else {
+        setError("Failed to load Google sign-in. Please try again.")
+        setLoading(false)
+      }
     }
+    tryInit()
   }
 
   return (
