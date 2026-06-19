@@ -49,7 +49,7 @@ export default function HomePage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-sm font-medium mb-8 fade-in-up">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            Live on Ethereum · Starknet
+            Live on Ethereum
           </div>
 
           {/* Headline */}
@@ -157,7 +157,7 @@ export default function HomePage() {
               { icon: <BoltIcon />, title:'Competitive Intelligence', desc:'Index competitor contracts and get side-by-side benchmarks with automated alerts when they overtake you.' },
               { icon: <TrendingUpIcon />, title:'Traction Reports', desc:'Generate investor-ready PDF reports with OPS scores, task lists, and growth metrics. Send directly by email.' },
               { icon: <BellIcon />, title:'Smart Alerts', desc:'Set custom thresholds on any metric. Get notified when churn spikes, retention drops, or a competitor surges.' },
-              { icon: <GlobeIcon />, title:'Multi-Chain', desc:'Ethereum and Starknet with automatic chain detection and failover RPC providers.' },
+              { icon: <GlobeIcon />, title:'Ethereum', desc:'Full Ethereum support with automatic chain detection and failover RPC providers.' },
             ].map(({ icon, title, desc }) => (
               <div key={title} className="card-premium border-gradient p-6 fade-in-up">
                 <div className="w-12 h-12 rounded-xl gradient-brand flex items-center justify-center mb-4">{icon}</div>

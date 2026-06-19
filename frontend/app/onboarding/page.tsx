@@ -40,7 +40,7 @@ type OnboardingFormData = z.infer<typeof OnboardingSchema>;
 
 const CHAINS = [
   { value: 'ethereum', label: 'Ethereum', logo: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
-  { value: 'starknet', label: 'Starknet', logo: 'https://assets.coingecko.com/coins/images/26433/small/starknet.png' },
+  // Starknet support coming soon
 ];
 
 const CATEGORIES = [
