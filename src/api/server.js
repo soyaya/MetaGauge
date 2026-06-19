@@ -150,6 +150,8 @@ app.use(cors({
     /^http:\/\/172\.\d+\.\d+\.\d+:3000$/, // Allow WSL2 network IPs
     /\.pages\.dev$/,   // All Cloudflare Pages preview deployments
     /\.workers\.dev$/, // Cloudflare Workers deployments
+    'https://metagauge.xyz',
+    'https://www.metagauge.xyz',
     config.frontendUrl
   ].filter(Boolean),
   credentials: true,
