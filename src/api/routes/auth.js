@@ -715,7 +715,7 @@ router.post('/verify-otp', async (req, res) => {
     if (!user.verifyOtp || user.verifyOtp !== otp) return res.status(400).json({ message: 'Invalid verification code' });
     if (user.verifyOtpExpiry < Date.now()) return res.status(400).json({ message: 'Verification code expired' });
 
-    await UserStorage.update(user.id, { emailVerified: true, is_verified: true, verifyOtp: null, verifyOtpExpiry: null });
+    await UserStorage.update(user.id, { emailVerified: true, verifyOtp: null, verifyOtpExpiry: null });
     const updatedUser = await UserStorage.findById(user.id);
     const token = generateToken(updatedUser);
 
