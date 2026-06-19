@@ -24,12 +24,12 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Allow eval for Web3 libraries
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com", // Allow eval for Web3 libraries
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.onrender.com wss://*.onrender.com http://localhost:5000 https://*.infura.io https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://*.lisk.com https://eth.merkle.io https://*.alchemy.com https://*.quicknode.pro https://*.publicnode.com https://api.web3modal.org https://*.reown.com https://pulse.walletconnect.com https://pulse.walletconnect.org",
-              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org",
+              "connect-src 'self' https://*.onrender.com wss://*.onrender.com http://localhost:5000 https://*.infura.io https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://*.lisk.com https://eth.merkle.io https://*.alchemy.com https://*.quicknode.pro https://*.publicnode.com https://api.web3modal.org https://*.reown.com https://pulse.walletconnect.com https://pulse.walletconnect.org https://accounts.google.com https://www.googleapis.com",
+              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org https://accounts.google.com",
             ].join('; '),
           },
         ],
