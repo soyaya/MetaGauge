@@ -14,7 +14,7 @@ interface MetricsTabProps { analysisResults: any }
 
 import { CHART_COLORS, CHART_PRIMARY, CHART_SECONDARY, TOOLTIP_STYLE, AXIS_STYLE, GRID_STYLE } from '@/lib/chart-colors';
 const COLORS = CHART_COLORS;
-const NA = <span className="text-muted-foreground text-sm italic">Requires protocol-specific data</span>;
+const NA = <span className="text-muted-foreground text-sm italic">N/A</span>;
 
 export function MetricsTab({ analysisResults }: MetricsTabProps) {
   const [data, setData] = useState<any>(null);
@@ -99,24 +99,25 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
 
       {/* ── TVL & LIQUIDITY ──────────────────────────────────────────── */}
       <section>
-        <SectionTitle>TVL &amp; Liquidity</SectionTitle>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <MetricCard label="Total Value Locked"
+        <SectionTitle>Token Supply &amp; Volume</SectionTitle>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <MetricCard label="Token Supply Value"
             value={dm.tvl != null
               ? (dm.tvl >= 1e9 ? `$${(dm.tvl/1e9).toFixed(2)}B` : dm.tvl >= 1e6 ? `$${(dm.tvl/1e6).toFixed(2)}M` : dm.tvl >= 1e3 ? `$${(dm.tvl/1e3).toFixed(1)}K` : `$${dm.tvl.toFixed(2)}`)
               : 'Loading…'}
             sub={dm.tvlLabel === 'USD' ? 'Total supply (stablecoin)' : 'Total supply × ETH price'}
-            info="Total token supply fetched live via eth_call totalSupply(). For stablecoins this equals TVL in USD." />
-          <MetricCard label="Liquidity Utilization" value={NA} sub="Needs pool reserve state" info="Ratio of active to total liquidity. Requires getReserves() calls. Planned for batch enrichment." />
-          <MetricCard label="Active Pools"          value={NA} sub="Needs pool factory events" info="Requires indexing PairCreated events from the factory contract." />
+            info="Total token supply × current ETH price. Note: this is market cap proxy, not TVL (locked funds). TVL requires pool reserve tracking." />
           <MetricCard label="Net Token Flow"
             value={dm.totalVolumeEth != null && dm.totalVolumeEth > 0
               ? (dm.totalVolumeEth >= 1e6 ? `$${(dm.totalVolumeEth/1e6).toFixed(2)}M` : dm.totalVolumeEth >= 1e3 ? `$${(dm.totalVolumeEth/1e3).toFixed(1)}K` : `$${dm.totalVolumeEth.toFixed(2)}`)
               : 'N/A'}
             sub="Token value transferred" info="Cumulative token value decoded from transfer() calls in the indexed sample." />
-          <MetricCard label="Gas Revenue"
-            value={gas.totalGasCostUSD != null ? `$${gas.totalGasCostUSD}` : 'N/A'}
-            sub="Total gas spent by users" info="Total USD value users spent on gas. Approximates network demand for this contract." />
+          <MetricCard label="Recent Transfer Vol"
+            value={dm.recentTransferVolume != null
+              ? (dm.recentTransferVolume >= 1e6 ? `$${(dm.recentTransferVolume/1e6).toFixed(2)}M` : dm.recentTransferVolume >= 1e3 ? `$${(dm.recentTransferVolume/1e3).toFixed(1)}K` : `$${dm.recentTransferVolume.toFixed(2)}`)
+              : 'N/A'}
+            sub={dm.recentTransferCount ? `${dm.recentTransferCount} transfers` : 'From Transfer events'}
+            info="Total token volume from Transfer events in the last 500 blocks." />
         </div>
       </section>
 
@@ -172,28 +173,20 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
       {/* ── FINANCIAL ────────────────────────────────────────────────── */}
       <section>
         <SectionTitle>Financial Metrics</SectionTitle>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <MetricCard label="Protocol Revenue"
             value={dm.protocolRevenue != null
               ? (dm.protocolRevenue > 0 ? `$${dm.protocolRevenue.toLocaleString()}` : '$0 (0 bps fee)')
-              : NA}
-            sub={dm.recentBlockRange ? `Last ${dm.recentBlockRange} blocks` : 'Fee × transfer volume'}
-            info="Protocol revenue = fee rate × transfer volume from recent Transfer events. USDT currently charges 0 bps." />
-          <MetricCard label="Recent Transfer Vol"
-            value={dm.recentTransferVolume != null
-              ? (dm.recentTransferVolume >= 1e6 ? `$${(dm.recentTransferVolume/1e6).toFixed(2)}M` : dm.recentTransferVolume >= 1e3 ? `$${(dm.recentTransferVolume/1e3).toFixed(1)}K` : `$${dm.recentTransferVolume.toFixed(2)}`)
-              : NA}
-            sub={dm.recentTransferCount ? `${dm.recentTransferCount} transfers` : 'From Transfer events'}
-            info="Total token volume from Transfer events in the last 500 blocks. Decoded directly from event logs." />
-          <MetricCard label="Revenue Per User"
-            value={gas.totalGasCostUSD != null && dm.mau > 0
-              ? `$${(gas.totalGasCostUSD / dm.mau).toFixed(4)}`
               : 'N/A'}
-            sub="Gas cost per active user" info="Total gas cost ÷ monthly active users. Proxy for cost-to-serve." />
+            sub={dm.recentBlockRange ? `Last ${dm.recentBlockRange} blocks` : 'Fee × transfer volume'}
+            info="Protocol revenue = fee rate × transfer volume. Only applicable for fee-charging contracts like USDT." />
           <MetricCard label="Protocol Fee Rate"
-            value={dm.feeRateBps != null ? `${dm.feeRateBps} bps` : NA}
+            value={dm.feeRateBps != null ? `${dm.feeRateBps} bps` : 'N/A'}
             sub={dm.feeRateBps != null ? `${(dm.feeRateBps/100).toFixed(2)}% per transfer` : 'Fetched via eth_call'}
-            info="Fee per transfer in basis points. Fetched live from basisPointsRate() on-chain." />
+            info="Fee per transfer in basis points fetched live from basisPointsRate() on-chain." />
+          <MetricCard label="Total Gas Spent"
+            value={gas.totalGasCostUSD != null ? `$${gas.totalGasCostUSD}` : 'N/A'}
+            sub="By users on this contract" info="Total USD value users spent on gas fees interacting with this contract. Goes to validators, not the protocol." />
         </div>
       </section>
 
@@ -287,48 +280,26 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
       </section>
 
       {/* ── RISK & SECURITY ──────────────────────────────────────────── */}
-      <section>
-        <SectionTitle>Risk &amp; Security</SectionTitle>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <MetricCard label="MEV Exposure"       value={NA} sub="Requires mempool analysis" />
-          <MetricCard label="Front Running"      value={NA} sub="Requires mempool analysis" />
-          <MetricCard label="Sandwich Attacks"   value={NA} sub="Requires mempool analysis" />
-          <MetricCard label="Arbitrage Opps"     value={NA} sub="Requires price oracle" />
-          <MetricCard label="Liquidation Events" value={NA} sub="Requires liquidation events" />
-        </div>
-      </section>
-
       {/* ── ENHANCED DEFI ────────────────────────────────────────────── */}
       <section>
-        <SectionTitle>Enhanced DeFi</SectionTitle>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricCard label="Impermanent Loss"        value={NA} sub="Requires LP position tracking" />
-          <MetricCard label="Slippage Tolerance"      value={NA} sub="Requires swap event parsing" />
-          <MetricCard label="Bridge Utilization"      value={NA} sub="Requires bridge events" />
-          <MetricCard label="Governance Participation" value={NA} sub="Requires governance events" />
+        <SectionTitle>Advanced Analytics</SectionTitle>
+        <div className="rounded-lg border border-dashed border-muted-foreground/30 p-6 text-center text-sm text-muted-foreground space-y-1">
+          <p className="font-medium">Coming Soon</p>
+          <p>MEV exposure · Front-running · Sandwich attacks · Liquidity utilization · Impermanent loss · Slippage · Governance participation · Cross-chain volume · Bridge utilization</p>
+          <p className="text-xs">These metrics require mempool data, pool reserve tracking, or bridge event indexing.</p>
         </div>
       </section>
 
-      {/* ── CONTRACT INTERACTION ─────────────────────────────────────── */}
-      <section>
-        <SectionTitle>Contract Interaction</SectionTitle>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricCard label="Interaction Complexity" value={val(dm.interactionComplexity)}  sub="Based on distinct function calls" info="Low/Medium/High based on how many distinct contract functions are being called. High = diverse usage." />
-          <MetricCard label="Contract Utilization"   value={num(dm.contractUtilization)}    sub="Total interactions"               info="Total number of transactions in the indexed sample. Proxy for overall contract activity." />
-          <MetricCard label="Event Driven Volume"    value={NA}                              sub="Requires event log parsing"       info="Volume derived from on-chain events (Transfer, Swap, etc.). Requires full event log indexing." />
-          <MetricCard label="Peak Interaction Hour"  value={peakHours.length ? `${peakHours[0].hour}:00 UTC` : 'N/A'} sub={peakHours.length ? `${peakHours[0].count} txs` : 'No timestamp data'} info="UTC hour with the most transactions. Useful for scheduling maintenance or marketing campaigns." />
-        </div>
-      </section>
 
       {/* ── ADVANCED PERFORMANCE ─────────────────────────────────────── */}
       <section>
         <SectionTitle>Advanced Performance</SectionTitle>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <MetricCard label="Function Success Rate" value={pct(dm.functionSuccessRate)} sub="Tx reliability"    info="% of transactions that succeeded. Equivalent to Tx Success Rate — measures contract reliability." />
-          <MetricCard label="Protocol Stickiness"   value={pct(dm.protocolStickiness)}  sub="Repeat user rate"  info="% of users who returned after their first interaction. High stickiness = strong product-market fit." />
-          <MetricCard label="Cross-Chain Volume"    value={NA}                           sub="Requires bridge events"          info="Volume flowing in from other chains. Requires bridge contract event indexing." />
-          <MetricCard label="Active Pools"          value={NA}                           sub="Requires pool events"            info="Number of active liquidity pools. Requires pool factory event parsing." />
-          <MetricCard label="Cross-Chain Users"     value={NA}                           sub="Requires cross-chain matching"   info="Users active on multiple chains. Requires wallet address matching across chain data." />
+          <MetricCard label="Function Success Rate" value={pct(dm.functionSuccessRate)} sub="Tx reliability"   info="% of transactions that succeeded. Measures contract reliability." />
+          <MetricCard label="Protocol Stickiness"   value={pct(dm.protocolStickiness)}  sub="Repeat user rate" info="% of users who returned after their first interaction. High stickiness = strong product-market fit." />
+          <MetricCard label="Interaction Complexity" value={val(dm.interactionComplexity)} sub="Based on distinct function calls" info="Low/Medium/High based on how many distinct contract functions are being called." />
+          <MetricCard label="Contract Utilization"   value={num(dm.contractUtilization)}  sub="Total interactions" info="Total number of transactions in the indexed sample." />
+          <MetricCard label="Peak Interaction Hour"  value={peakHours.length ? `${peakHours[0].hour}` : 'N/A'} sub={peakHours.length ? `${peakHours[0].count} txs` : 'No timestamp data'} info="UTC hour with the most transactions." />
         </div>
       </section>
 
