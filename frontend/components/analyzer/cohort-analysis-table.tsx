@@ -91,11 +91,11 @@ export function CohortAnalysisTable({ contractAddress, chain }: CohortAnalysisTa
     <Card>
       <CardHeader>
         <CardTitle>Cohort Analysis</CardTitle>
-        <div className="flex gap-4 mt-4">
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Metric Type</label>
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Metric</label>
             <Select value={metricType} onValueChange={(v: any) => setMetricType(v)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -105,11 +105,10 @@ export function CohortAnalysisTable({ contractAddress, chain }: CohortAnalysisTa
               </SelectContent>
             </Select>
           </div>
-          
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Cohort Period</label>
+          <div>
+            <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Period</label>
             <Select value={cohortPeriod} onValueChange={(v: any) => setCohortPeriod(v)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -121,66 +120,60 @@ export function CohortAnalysisTable({ contractAddress, chain }: CohortAnalysisTa
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         {cohorts.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No cohort data available</p>
+          <p className="text-muted-foreground text-center py-8 px-4">No cohort data available</p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cohort</TableHead>
-                <TableHead className="text-right">Wallets</TableHead>
-                {metricType === 'activation' && (
-                  <TableHead className="text-right">Activation Rate</TableHead>
-                )}
-                {metricType === 'churn' && (
-                  <TableHead className="text-right">Churn Rate</TableHead>
-                )}
-                {metricType === 'retention' && (
-                  <>
-                    <TableHead className="text-right">Day 1</TableHead>
-                    <TableHead className="text-right">Day 7</TableHead>
-                    <TableHead className="text-right">Day 30</TableHead>
-                    <TableHead className="text-right">Day 90</TableHead>
-                  </>
-                )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cohorts.map((cohort) => (
-                <TableRow key={cohort.cohortId}>
-                  <TableCell>{cohort.cohortId}</TableCell>
-                  <TableCell className="text-right">{cohort.walletCount.toLocaleString()}</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="whitespace-nowrap">Cohort</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Wallets</TableHead>
                   {metricType === 'activation' && (
-                    <TableCell className="text-right">
-                      {((cohort.activationRate || 0) * 100).toFixed(1)}%
-                    </TableCell>
+                    <TableHead className="text-right whitespace-nowrap">Activation</TableHead>
                   )}
                   {metricType === 'churn' && (
-                    <TableCell className="text-right">
-                      {((cohort.churnRate || 0) * 100).toFixed(1)}%
-                    </TableCell>
+                    <TableHead className="text-right whitespace-nowrap">Churn</TableHead>
                   )}
-                  {metricType === 'retention' && cohort.retentionRates && (
+                  {metricType === 'retention' && (
                     <>
-                      <TableCell className="text-right">
-                        {((cohort.retentionRates.day1 || 0) * 100).toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {((cohort.retentionRates.day7 || 0) * 100).toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {((cohort.retentionRates.day30 || 0) * 100).toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {((cohort.retentionRates.day90 || 0) * 100).toFixed(1)}%
-                      </TableCell>
+                      <TableHead className="text-right whitespace-nowrap">D1</TableHead>
+                      <TableHead className="text-right whitespace-nowrap">D7</TableHead>
+                      <TableHead className="text-right whitespace-nowrap">D30</TableHead>
+                      <TableHead className="text-right whitespace-nowrap hidden sm:table-cell">D90</TableHead>
                     </>
                   )}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {cohorts.map((cohort) => (
+                  <TableRow key={cohort.cohortId}>
+                    <TableCell className="whitespace-nowrap text-sm">{cohort.cohortId}</TableCell>
+                    <TableCell className="text-right tabular-nums">{cohort.walletCount.toLocaleString()}</TableCell>
+                    {metricType === 'activation' && (
+                      <TableCell className="text-right tabular-nums">
+                        {((cohort.activationRate || 0) * 100).toFixed(1)}%
+                      </TableCell>
+                    )}
+                    {metricType === 'churn' && (
+                      <TableCell className="text-right tabular-nums">
+                        {((cohort.churnRate || 0) * 100).toFixed(1)}%
+                      </TableCell>
+                    )}
+                    {metricType === 'retention' && cohort.retentionRates && (
+                      <>
+                        <TableCell className="text-right tabular-nums">{((cohort.retentionRates.day1 || 0) * 100).toFixed(1)}%</TableCell>
+                        <TableCell className="text-right tabular-nums">{((cohort.retentionRates.day7 || 0) * 100).toFixed(1)}%</TableCell>
+                        <TableCell className="text-right tabular-nums">{((cohort.retentionRates.day30 || 0) * 100).toFixed(1)}%</TableCell>
+                        <TableCell className="text-right tabular-nums hidden sm:table-cell">{((cohort.retentionRates.day90 || 0) * 100).toFixed(1)}%</TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>

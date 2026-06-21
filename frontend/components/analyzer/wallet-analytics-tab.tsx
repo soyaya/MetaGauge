@@ -124,13 +124,13 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
       {/* ── Wallet Summary ────────────────────────────────────────────── */}
       <section>
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Wallet Overview</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <MetricCard label="Total Wallets"   value={summary.totalWallets}   sub="Distinct addresses" />
           <MetricCard label="Active Wallets"  value={activeWallets.length}   sub="2+ interactions" warn={activeWallets.length < summary.totalWallets * 0.2} />
           <MetricCard label="Dormant Wallets" value={dormantWallets.length}  sub="1 interaction only" warn={dormantWallets.length > summary.totalWallets * 0.7} />
           <MetricCard label="Whale Wallets"   value={summary.whaleWallets}   sub="10+ transactions" />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <MetricCard label="Total Volume"    value={`${summary.totalVolumeETH} ETH`} sub={`≈ $${summary.totalVolumeUSD}`} />
           <MetricCard label="Total Gas Cost"  value={`$${summary.totalGasUSD}`}       sub="USD (ETH @ $2500)" />
           <MetricCard label="Avg Gas / Wallet" value={`$${summary.avgGasUSD}`}        sub="Per wallet" />
@@ -165,30 +165,30 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
           {/* Top wallets table */}
           <Card>
             <CardHeader><CardTitle className="text-sm">Top Wallets by Activity</CardTitle></CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-xs min-w-[420px]">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-1 px-2 text-muted-foreground">Address</th>
-                      <th className="text-right py-1 px-2 text-muted-foreground">Txs</th>
-                      <th className="text-right py-1 px-2 text-muted-foreground">Gas USD</th>
-                      <th className="text-right py-1 px-2 text-muted-foreground">Failed%</th>
-                      <th className="text-center py-1 px-2 text-muted-foreground">Type</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground">Address</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground">Txs</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground">Gas $</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground">Failed%</th>
+                      <th className="text-center py-2 px-3 text-muted-foreground">Type</th>
                     </tr>
                   </thead>
                   <tbody>
                     {wallets.slice(0, 8).map((w: any, i: number) => (
                       <tr key={i} className="border-b hover:bg-muted/30">
-                        <td className="py-1 px-2 font-mono">{w.address.slice(0,6)}...{w.address.slice(-4)}</td>
-                        <td className="text-right py-1 px-2 font-semibold">{w.txCount}</td>
-                        <td className="text-right py-1 px-2">${w.gasSpentUSD}</td>
-                        <td className={`text-right py-1 px-2 ${w.failedPct > 10 ? 'text-red-600' : ''}`}>{w.failedPct}%</td>
-                        <td className="text-center py-1 px-2">
+                        <td className="py-1.5 px-3 font-mono">{w.address.slice(0,6)}…{w.address.slice(-4)}</td>
+                        <td className="text-right py-1.5 px-3 tabular-nums font-semibold">{w.txCount}</td>
+                        <td className="text-right py-1.5 px-3 tabular-nums">${w.gasSpentUSD}</td>
+                        <td className={`text-right py-1.5 px-3 tabular-nums ${w.failedPct > 10 ? 'text-red-600' : ''}`}>{w.failedPct}%</td>
+                        <td className="text-center py-1.5 px-3">
                           <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                            w.status==='whale' ? 'bg-purple-100 text-purple-700' :
-                            w.status==='active' ? 'bg-green-100 text-green-700' :
-                            'bg-gray-100 text-gray-600'}`}>{w.status}</span>
+                            w.status==='whale' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
+                            w.status==='active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
+                            'bg-muted text-muted-foreground'}`}>{w.status}</span>
                         </td>
                       </tr>
                     ))}
@@ -211,7 +211,7 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
               </p>
             )}
             {data.crossAppInsights.enrichedWallets > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <MetricCard label="Avg Lifetime Txs" value={(data.crossAppInsights.avgTotalTxsEver||0).toLocaleString()} sub="Total txs ever on chain (nonce)" />
                 <MetricCard label="Avg ETH Balance"  value={`${data.crossAppInsights.avgEthBalance||0} ETH`} sub="Current wallet balance" />
                 <MetricCard label="Avg Recent Transfers Out" value={data.crossAppInsights.avgRecentTransferOut||0} sub="Last ~6h on other contracts" />
@@ -229,17 +229,17 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
             {wallets.some((w: any) => w.onChain && !w.onChain.error) && (
               <Card>
                 <CardHeader><CardTitle className="text-sm">Wallet Activity Elsewhere (On-Chain)</CardTitle></CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-xs">
+                    <table className="w-full text-xs min-w-[540px]">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-1 px-2 text-muted-foreground">Address</th>
-                          <th className="text-right py-1 px-2 text-muted-foreground">Txs Here</th>
-                          <th className="text-right py-1 px-2 text-muted-foreground">Total Lifetime Txs</th>
-                          <th className="text-right py-1 px-2 text-muted-foreground">ETH Balance</th>
-                          <th className="text-right py-1 px-2 text-muted-foreground">Other Contracts (6h)</th>
-                          <th className="text-right py-1 px-2 text-muted-foreground">Transfers Out (6h)</th>
+                          <th className="text-left py-2 px-3 text-muted-foreground">Address</th>
+                          <th className="text-right py-2 px-3 text-muted-foreground">Txs Here</th>
+                          <th className="text-right py-2 px-3 text-muted-foreground">Lifetime Txs</th>
+                          <th className="text-right py-2 px-3 text-muted-foreground">ETH Bal</th>
+                          <th className="text-right py-2 px-3 text-muted-foreground">Contracts (6h)</th>
+                          <th className="text-right py-2 px-3 text-muted-foreground">Transfers Out</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -250,24 +250,23 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
                             : null;
                           return (
                             <tr key={i} className="border-b hover:bg-muted/30">
-                              <td className="py-1 px-2 font-mono">{w.address.slice(0,6)}...{w.address.slice(-4)}</td>
-                              <td className="text-right py-1 px-2 font-semibold">{w.txCount}</td>
-                              <td className="text-right py-1 px-2">
+                              <td className="py-1.5 px-3 font-mono">{w.address.slice(0,6)}…{w.address.slice(-4)}</td>
+                              <td className="text-right py-1.5 px-3 tabular-nums font-semibold">{w.txCount}</td>
+                              <td className="text-right py-1.5 px-3 tabular-nums">
                                 {oc.totalTxsEver?.toLocaleString() || '—'}
-                                {elsewhereRatio && <span className="text-muted-foreground ml-1">({elsewhereRatio}% elsewhere)</span>}
+                                {elsewhereRatio && <span className="text-muted-foreground ml-1">({elsewhereRatio}%↗)</span>}
                               </td>
-                              <td className="text-right py-1 px-2">{oc.ethBalance != null ? `${oc.ethBalance} ETH` : '—'}</td>
-                              <td className="text-right py-1 px-2">{oc.contractsUsed?.length ?? '—'}</td>
-                              <td className="text-right py-1 px-2">{oc.recentTransferOut ?? '—'}</td>
+                              <td className="text-right py-1.5 px-3 tabular-nums">{oc.ethBalance != null ? `${oc.ethBalance}` : '—'}</td>
+                              <td className="text-right py-1.5 px-3 tabular-nums">{oc.contractsUsed?.length ?? '—'}</td>
+                              <td className="text-right py-1.5 px-3 tabular-nums">{oc.recentTransferOut ?? '—'}</td>
                             </tr>
                           );
                         })}
                       </tbody>
                     </table>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    "Total Lifetime Txs" = nonce from chain. "Other Contracts" = ERC20 Transfer events in last ~6h.
-                    Full cross-app tx history requires Etherscan/Alchemy API.
+                  <p className="text-xs text-muted-foreground px-3 py-2">
+                    Lifetime Txs = nonce from chain. Contracts = ERC20 Transfer events in last ~6h.
                   </p>
                 </CardContent>
               </Card>
@@ -354,14 +353,16 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
             <CardHeader><CardTitle className="text-sm">Feature Deep Dive</CardTitle></CardHeader>
             <CardContent>
               <Tabs value={featureTab} onValueChange={setFeatureTab}>
-                <TabsList className="flex flex-wrap gap-1 h-auto mb-4">
-                  {features.slice(0, 8).map((f: any) => (
-                    <TabsTrigger key={f.name} value={f.name} className="text-xs">{f.name}</TabsTrigger>
-                  ))}
-                </TabsList>
+                <div className="overflow-x-auto pb-1">
+                  <TabsList className="inline-flex h-auto gap-1 mb-4 flex-wrap">
+                    {features.slice(0, 8).map((f: any) => (
+                      <TabsTrigger key={f.name} value={f.name} className="text-xs h-7">{f.name}</TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
                 {features.slice(0, 8).map((f: any) => (
                   <TabsContent key={f.name} value={f.name}>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                       <MetricCard label="Transactions"   value={f.txCount}                    sub="Total calls" />
                       <MetricCard label="Unique Wallets" value={f.walletCount}                sub="Distinct users" />
                       <MetricCard label="Success Txs"    value={f.successTx}                  sub={`${f.failedPct}% failed`} warn={f.failedPct > 10} />

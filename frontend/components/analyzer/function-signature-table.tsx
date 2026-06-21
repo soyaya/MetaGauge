@@ -95,32 +95,34 @@ export function FunctionSignatureTable({ contractAddress, chain }: FunctionSigna
       <CardHeader>
         <CardTitle>Function Signatures</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Signature</TableHead>
-              <TableHead className="text-right">Unique Wallets</TableHead>
-              <TableHead className="text-right">Transactions</TableHead>
-              <TableHead className="text-right">Avg Txs/Wallet</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {signatures.map((sig) => (
-              <TableRow key={sig.signature}>
-                <TableCell className="font-mono text-sm">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{sig.name || 'Unknown'}</span>
-                    <span className="text-xs text-muted-foreground">{sig.signature}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">{sig.walletCount.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{sig.transactionCount.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{sig.avgTransactionsPerWallet.toFixed(2)}</TableCell>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Function</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Wallets</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Txs</TableHead>
+                <TableHead className="text-right whitespace-nowrap hidden sm:table-cell">Avg Txs/Wallet</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {signatures.map((sig) => (
+                <TableRow key={sig.signature}>
+                  <TableCell>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-sm truncate">{sig.name || 'Unknown'}</span>
+                      <span className="text-xs text-muted-foreground font-mono truncate max-w-[180px] sm:max-w-none">{sig.signature}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{sig.walletCount.toLocaleString()}</TableCell>
+                  <TableCell className="text-right tabular-nums">{sig.transactionCount.toLocaleString()}</TableCell>
+                  <TableCell className="text-right tabular-nums hidden sm:table-cell">{sig.avgTransactionsPerWallet.toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   )
