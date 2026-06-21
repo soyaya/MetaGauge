@@ -140,7 +140,7 @@ export async function triggerDefaultContractIndexing(req, res) {
         rpcClient = new StarknetRpcClient(rpcUrls);
       } else {
         const { EthereumRpcClient } = await import('../../services/EthereumRpcClient.js');
-        rpcClient = new EthereumRpcClient(rpcUrls);
+        rpcClient = new EthereumRpcClient(rpcUrls, { tier: user?.tier || 'free' });
       }
       currentBlock = await rpcClient.getBlockNumber();
       console.log(`✅ Current block: ${currentBlock}`);
@@ -708,12 +708,13 @@ export async function resumeLivePoll({ userId, contractAddress, chain, analysisI
   const rpcUrls = getRpcUrls(chain);
   let rpcClient;
   try {
+    const pollUser = await UserStorage.findById(userId).catch(() => null);
     if (chain.toLowerCase() === 'starknet') {
       const { StarknetRpcClient } = await import('../../services/StarknetRpcClient.js');
       rpcClient = new StarknetRpcClient(rpcUrls);
     } else {
       const { EthereumRpcClient } = await import('../../services/EthereumRpcClient.js');
-      rpcClient = new EthereumRpcClient(rpcUrls);
+      rpcClient = new EthereumRpcClient(rpcUrls, { tier: pollUser?.tier || 'free' });
     }
   } catch (err) {
     console.warn(`⚠️ Resume live poll: RPC init failed for ${contractAddress}: ${err.message}`);

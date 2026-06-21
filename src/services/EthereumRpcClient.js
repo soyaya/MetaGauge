@@ -234,15 +234,16 @@ export class EthereumRpcClient {
       // Step 2: Get unique transaction hashes from events
       const eventTxHashes = new Set(allLogs.map(log => log.transactionHash));
       console.log(`   🔗 Found ${eventTxHashes.size} unique transactions from events`);
-      
-      // Hard cap at 50 transactions for historical fetch
-      const maxTransactions = 50;
+
+      // Cap by tier: free=50, starter=200, pro=500, enterprise=2000
+      const tierCaps = { free: 50, starter: 200, pro: 500, enterprise: 2000 };
+      const maxTransactions = tierCaps[this.config.tier] ?? 200;
       const txHashArray = Array.from(eventTxHashes);
       const limitedTxHashes = txHashArray.slice(0, maxTransactions);
       if (limitedTxHashes.length < txHashArray.length) {
-        console.log(`   ⚠️ Limiting to ${maxTransactions} historical transactions`);
+        console.log(`   ⚠️ Limiting to ${maxTransactions} transactions (tier: ${this.config.tier})`);
       }
-      
+
       // Step 3: Batch fetch transaction details
       const batchSize = 15;
       
