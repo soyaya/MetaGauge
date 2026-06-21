@@ -700,6 +700,54 @@ router.post('/send-report', async (req, res) => {
   }
 });
 
+// ── GET /api/traction/download-report — PDF download (all sections) ──────────
+router.get('/download-report', async (req, res) => {
+  try {
+    const built = await buildFR(req.user.id);
+    if (!built) return res.status(404).json({ error: 'No completed analysis found. Index a contract first.' });
+    const { fr, contract, user } = built;
+
+    const alerts = await loadAlerts(req.user.id);
+    const ops    = calculateOPS(fr, alerts);
+    const tasks  = generateTasks(fr, ops);
+    const ethPrice = await priceService.getPrice('eth').catch(() => 2500);
+    const traction = buildTractionSummary(fr, await loadCompetitors(req.user.id), ethPrice);
+
+    const { generateTractionPDF } = await import('../../services/TractionPDFGenerator.js');
+    const pdfBuffer = await generateTractionPDF({
+      user,
+      contract,
+      ops,
+      tasks,
+      growth: {
+        newUsers:           fr.userLifecycle?.summary?.newUsers || 0,
+        returningUsers:     fr.userLifecycle?.summary?.returningUsers || 0,
+        totalUsers:         fr.summary?.uniqueUsers || 0,
+        activationFunnel:   fr.activationMetrics?.activationFunnel || [],
+      },
+      retentionMetrics:  fr.retentionMetrics,
+      activationMetrics: fr.activationMetrics,
+      gasAnalysis:       fr.gasAnalysis,
+      userQuality:       fr.userQualityMetrics,
+      defiMetrics:       fr.defiMetrics,
+      summary:           fr.summary,
+      featureInsights:   (fr.activationMetrics?.featureFirstUse || []).slice(0, 8),
+      labels:            traction.productivityScore >= 70 ? [{ label: 'Revenue Positive' }] : [],
+      users:             fr.users?.slice(0, 10) || [],
+      sections:          ['productivity', 'growth', 'retention', 'transactions', 'activation', 'quality', 'features', 'topusers', 'tasks'],
+    });
+
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `metagauge-traction-${contract.name || 'report'}-${date}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error('download-report error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── GET /api/traction/history — time-series snapshots ────────────────────────
 router.get('/history', async (req, res) => {
   try {

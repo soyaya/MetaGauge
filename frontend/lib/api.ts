@@ -651,6 +651,7 @@ export const api = {
     getRecommendation: async (taskId: string) => apiRequest(`/api/traction/tasks/${taskId}/recommendation`),
     sendReport:        async (body: { email: string; sections: string[] }) =>
       apiRequest('/api/traction/send-report', { method: 'POST', body: JSON.stringify(body) }),
+    getDownloadReportUrl: () => `${process.env.NEXT_PUBLIC_API_URL || ''}/api/traction/download-report`,
   },
 
   competitive: {
