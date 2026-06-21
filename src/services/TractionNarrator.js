@@ -1,4 +1,47 @@
-import AgentService from './AgentService.js';
+/**
+ * TractionNarrator
+ * Generates investor/marketing content from real indexed metrics.
+ * Calls Gemini directly (bypasses AgentService's component-JSON wrapper)
+ * so each content type gets clean, parseable output.
+ */
+import { GoogleGenAI } from '@google/genai';
+
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
+function getApiKeys() {
+  const keys = [];
+  if (process.env.GEMINI_API_KEY) keys.push(process.env.GEMINI_API_KEY);
+  for (let i = 2; i <= 10; i++) {
+    const k = process.env[`GEMINI_API_KEY_${i}`];
+    if (k) keys.push(k);
+  }
+  return keys;
+}
+
+async function callGemini(prompt) {
+  const keys = getApiKeys();
+  if (!keys.length) throw new Error('No Gemini API keys configured');
+  let lastErr;
+  for (const key of keys) {
+    try {
+      const ai = new GoogleGenAI({ apiKey: key });
+      const res = await ai.models.generateContent({
+        model: MODEL,
+        config: { generationConfig: { temperature: 0.4 } },
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      });
+      return res.candidates?.[0]?.content?.parts?.find(p => p.text)?.text || '';
+    } catch (err) {
+      lastErr = err;
+      const msg = err?.message || '';
+      const isKeyErr = /403|429|PERMISSION_DENIED|API_KEY|blocked|quota|RESOURCE_EXHAUSTED|disabled/i.test(msg);
+      if (!isKeyErr) throw err;
+    }
+  }
+  throw lastErr;
+}
+
+// ── Metric snapshot ──────────────────────────────────────────────────────────
 
 async function fetchMetricSnapshot(userId) {
   try {
@@ -15,11 +58,17 @@ async function fetchMetricSnapshot(userId) {
     const contract = latest.results?.target?.contract || {};
     const ethPrice = await priceService.getPrice('eth').catch(() => 2500);
     const fr = buildFullReportFromAnalysis(txs, metrics, { ...contract, _ethPriceUSD: ethPrice });
-    return { fr, contractName: contract.name || contract.address || 'Unknown', chain: contract.chain || 'ethereum', txCount: txs.length };
+    return {
+      fr,
+      contractName: contract.name || contract.address || 'Smart Contract',
+      contractAddress: contract.address || '',
+      chain: contract.chain || 'ethereum',
+      txCount: txs.length,
+    };
   } catch { return null; }
 }
 
-function buildMetricContext(snap) {
+function buildMetricBlock(snap) {
   if (!snap) return null;
   const { fr, contractName, chain, txCount } = snap;
   const ret  = fr.retentionMetrics   || {};
@@ -28,113 +77,148 @@ function buildMetricContext(snap) {
   const dm   = fr.defiMetrics        || {};
   const sum  = fr.summary            || {};
   const qual = fr.userQualityMetrics || {};
-  return `CONTRACT: ${contractName} on ${chain}
-INDEXED TRANSACTIONS: ${txCount}
-Total Users: ${sum.uniqueUsers || 0}
-Total Transactions: ${sum.totalTransactions || 0}
-Success Rate: ${sum.successRate || 0}%
-DAU: ${dm.dau || 0} | WAU: ${dm.wau || 0} | MAU: ${dm.mau || 0}
-D1 Retention: ${ret.d1Retention || 0}% | D7: ${ret.d7Retention || 0}% | D30: ${ret.d30Retention || 0}%
-Activation Rate: ${act.activationRate || 0}% (users who made a 2nd tx)
-Bounce Rate: ${dm.bounceRate || 0}% (single-tx users who never returned)
-Churn Rate: ${ret.churnRate || 0}%
-Resurrection Rate: ${ret.resurrectionRate || 0}%
-Avg Time to Activation: ${act.avgTimeToActivation || 'N/A'}
-Power User Rate: ${qual.powerUserRate || 0}%
-Bot Activity: ${qual.botPct || 0}%
-Token Supply Value: ${dm.tvl != null ? '$' + Number(dm.tvl).toLocaleString() : 'N/A'}
-Gas Efficiency Score: ${gas.gasEfficiencyScore || 0}%
-Total Gas Spent by Users: $${gas.totalGasCostUSD || 0}
-Avg Gas Cost per Tx: $${gas.averageGasCostUSD || 0}`;
+  const fmt  = (v, suffix = '') => (v != null && v !== 0) ? `${v}${suffix}` : '—';
+
+  return `CONTRACT: ${contractName} (${chain})
+Indexed transactions: ${txCount}
+
+USER METRICS
+  Total Unique Users   : ${fmt(sum.uniqueUsers)}
+  Total Transactions   : ${fmt(sum.totalTransactions)}
+  Daily Active (DAU)   : ${fmt(dm.dau)}
+  Weekly Active (WAU)  : ${fmt(dm.wau)}
+  Monthly Active (MAU) : ${fmt(dm.mau)}
+
+RETENTION
+  D1  (next-day)       : ${fmt(ret.d1Retention, '%')}
+  D7  (week)           : ${fmt(ret.d7Retention, '%')}
+  D30 (month)          : ${fmt(ret.d30Retention, '%')}
+  Overall Retention    : ${fmt(ret.retentionRate, '%')}
+  Churn Rate           : ${fmt(ret.churnRate, '%')}
+  Resurrection Rate    : ${fmt(ret.resurrectionRate, '%')}
+
+ACTIVATION & ENGAGEMENT
+  Activation Rate      : ${fmt(act.activationRate, '%')}  (wallets with ≥2 txs)
+  Bounce Rate          : ${fmt(dm.bounceRate, '%')}  (one-and-done wallets)
+  Avg Time to Activation: ${act.avgTimeToActivation || '—'}
+  Power User Rate      : ${fmt(qual.powerUserRate, '%')}
+  Bot Activity         : ${fmt(qual.botPct, '%')}
+  Protocol Stickiness  : ${fmt(dm.protocolStickiness, '%')}
+
+FINANCIAL & GAS
+  Token Supply Value   : ${dm.tvl != null ? '$' + Number(dm.tvl).toLocaleString() : '—'}
+  Tx Success Rate      : ${fmt(sum.successRate, '%')}
+  Gas Efficiency       : ${fmt(gas.gasEfficiencyScore, '%')}
+  Total Gas Spent      : $${gas.totalGasCostUSD || 0}
+  Avg Gas / Tx         : $${gas.averageGasCostUSD || 0}`;
 }
 
-function buildPrompt(type, metricCtx) {
-  const dataBlock = metricCtx
-    ? `\n\nREAL ON-CHAIN METRICS — use these exact numbers, do NOT invent or change them:\n${metricCtx}\n`
-    : '\n\n(No indexed data available yet.)\n';
+// ── Prompt builders — audience-aware, format-specific ────────────────────────
 
-  switch (type) {
-    case 'investor_summary':
-      return `You are writing an investor traction summary for a smart contract.${dataBlock}
-Write structured text using exactly this format (use markdown bold for section headers):
+function promptInvestorSummary(metricBlock) {
+  const data = metricBlock
+    ? `\n\n--- VERIFIED ON-CHAIN DATA (do not change or invent numbers) ---\n${metricBlock}\n---\n`
+    : '\n\n(No indexed data yet — use placeholder values and flag them.)\n';
+  return `You are a blockchain analyst writing a traction memo for a professional investor.
+Audience: Seed/Series-A VCs, angels, and crypto fund analysts. Tone: concise, data-driven, honest.${data}
+Write the memo in this exact structure. Use **bold** for each section header:
 
 **CONTRACT OVERVIEW**
-2-3 sentences about what this contract does.
+What this smart contract does and its market context. (2-3 sentences)
 
-**KEY TRACTION METRICS**
-List every metric above as: • Metric Name: [exact value] — [1-line interpretation]
+**TRACTION SNAPSHOT**
+Every metric from the data as a bullet: • [Metric]: [exact value] — [what it signals to an investor]
 
-**BENCHMARKS**
-Compare the 5 most important metrics vs DeFi/Web3 industry averages:
-• [Metric]: [value] vs [industry avg] ([above/below] average)
+**BENCHMARK COMPARISON**
+Compare the 5 most telling metrics against DeFi/Web3 category benchmarks:
+• [Metric]: [our value] vs [benchmark] → [above average / below average / on par]
+Use these reference benchmarks: D1 ~20%, D7 ~10%, D30 ~6%, Activation ~40%, Bounce <35%, Churn <25%.
 
 **GROWTH NARRATIVE**
-2-3 sentences interpreting what the data says about the growth trajectory.
+What the data collectively says about growth trajectory and product-market fit. (2-3 sentences, no fluff)
 
-**TOP OPPORTUNITIES**
-3 specific actions based on the weakest metrics. Format: • [Action]: [expected impact]
+**RISK FACTORS**
+2-3 honest risks visible in the data (e.g. high bounce, low D30).
 
-**INVESTOR SIGNAL**
-1-2 sentences: honest assessment of whether this merits attention and why.
+**OPPORTUNITIES**
+3 high-impact actions tied to specific weak metrics, each with expected outcome.
 
-Use exact numbers. Keep total length under 450 words.`;
+**VERDICT**
+One clear sentence: investment signal (strong / early traction / watch / not yet) and primary reason.
 
-    case 'twitter_thread':
-      return `You are writing a Twitter/X thread about on-chain traction milestones.${dataBlock}
-Rules:
-- EVERY tweet must be strictly under 240 characters
-- Use EXACT numbers from the data — never round or invent
-- Tweet 1: Hook with the single most impressive metric
-- Tweets 2-5: One specific data point each with brief context
-- Tweet 6: Forward-looking statement
-- Tweet 7 (optional): CTA — track your contract at metagauge.xyz
+Rules: use exact numbers, no invented figures, under 500 words total.`;
+}
 
-Return ONLY a valid JSON array of strings, nothing else:
-["tweet text", "tweet text", ...]`;
+function promptTwitterThread(metricBlock) {
+  const data = metricBlock
+    ? `\n\n--- ON-CHAIN DATA (use exact numbers) ---\n${metricBlock}\n---\n`
+    : '\n\n(No indexed data yet.)\n';
+  return `You are a Web3 growth marketer writing a Twitter/X thread for a smart contract project.
+Audience: crypto Twitter — developers, DeFi users, investors. Tone: confident, punchy, numbers-forward.${data}
+Write 6-7 tweets following this structure:
+Tweet 1 — HOOK: Most impressive metric as a bold opening claim. Start with a number.
+Tweet 2 — USER GROWTH: DAU/WAU/MAU or total users with context.
+Tweet 3 — RETENTION: D7 or D30 retention with what it means vs industry.
+Tweet 4 — ACTIVATION: Activation rate and what drives return users.
+Tweet 5 — QUALITY: Power users, success rate, or gas efficiency.
+Tweet 6 — NARRATIVE: What the data story means for the protocol's future.
+Tweet 7 — CTA: "Track your own smart contract → metagauge.xyz" (optional, include only if space allows)
 
-    case 'pitch_slide':
-      return `You are generating a pitch deck "Traction" slide.${dataBlock}
-Return ONLY a valid JSON object, nothing else before or after the JSON:
+STRICT RULES:
+- Every tweet ≤ 240 characters (hard limit)
+- Use EXACT numbers from the data — never round, never invent
+- No hashtags unless they fit naturally within the char limit
+- Return ONLY a valid JSON array of strings, no other text before or after:
+["tweet 1", "tweet 2", ...]`;
+}
+
+function promptPitchSlide(metricBlock) {
+  const data = metricBlock
+    ? `\n\n--- ON-CHAIN DATA (use exact numbers) ---\n${metricBlock}\n---\n`
+    : '\n\n(No indexed data yet.)\n';
+  return `You are a pitch deck consultant creating the "Traction" slide for a blockchain startup.
+Audience: VCs in a 5-minute pitch meeting. Every word must earn its place.${data}
+Return ONLY a valid JSON object. No text before or after the JSON. No markdown code fences.
+
 {
-  "headline": "One compelling headline using the strongest metric (max 12 words)",
-  "subheadline": "Supporting context sentence (max 18 words)",
+  "headline": "Single strongest metric as a compelling headline — max 10 words",
+  "subheadline": "One supporting sentence giving context — max 15 words",
+  "highlight": "The investor punchline — one short phrase (e.g. '2.1x DeFi average D7 retention')",
   "bullets": [
-    "D1/D7/D30 Retention: [exact values]% — [benchmark comparison]",
-    "Activation: [exact value]% of wallets make a 2nd transaction",
-    "Power Users: [exact value]% classified as high-frequency wallets",
-    "[strongest metric]: [exact value] — [investor-relevant context]",
-    "[growth signal]: [exact value] — [what it signals]"
+    "• D1 / D7 / D30 Retention: [exact values]% — vs [DeFi benchmark], [above/below] average",
+    "• Activation: [exact value]% of wallets return for a 2nd transaction",
+    "• [Strongest growth metric]: [exact value] — [investor-relevant context]",
+    "• Power Users: [exact value]% of wallets are high-frequency — signals loyal core",
+    "• Tx Success Rate: [exact value]% — [reliability signal]"
   ],
   "chart_data": [
-    { "label": "D1 Retention",    "value": "[exact value from data]%" },
-    { "label": "D7 Retention",    "value": "[exact value from data]%" },
-    { "label": "D30 Retention",   "value": "[exact value from data]%" },
-    { "label": "Activation Rate", "value": "[exact value from data]%" },
-    { "label": "Power Users",     "value": "[exact value from data]%" }
+    { "label": "D1 Retention",    "value": "[exact %]", "benchmark": "~20%" },
+    { "label": "D7 Retention",    "value": "[exact %]", "benchmark": "~10%" },
+    { "label": "D30 Retention",   "value": "[exact %]", "benchmark": "~6%"  },
+    { "label": "Activation Rate", "value": "[exact %]", "benchmark": "~40%" },
+    { "label": "Power Users",     "value": "[exact %]", "benchmark": "~15%" }
   ],
-  "highlight": "The single most investor-relevant stat as a short phrase",
-  "footnote": "Verified on-chain data via MetaGauge · metagauge.xyz"
+  "footnote": "Verified on-chain data · MetaGauge · metagauge.xyz · ${new Date().toLocaleDateString('en-GB')}"
 }`;
-
-    default:
-      throw new Error(`Unknown content type: ${type}`);
-  }
 }
+
+// ── Main export ───────────────────────────────────────────────────────────────
 
 export class TractionNarrator {
   static async generate(userId, type, { contractAddress, chain } = {}) {
     const snap = await fetchMetricSnapshot(userId);
-    const metricCtx = buildMetricContext(snap);
-    const prompt = buildPrompt(type, metricCtx);
+    const metricBlock = buildMetricBlock(snap);
 
-    const result = await AgentService.run(userId, prompt, {
-      contractAddress: contractAddress || '',
-      chain: chain || snap?.chain || 'ethereum',
-      source: 'marketing',
-    });
+    let prompt;
+    if (type === 'investor_summary') prompt = promptInvestorSummary(metricBlock);
+    else if (type === 'twitter_thread') prompt = promptTwitterThread(metricBlock);
+    else if (type === 'pitch_slide') prompt = promptPitchSlide(metricBlock);
+    else throw new Error(`Unknown content type: ${type}`);
+
+    const raw = await callGemini(prompt);
 
     return {
-      content: result.content,
+      content: raw.trim(),
       type,
       hasRealData: !!snap,
       metrics: snap ? {
