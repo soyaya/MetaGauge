@@ -198,10 +198,10 @@ export default function TractionPage() {
               <div className="flex-1 space-y-2 min-w-[220px]">
                 <p className="text-sm font-semibold mb-3">Operational Productivity Score — <span style={{color:opsRing}}>{ops.label}</span></p>
                 {Object.entries(ops.pillars).map(([key, val]: any) => (
-                  <div key={key} className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-36 shrink-0 flex items-center gap-1">
-                      {pillarLabels[key]} <span className="text-muted-foreground/60">({pillarWeights[key]})</span>
-                      <span className="relative group cursor-help">
+                  <div key={key} className="flex items-center gap-2 sm:gap-3">
+                    <span className="text-xs text-muted-foreground w-28 sm:w-36 shrink-0 flex items-center gap-1 truncate">
+                      {pillarLabels[key]} <span className="text-muted-foreground/60 hidden sm:inline">({pillarWeights[key]})</span>
+                      <span className="relative group cursor-help shrink-0">
                         <svg className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2"/><path strokeLinecap="round" strokeWidth="2" d="M12 16v-4M12 8h.01"/></svg>
                         <span className="absolute left-4 top-0 z-50 hidden group-hover:block w-56 rounded bg-popover border text-xs text-popover-foreground shadow-lg p-2 leading-relaxed">
                           {pillarDescriptions[key]}
@@ -211,7 +211,7 @@ export default function TractionPage() {
                     <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{width:`${val}%`, backgroundColor: val>=75?'#22c55e':val>=50?'#eab308':'#ef4444'}} />
                     </div>
-                    <span className="text-xs font-semibold w-8 text-right">{val}</span>
+                    <span className="text-xs font-semibold w-8 text-right shrink-0">{val}</span>
                   </div>
                 ))}
               </div>
@@ -287,8 +287,8 @@ export default function TractionPage() {
             <CardHeader className="pb-3"><CardTitle className="text-sm">Feature Adoption</CardTitle><CardDescription className="text-xs">First interactions by users</CardDescription></CardHeader>
             <CardContent className="space-y-2">
               {featureInsights.map((f: any) => (
-                <div key={f.feature} className="flex items-center gap-3">
-                  <span className="text-xs font-mono text-muted-foreground w-44 truncate" title={f.feature}>{f.feature}</span>
+                <div key={f.feature} className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-xs font-mono text-muted-foreground w-32 sm:w-44 truncate" title={f.feature}>{f.feature}</span>
                   <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-foreground/30 rounded-full" style={{width:`${f.adoption}%`}} />
                   </div>

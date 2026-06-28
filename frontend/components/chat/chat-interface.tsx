@@ -250,7 +250,7 @@ export function ChatInterface({ session, onSessionUpdate, onContractContextUpdat
             </Button>
           </div>
           
-          <p className="text-xs text-muted-foreground mt-2 text-center">
+          <p className="hidden sm:block text-xs text-muted-foreground mt-2 text-center">
             AI responses include interactive charts and visualizations based on contract data.
           </p>
         </div>

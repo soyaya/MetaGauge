@@ -245,7 +245,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-64 w-full">
+              <div className="h-48 sm:h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   {component.data?.type === 'line' && (
                     <LineChart data={component.data?.data || []}>
@@ -686,7 +686,11 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
 
   return (
     <div className={`flex mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+      {/* For assistant messages with components, use full width */}
+      <div className={`flex ${
+        isUser ? 'flex-row-reverse max-w-[85%]' : 
+        (message.components?.length > 0 ? 'flex-row w-full' : 'flex-row max-w-[85%]')
+      }`}>
         {/* Avatar */}
         <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${

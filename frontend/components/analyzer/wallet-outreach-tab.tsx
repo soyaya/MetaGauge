@@ -45,7 +45,7 @@ export function WalletOutreachTab() {
 
   return (
     <div className="space-y-4 pt-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h3 className="font-semibold">Wallet Outreach Intelligence</h3>
           <p className="text-xs text-muted-foreground mt-1">
@@ -53,7 +53,7 @@ export function WalletOutreachTab() {
           </p>
         </div>
         {wallets.length > 0 && (
-          <Button size="sm" variant="outline" onClick={exportCSV}>
+          <Button size="sm" variant="outline" onClick={exportCSV} className="shrink-0">
             <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
           </Button>
         )}
@@ -79,7 +79,7 @@ export function WalletOutreachTab() {
             {wallets.map((w: any) => (
               <Card key={w.address}>
                 <CardContent className="py-3 px-4">
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={`w-2 h-2 rounded-full shrink-0 ${w.segment === 'high' ? 'bg-red-500' : 'bg-yellow-500'}`} />
                       <span className="font-mono text-xs text-muted-foreground truncate">
@@ -89,7 +89,7 @@ export function WalletOutreachTab() {
                         {w.segment === 'high' ? 'High Value' : 'Mid Value'}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4 text-xs shrink-0">
+                    <div className="flex items-center gap-3 text-xs shrink-0">
                       <div className="text-right">
                         <div className="font-semibold">${w.ltv?.toFixed(2)}</div>
                         <div className="text-muted-foreground">LTV</div>

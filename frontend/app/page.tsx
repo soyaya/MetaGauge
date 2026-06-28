@@ -53,25 +53,25 @@ export default function HomePage() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight mb-6 fade-in-up" style={{animationDelay:'80ms'}}>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 fade-in-up" style={{animationDelay:'80ms'}}>
             <span className="block text-foreground">Know your contract.</span>
             <span className="block gradient-brand-text">Grow your protocol.</span>
           </h1>
 
           {/* Subheading */}
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed fade-in-up" style={{animationDelay:'160ms'}}>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed fade-in-up" style={{animationDelay:'160ms'}}>
             MetaGauge transforms raw on-chain data into investor-ready insights — retention, activation, gas efficiency, and competitive intelligence. All in real time.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 fade-in-up" style={{animationDelay:'240ms'}}>
+          <div className="flex flex-col xs:flex-row items-center justify-center gap-3 fade-in-up" style={{animationDelay:'240ms'}}>
             <Link href="/signup"
-              className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white gradient-brand shadow-glow hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 text-base">
+              className="group relative w-full xs:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-white gradient-brand shadow-glow hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 text-base">
               Start for free
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
             </Link>
             <Link href="/login"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold border border-border bg-card hover:bg-secondary text-foreground transition-all duration-200 hover:-translate-y-0.5 text-base shadow-brand-sm">
+              className="w-full xs:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold border border-border bg-card hover:bg-secondary text-foreground transition-all duration-200 hover:-translate-y-0.5 text-base shadow-brand-sm">
               Sign in
             </Link>
           </div>
@@ -97,17 +97,17 @@ export default function HomePage() {
               </div>
             </div>
             {/* Mock dashboard content */}
-            <div className="p-6 bg-background/50">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div className="p-4 sm:p-6 bg-background/50">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
                 {[['Total Users','10','↑ 40%'],['DAU','9','↑ 12%'],['Retention','60%','↑ 5%'],['OPS Score','73/100','↑ 8']].map(([l,v,c])=>(
-                  <div key={l} className="rounded-xl border border-border bg-card p-4">
-                    <p className="text-xs text-muted-foreground mb-1">{l}</p>
-                    <p className="text-2xl font-bold">{v}</p>
+                  <div key={l} className="rounded-xl border border-border bg-card p-3 sm:p-4">
+                    <p className="text-xs text-muted-foreground mb-1 truncate">{l}</p>
+                    <p className="text-xl sm:text-2xl font-bold">{v}</p>
                     <p className="text-xs text-green-600 mt-1">{c}</p>
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="col-span-2 rounded-xl border border-border bg-card p-4 h-32 flex items-end gap-1">
                   {[40,55,48,62,58,70,65,80,75,90,85,100].map((h,i)=>(
                     <div key={i} className="flex-1 rounded-sm gradient-brand opacity-70" style={{height:`${h}%`}} />
@@ -131,7 +131,7 @@ export default function HomePage() {
 
       {/* ── Stats bar ─────────────────────────────────────────────────────── */}
       <section className="py-12 border-y border-border bg-muted/20">
-        <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
           {[['2','Chains supported'],['50+','Metrics tracked'],['Real-time','Live monitoring'],['Free','To get started']].map(([v,l])=>(
             <div key={l}>
               <p className="text-3xl font-black gradient-brand-text mb-1">{v}</p>
@@ -146,8 +146,8 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">Everything you need</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Built for serious builders</h2>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto">From raw transactions to investor-ready traction reports — in minutes.</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-4">Built for serious builders</h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">From raw transactions to investor-ready traction reports — in minutes.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger">
@@ -173,7 +173,7 @@ export default function HomePage() {
       <section className="py-24 px-6 bg-muted/20 border-y border-border">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Who uses MetaGauge?</h2>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-4">Who uses MetaGauge?</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
@@ -196,12 +196,12 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="relative rounded-3xl gradient-brand p-px shadow-glow">
             <div className="rounded-3xl bg-card px-8 py-16">
-              <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Start measuring today</h2>
-              <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">Onboard your contract in 2 minutes. Get your first insights immediately.</p>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-4">Start measuring today</h2>
+              <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-lg mx-auto">Onboard your contract in 2 minutes. Get your first insights immediately.</p>
               <Link href="/signup"
-                className="inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-white gradient-brand shadow-glow hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 text-lg">
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white gradient-brand shadow-glow hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 text-base sm:text-lg">
                 Get started free
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
               </Link>
             </div>
           </div>

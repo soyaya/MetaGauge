@@ -381,25 +381,25 @@ export default function AnalysisResultPage() {
         {/* Analysis Info */}
         <Card className="mb-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
                 {getStatusIcon(analysis.status)}
                 <div>
                   <CardTitle>Analysis Results</CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs break-all">
                     ID: {analysis.id} • {analysis.analysisType} analysis
                   </CardDescription>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={handleRefresh}
                   disabled={refreshing}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                  Refresh
+                  <RefreshCw className={`h-4 w-4 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">Refresh</span>
                 </Button>
                 
                 {analysis.status === 'completed' && (
@@ -409,8 +409,8 @@ export default function AnalysisResultPage() {
                     onClick={handleSync}
                     disabled={syncing}
                   >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-                    {syncing ? 'Syncing...' : 'Sync Latest'}
+                    <RefreshCw className={`h-4 w-4 sm:mr-2 ${syncing ? 'animate-spin' : ''}`} />
+                    <span className="hidden sm:inline">{syncing ? 'Syncing...' : 'Sync Latest'}</span>
                   </Button>
                 )}
                 
@@ -419,16 +419,16 @@ export default function AnalysisResultPage() {
                   size="sm"
                   onClick={handleShareOnX}
                 >
-                  <Twitter className="h-4 w-4 mr-2" />
-                  Share
+                  <Twitter className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Share</span>
                 </Button>
                 
                 {analysis.status === 'completed' && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Export
+                        <Download className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Export</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -451,7 +451,7 @@ export default function AnalysisResultPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <p className="text-sm font-medium">Status</p>
                 <div className="mt-1">

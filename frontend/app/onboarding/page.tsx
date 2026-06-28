@@ -436,31 +436,31 @@ export default function OnboardingPage() {
               <CardContent className="space-y-6">
                 <div>
                   <h3 className="font-semibold mb-2">Project Information</h3>
-                  <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
                     {form.watch('website') && (
-                      <p><strong>Website:</strong> {form.watch('website')}</p>
+                      <p className="break-all"><strong>Website:</strong> {form.watch('website')}</p>
                     )}
                     {form.watch('twitter') && (
                       <p><strong>Twitter:</strong> {form.watch('twitter')}</p>
                     )}
                     {form.watch('discord') && (
-                      <p><strong>Discord:</strong> {form.watch('discord')}</p>
+                      <p className="break-all"><strong>Discord:</strong> {form.watch('discord')}</p>
                     )}
                     {form.watch('telegram') && (
-                      <p><strong>Telegram:</strong> {form.watch('telegram')}</p>
+                      <p className="break-all"><strong>Telegram:</strong> {form.watch('telegram')}</p>
                     )}
                   </div>
                 </div>
 
                 <div>
                   <h3 className="font-semibold mb-2">Contract Details</h3>
-                  <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
                     <p><strong>Name:</strong> {form.watch('contractName')}</p>
                     <p><strong>Chain:</strong> {CHAINS.find(c => c.value === form.watch('chain'))?.label}</p>
-                    <p><strong>Address:</strong> {form.watch('contractAddress')}</p>
+                    <p className="break-all"><strong>Address:</strong> {form.watch('contractAddress')}</p>
                     <p><strong>Category:</strong> {CATEGORIES.find(c => c.value === form.watch('category'))?.label}</p>
                     <p><strong>Start Date:</strong> {form.watch('startDate')}</p>
-                    <p><strong>Purpose:</strong> {form.watch('purpose')}</p>
+                    <p className="break-words"><strong>Purpose:</strong> {form.watch('purpose')}</p>
                   </div>
                 </div>
 

@@ -295,7 +295,7 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">
               Welcome back, <span className="gradient-brand-text">{user?.name}</span>
             </h1>
             <p className="text-muted-foreground text-sm">
@@ -372,7 +372,7 @@ export default function DashboardPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
                     {[
                       ['Onboarded', formatDate(defaultContract.contract.startDate)],
                       ['Deployment Block', defaultContract.blockRange?.deployment?.toLocaleString() ?? defaultContract.contract.deploymentBlock?.toLocaleString() ?? '—'],
@@ -417,8 +417,8 @@ export default function DashboardPage() {
             {/* Detailed Metrics Tabs - Always Show */}
             <div className="mb-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="overflow-x-auto pb-1">
-                  <TabsList className="flex w-max min-w-full gap-1 h-auto p-1">
+                <div className="overflow-x-auto pb-1 -mx-1 px-1">
+                  <TabsList className="flex w-max gap-1 h-auto p-1">
                     {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Txns'],['wallets','Wallets'],['functions','Functions'],['ux','UX'],['intelligence','Intelligence 🔍'],['playbooks','Playbooks 📋'],['outreach','Outreach 🎯'],['campaigns','Campaigns 🚀'],['export','Export 📤'],['agent','Agent 🤖'],['competitive','Competitive']].map(([v,l])=>(
                       <TabsTrigger key={v} value={v} className="text-xs whitespace-nowrap px-3 py-1.5">{l}</TabsTrigger>
                     ))}
@@ -579,7 +579,7 @@ export default function DashboardPage() {
                   <CardDescription>Your analytics activity</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
                     {[
                       ['Contracts', userMetrics.overview.totalContracts, 'text-primary'],
                       ['Completed', userMetrics.overview.completedAnalyses, 'text-green-600'],

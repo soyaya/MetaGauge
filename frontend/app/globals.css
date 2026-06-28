@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ── Custom breakpoints ────────────────────────────────────────────────────── */
+@theme {
+  --breakpoint-xs: 480px;
+}
+
 /* ── Premium Design Tokens ─────────────────────────────────────────────────── */
 :root {
   /* Brand: deep indigo-blue primary, electric violet accent */

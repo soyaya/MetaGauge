@@ -156,14 +156,14 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
           {users.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">No user data available.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[480px]">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-2 px-3 text-muted-foreground font-medium">Address</th>
                     <th className="text-right py-2 px-3 text-muted-foreground font-medium">Txs</th>
-                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Total Value</th>
-                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Gas Spent</th>
+                    <th className="text-right py-2 px-3 text-muted-foreground font-medium hidden sm:table-cell">Total Value</th>
+                    <th className="text-right py-2 px-3 text-muted-foreground font-medium hidden sm:table-cell">Gas Spent</th>
                     <th className="text-center py-2 px-3 text-muted-foreground font-medium">Type</th>
                   </tr>
                 </thead>
@@ -172,8 +172,8 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
                     <tr key={i} className="border-b hover:bg-muted/30 transition-colors">
                       <td className="py-2 px-3 font-mono text-xs">{formatAddr(u.address)}</td>
                       <td className="text-right py-2 px-3 font-semibold">{u.transactionCount}</td>
-                      <td className="text-right py-2 px-3 text-muted-foreground">{formatEth(u.totalValue)}</td>
-                      <td className="text-right py-2 px-3 text-muted-foreground">{formatEth(u.totalGasSpent)}</td>
+                      <td className="text-right py-2 px-3 text-muted-foreground hidden sm:table-cell">{formatEth(u.totalValue)}</td>
+                      <td className="text-right py-2 px-3 text-muted-foreground hidden sm:table-cell">{formatEth(u.totalGasSpent)}</td>
                       <td className="text-center py-2 px-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           u.userType === 'whale'   ? 'bg-purple-100 text-purple-700' :
@@ -186,7 +186,7 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
           )}
         </CardContent>
       </Card>

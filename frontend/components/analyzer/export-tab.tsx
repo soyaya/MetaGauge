@@ -160,7 +160,7 @@ function PitchSlide({ content }: { content: string }) {
 
         {/* Metric grid */}
         {slide.chart_data?.length > 0 && (
-          <div className="grid grid-cols-5 gap-2 my-3">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 my-3">
             {slide.chart_data.map((d: any, i: number) => (
               <div key={i} className="rounded-lg border border-primary/20 bg-background/60 p-2 text-center">
                 <div className="text-base font-bold text-foreground">{d.value}</div>
@@ -336,10 +336,10 @@ export function ExportTab({ contractAddress, chain }: ExportTabProps) {
       {/* ── PDF Download ── */}
       <Card className="border-primary/30 bg-primary/5">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <FileText className="h-4 w-4 text-primary" />
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <FileText className="h-4 w-4 text-primary shrink-0" />
                 <span className="font-semibold text-sm">Full Traction PDF Report</span>
                 <Badge className="text-xs">Investor Ready</Badge>
               </div>
@@ -359,10 +359,10 @@ export function ExportTab({ contractAddress, chain }: ExportTabProps) {
       {/* ── Share Link ── */}
       <Card>
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Share2 className="h-4 w-4 text-primary" />
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <Share2 className="h-4 w-4 text-primary shrink-0" />
                 <span className="font-semibold text-sm">Public Intelligence Report</span>
                 <Badge variant="secondary" className="text-xs">7-day link</Badge>
               </div>
@@ -392,18 +392,18 @@ export function ExportTab({ contractAddress, chain }: ExportTabProps) {
       {TYPES.map(({ id, label, description, icon: Icon, badge, audience }) => (
         <Card key={id}>
           <CardHeader className="pb-2">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div className="p-2 rounded-lg bg-primary/10 shrink-0 mt-0.5">
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <CardTitle className="text-sm">{label}</CardTitle>
                     <Badge variant="secondary" className="text-xs">{badge}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-                  <p className="text-xs text-muted-foreground/60 mt-0.5">Audience: {audience}</p>
+                  <p className="text-xs text-muted-foreground/60 mt-0.5 hidden sm:block">Audience: {audience}</p>
                   {results[id]?.hasRealData === false && (
                     <div className="flex items-center gap-1 mt-1.5 text-xs text-amber-600">
                       <AlertCircle className="h-3 w-3" />

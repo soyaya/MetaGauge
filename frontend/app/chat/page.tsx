@@ -8,7 +8,7 @@ import { ChatInterface } from '@/components/chat/chat-interface';
 import { ChatSidebar } from '@/components/chat/chat-sidebar';
 import { ContractDetailsSidebar } from '@/components/chat/contract-details-sidebar';
 import { Button } from '@/components/ui/button';
-import { PanelRightOpen, PanelRightClose, Loader2 } from 'lucide-react';
+import { PanelRightOpen, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 
 function ChatPageContent() {
@@ -21,7 +21,7 @@ function ChatPageContent() {
   const [contractContext, setContractContext] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showContractDetails, setShowContractDetails] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   // Get contract info from URL params
   const contractAddress = searchParams.get('address');
@@ -157,9 +157,26 @@ function ChatPageContent() {
     <div className="page-shell">
       <Header />
       
-      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
-        {/* Left Sidebar - Sessions */}
-        <div className="flex-shrink-0 w-80 hidden lg:block h-full border-r border-border">
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden relative">
+        {/* Mobile sidebar overlay */}
+        {showSidebar && (
+          <div className="lg:hidden fixed inset-0 z-40 flex">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setShowSidebar(false)} />
+            <div className="relative z-50 w-72 h-full bg-background border-r border-border shadow-xl">
+              <ChatSidebar
+                sessions={sessions}
+                currentSession={currentSession}
+                onSessionSelect={(id) => { handleSessionSelect(id); setShowSidebar(false); }}
+                onNewChat={() => { handleNewChat(); setShowSidebar(false); }}
+                onSessionsUpdate={loadChatSessions}
+                onContractSelect={(a, c, n) => { handleContractSelect(a, c, n); setShowSidebar(false); }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Left Sidebar - Sessions (desktop) */}
+        <div className="flex-shrink-0 w-72 xl:w-80 hidden lg:block h-full border-r border-border">
           <ChatSidebar
             sessions={sessions}
             currentSession={currentSession}
@@ -175,24 +192,15 @@ function ChatPageContent() {
           <div className="flex-1 flex flex-col min-w-0 h-full">
             {currentSession ? (
               <>
-                {/* Mobile Contract Details Toggle */}
-                <div className="2xl:hidden border-b border-border p-2 flex items-center justify-between bg-card flex-shrink-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-sm font-medium truncate">{currentSession.contractName}</span>
-                    <span className="text-xs text-muted-foreground flex-shrink-0">({currentSession.contractChain})</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowContractDetails(!showContractDetails)}
-                    className="h-8 w-8 p-0 flex-shrink-0"
-                  >
-                    {showContractDetails ? (
-                      <PanelRightClose className="h-4 w-4" />
-                    ) : (
-                      <PanelRightOpen className="h-4 w-4" />
-                    )}
+                {/* Mobile top bar */}
+                <div className="lg:hidden border-b border-border p-2 flex items-center justify-between bg-card flex-shrink-0 gap-2">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" onClick={() => setShowSidebar(true)}>
+                    <PanelRightOpen className="h-4 w-4 rotate-180" />
                   </Button>
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span className="text-sm font-medium truncate">{currentSession.contractName}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">({currentSession.contractChain})</span>
+                  </div>
                 </div>
                 
                 <div className="flex-1 overflow-hidden">
@@ -209,17 +217,21 @@ function ChatPageContent() {
             ) : (
               <div className="flex-1 flex items-center justify-center p-4">
                 <div className="text-center max-w-md">
+                  {/* Mobile: show "browse sessions" button when no session selected */}
+                  <Button variant="outline" size="sm" className="lg:hidden mb-6" onClick={() => setShowSidebar(true)}>
+                    Browse sessions
+                  </Button>
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-semibold mb-2">Welcome to Contract Chat</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-2">Welcome to Contract Chat</h2>
+                  <p className="text-muted-foreground mb-6 text-sm sm:text-base">
                     Start a conversation about any smart contract. Get AI-powered insights, 
                     analysis, and recommendations with interactive charts and data visualizations.
                   </p>
-                  <div className="space-y-2 text-sm text-muted-foreground">
+                  <div className="space-y-2 text-sm text-muted-foreground text-left inline-block">
                     <p>• Ask questions about contract performance</p>
                     <p>• Get transaction and user analysis</p>
                     <p>• Compare with competitors</p>
@@ -236,30 +248,13 @@ function ChatPageContent() {
             )}
           </div>
 
-          {/* Right Sidebar - Contract Details */}
-          {/* Desktop: Only visible on 2xl+ screens (1536px+) to ensure enough space */}
+          {/* Right Sidebar - Contract Details (desktop 2xl+) */}
           <div className="flex-shrink-0 w-80 hidden 2xl:block h-full border-l border-border">
             <ContractDetailsSidebar 
               session={currentSession}
               contractContext={contractContext}
             />
           </div>
-          
-          {/* Mobile/Tablet: Overlay when toggled */}
-          {showContractDetails && currentSession && (
-            <div className="2xl:hidden absolute inset-0 z-50 flex">
-              <div 
-                className="flex-1 bg-black/20 backdrop-blur-sm"
-                onClick={() => setShowContractDetails(false)}
-              />
-              <div className="flex-shrink-0 w-80 h-full">
-                <ContractDetailsSidebar 
-                  session={currentSession}
-                  contractContext={contractContext}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

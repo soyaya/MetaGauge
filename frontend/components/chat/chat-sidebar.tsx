@@ -135,7 +135,7 @@ export function ChatSidebar({
   };
 
   return (
-    <div className="w-72 xl:w-80 border-r border-border bg-card flex flex-col h-full">
+    <div className="w-full border-r border-border bg-card flex flex-col h-full">
       {/* Header */}
       <div className="p-3 xl:p-4 border-b border-border flex-shrink-0">
         <div className="flex items-center justify-between mb-4">

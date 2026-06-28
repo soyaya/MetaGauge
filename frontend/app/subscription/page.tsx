@@ -392,13 +392,13 @@ function BillingPage() {
             ) : (
               <div className="space-y-2">
                 {txs.slice(0, 20).map((tx, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm py-1 border-b last:border-0">
-                    <div>
+                  <div key={i} className="flex items-start sm:items-center justify-between gap-2 text-sm py-1 border-b last:border-0">
+                    <div className="min-w-0">
                       <span className="font-medium capitalize">{tx.action.replace(/_/g, ' ')}</span>
                       {tx.quantity > 1 && <span className="text-muted-foreground ml-1">×{tx.quantity}</span>}
                       <span className="text-muted-foreground ml-2 text-xs">{new Date(tx.at).toLocaleDateString()}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <Badge variant={tx.action === 'topup' ? 'default' : 'secondary'}>
                         {tx.action === 'topup' ? `+$${Math.abs(tx.cost)}` : tx.cost === 0 ? 'Free' : `-$${tx.cost}`}
                       </Badge>

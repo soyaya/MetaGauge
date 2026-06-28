@@ -194,12 +194,17 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-xs min-w-[420px]">
                   <thead>
                     <tr className="border-b">
-                      {['Hash','From','To','Value','Gas Used','Gas Cost','Method','Status'].map(h => (
-                        <th key={h} className={`py-2 px-2 text-muted-foreground font-medium ${h==='Value'||h==='Gas Used'||h==='Gas Cost'?'text-right':'text-left'}`}>{h}</th>
-                      ))}
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-left">Hash</th>
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-left hidden sm:table-cell">From</th>
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-left hidden sm:table-cell">To</th>
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-right">Value</th>
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-right hidden md:table-cell">Gas Used</th>
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-right hidden md:table-cell">Gas Cost</th>
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-left hidden lg:table-cell">Method</th>
+                      <th className="py-2 px-2 text-muted-foreground font-medium text-left">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -210,15 +215,15 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
                       return (
                         <tr key={i} className="border-b hover:bg-muted/30 transition-colors">
                           <td className="py-2 px-2 font-mono">{formatHash(tx.hash)}</td>
-                          <td className="py-2 px-2 font-mono">{formatAddr(tx.from)}</td>
-                          <td className="py-2 px-2 font-mono">{formatAddr(tx.to)}</td>
+                          <td className="py-2 px-2 font-mono hidden sm:table-cell">{formatAddr(tx.from)}</td>
+                          <td className="py-2 px-2 font-mono hidden sm:table-cell">{formatAddr(tx.to)}</td>
                           <td className="py-2 px-2 text-right">{formatEth(tx.value)}</td>
-                          <td className="py-2 px-2 text-right">{gasUsed.toLocaleString()}</td>
-                          <td className="py-2 px-2 text-right">${gasCostUSD}</td>
-                          <td className="py-2 px-2">{methodLabel(tx.input)}</td>
+                          <td className="py-2 px-2 text-right hidden md:table-cell">{gasUsed.toLocaleString()}</td>
+                          <td className="py-2 px-2 text-right hidden md:table-cell">${gasCostUSD}</td>
+                          <td className="py-2 px-2 hidden lg:table-cell">{methodLabel(tx.input)}</td>
                           <td className="py-2 px-2">
                             <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${tx.status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {tx.status ? 'success' : 'failed'}
+                              {tx.status ? '✓' : '✗'}
                             </span>
                           </td>
                         </tr>

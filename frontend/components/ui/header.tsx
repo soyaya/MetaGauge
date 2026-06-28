@@ -123,7 +123,7 @@ export function Header() {
               <>
                 {/* Notifications icon with badge */}
                 <Link href={openTasks > 0 ? '/agent' : '/alerts'}
-                  className="w-9 h-9 rounded-lg hidden sm:flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all relative"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all relative"
                   title={openTasks > 0 ? `${openTasks} open tasks` : 'Alerts'}>
                   <Bell className="w-4 h-4" />
                   {notifCount > 0 && (

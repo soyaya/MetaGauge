@@ -65,16 +65,16 @@ export default function SharePage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="font-bold text-lg">MetaGauge</span>
             <Badge variant="secondary" className="text-xs">Intelligence Report</Badge>
           </div>
-          <Link href="/signup" className="text-xs text-primary underline">Get your own report →</Link>
+          <Link href="/signup" className="text-xs text-primary underline shrink-0">Get your own report →</Link>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
 
         {/* Contract header */}
         <div>
