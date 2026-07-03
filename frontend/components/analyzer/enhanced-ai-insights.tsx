@@ -153,13 +153,13 @@ export function EnhancedAIInsights({ analysisId, analysisResults }: EnhancedAIIn
             {interpStrengths.length > 0 && (
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Strengths</p>
-                {interpStrengths.map((s, i) => <div key={i} className="text-sm flex gap-2 p-2 bg-green-50 dark:bg-green-950/30 rounded text-foreground"><span className="text-green-500">✓</span>{s}</div>)}
+                {interpStrengths.map((s, i) => <div key={i} className="text-sm flex gap-2 p-2 bg-green-50 dark:bg-green-950/30 rounded text-foreground"><span className="text-green-500 font-bold">+</span>{s}</div>)}
               </div>
             )}
             {interpWeaknesses.length > 0 && (
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Weaknesses</p>
-                {interpWeaknesses.map((w, i) => <div key={i} className="text-sm flex gap-2 p-2 bg-red-50 dark:bg-red-950/30 rounded text-foreground"><span className="text-red-500">✗</span>{w}</div>)}
+                {interpWeaknesses.map((w, i) => <div key={i} className="text-sm flex gap-2 p-2 bg-red-50 dark:bg-red-950/30 rounded text-foreground"><span className="text-red-500 font-bold">-</span>{w}</div>)}
               </div>
             )}
             {interpRecs.length > 0 && (

@@ -110,7 +110,7 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
           <CardContent className="space-y-2">
             {alerts.map((a: any, i: number) => (
               <div key={i} className="flex items-start gap-3 p-3 bg-card border border-amber-200 dark:border-amber-800 rounded-lg">
-                <span className="text-red-500 font-bold text-sm mt-0.5">⚠</span>
+                <span className="text-red-500 font-bold text-sm mt-0.5">!</span>
                 <div>
                   <p className="text-sm font-medium">{a.metric}: <span className="text-red-600">{a.value}</span></p>
                   <p className="text-xs text-muted-foreground mt-0.5">{a.action}</p>
@@ -207,7 +207,7 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
           <div className="space-y-4">
             {data.crossAppInsights.note && (
               <p className="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded p-2">
-                🔄 {data.crossAppInsights.note}
+                {data.crossAppInsights.note}
               </p>
             )}
             {data.crossAppInsights.enrichedWallets > 0 ? (

@@ -109,7 +109,7 @@ function TwitterThread({ content }: { content: string }) {
               <p className="text-sm leading-relaxed flex-1 pt-0.5">{tweet}</p>
             </div>
             <div className={`text-right text-xs mt-1.5 ${over ? 'text-destructive font-medium' : warn ? 'text-amber-500' : 'text-muted-foreground'}`}>
-              {chars}/280{over ? ' ✗ too long' : warn ? ' ⚠ near limit' : ''}
+              {chars}/280{over ? ' (too long)' : warn ? ' (near limit)' : ''}
             </div>
           </div>
         );

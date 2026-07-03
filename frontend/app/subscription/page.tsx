@@ -75,7 +75,7 @@ function CardForm({ onCharge, loading }: { onCharge: (card: any, amount: number)
       <Button type="submit" className="w-full gradient-brand text-white" disabled={loading}>
         {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Processing...</> : <><Lock className="h-4 w-4 mr-2" />Pay ${amount}</>}
       </Button>
-      <p className="text-xs text-center text-muted-foreground">🔒 Card data encrypted before leaving your browser</p>
+      <p className="text-xs text-center text-muted-foreground">Card data encrypted before leaving your browser</p>
     </form>
   )
 }
@@ -138,7 +138,7 @@ function BillingPage() {
     if (authLoading || !isAuthenticated) return
     load()
     if (searchParams.get('success') === '1') {
-      toast({ title: '✅ Payment successful! Credits added.' })
+      toast({ title: 'Payment successful! Credits added.' })
       setTimeout(load, 2000)
     }
     if (searchParams.get('cancelled') === '1') {
@@ -181,7 +181,7 @@ function BillingPage() {
       })
 
       if (result.status === 'success') {
-        toast({ title: `✅ $${amountUSD} added to your account!` })
+        toast({ title: `$${amountUSD} added to your account!` })
         await load()
       } else if (result.status === 'redirect') {
         window.location.href = result.redirectUrl
@@ -210,7 +210,7 @@ function BillingPage() {
         amountUSD:    pendingCharge.amountUSD,
       })
       if (result.status === 'success') {
-        toast({ title: `✅ $${pendingCharge.amountUSD} added!` })
+        toast({ title: `$${pendingCharge.amountUSD} added!` })
         setPendingCharge(null)
         await load()
       } else if (result.status === 'redirect') {
@@ -258,11 +258,11 @@ function BillingPage() {
             <div className="flex items-center gap-2">
               {status?.state === 'paid' ? (
                 <Badge className="bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400 border-0 px-3 py-1">
-                  ✅ Paid — credits active
+                  Paid — credits active
                 </Badge>
               ) : status?.canContinue === false ? (
                 <Badge variant="destructive" className="px-3 py-1">
-                  ⛔ Quota exhausted — top up to continue
+                  Quota exhausted — top up to continue
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="px-3 py-1">
@@ -295,7 +295,7 @@ function BillingPage() {
                     className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                       provider === p ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/50'
                     }`}>
-                    {p === 'flutterwave' ? '🌊 Card (FLW)' : '🟢 Paystack'}
+                    {p === 'flutterwave' ? 'Card (FLW)' : 'Paystack'}
                   </button>
                 ))}
               </div>

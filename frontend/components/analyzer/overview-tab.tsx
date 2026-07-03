@@ -242,7 +242,7 @@ export function OverviewTab({ analysisResults }: OverviewTabProps) {
       {recommendations.length > 0 && (
         <Card className="border-amber-200">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">💡 Recommendations</CardTitle>
+            <CardTitle className="text-base font-semibold">Recommendations</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -258,7 +258,7 @@ export function OverviewTab({ analysisResults }: OverviewTabProps) {
       {alerts.length > 0 && (
         <Card className="border-yellow-200">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">⚡ Alerts</CardTitle>
+            <CardTitle className="text-base font-semibold">Alerts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {alerts.slice(0, 3).map((alert: any, i: number) => (
@@ -281,7 +281,7 @@ export function OverviewTab({ analysisResults }: OverviewTabProps) {
       {!summary.totalTransactions && (
         <Card className="border-blue-200">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">📊 Waiting for data</CardTitle>
+            <CardTitle className="text-base font-semibold">Waiting for data</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">

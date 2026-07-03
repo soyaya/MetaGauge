@@ -45,7 +45,7 @@ export function CompetitiveTab({ analysisResults }: CompetitiveTabProps) {
     const prevCount = data?.competitors?.length || 0;
     try {
       await api.competitive.addCompetitor(form);
-      setAddMsg(`✅ Indexing ${form.name || form.address.slice(0,10)}... Refreshing every 10s`);
+      setAddMsg(`Indexing ${form.name || form.address.slice(0,10)}... Refreshing every 10s`);
       setForm({ address: '', chain: 'ethereum', name: '' });
       let attempts = 0;
       const poll = setInterval(async () => {
@@ -54,12 +54,12 @@ export function CompetitiveTab({ analysisResults }: CompetitiveTabProps) {
           const d = await api.competitive.getDashboard();
           // Stop only when count actually increased (new competitor appeared)
           if ((d.competitors?.length || 0) > prevCount) {
-            setData(d); setAddMsg('✅ Competitor loaded!'); clearInterval(poll);
+            setData(d); setAddMsg('Competitor loaded!'); clearInterval(poll);
           }
         } catch { /* keep polling */ }
         if (attempts >= 9) { clearInterval(poll); load(); }
       }, 10000);
-    } catch (e: any) { setAddMsg(`❌ ${e.message}`); }
+    } catch (e: any) { setAddMsg(`Error: ${e.message}`); }
     finally { setAdding(false); }
   };
 
@@ -82,7 +82,7 @@ export function CompetitiveTab({ analysisResults }: CompetitiveTabProps) {
             <div className="flex items-center gap-2 mb-1">
               <span className={`w-3 h-3 rounded-full ${myColor.bg} shadow-lg`} />
               <h2 className="text-2xl font-bold">{me.name || 'Your Contract'}</h2>
-              <Badge className={myColor.badge}>★ You</Badge>
+              <Badge className={myColor.badge}>You</Badge>
             </div>
             <p className="text-sm text-muted-foreground mb-4">Benchmarked against {competitors.length} competitor{competitors.length !== 1 ? 's' : ''}
               {data?.quota && <span className="ml-2 text-xs">· <span title="Competitor slots used (deleting doesn't reset this)">{data.quota.used}/{data.quota.limit} slots used ({data.quota.remaining} remaining on {data.quota.tier} plan)</span></span>}
@@ -429,7 +429,7 @@ function FullComparisonTable({ me, competitors, featureBenchmark, allNames }: an
                           <span className={`w-2.5 h-2.5 rounded-full ${col.bg} shadow`} />
                           <span className={col.text}>{c.name || `Competitor ${i}`}</span>
                         </div>
-                        {c._isMe && <div className="text-xs font-normal text-muted-foreground">★ You</div>}
+                        {c._isMe && <div className="text-xs font-normal text-muted-foreground">You</div>}
                         {!c._isMe && <div className="text-xs font-normal text-muted-foreground">{c.chain}</div>}
                       </th>
                     );
@@ -480,7 +480,7 @@ function FullComparisonTable({ me, competitors, featureBenchmark, allNames }: an
                         <th key={n} colSpan={3} className={`text-center py-3 px-2 font-medium border-l ${col.light}`}>
                           <div className="flex items-center justify-center gap-1.5">
                             <span className={`w-2 h-2 rounded-full ${col.bg}`} />
-                            <span className={col.text}>{n}{i===0 && ' ★'}</span>
+                            <span className={col.text}>{n}{i===0 && ' (You)'}</span>
                           </div>
                         </th>
                       );
@@ -554,8 +554,8 @@ function AlertForm({ competitorId, competitorName, onClose, onCreated, color }: 
         name: form.name || `${competitorName}: ${form.metric} ${form.condition} ${form.threshold}`,
       });
       onCreated?.(d.config);
-      setMsg('✅ Alert created');
-    } catch (e: any) { setMsg('❌ ' + e.message); }
+      setMsg('Alert created');
+    } catch (e: any) { setMsg('Error: ' + e.message); }
   };
 
   return (
@@ -589,7 +589,7 @@ function AlertForm({ competitorId, competitorName, onClose, onCreated, color }: 
         <Button size="sm" onClick={submit} className="flex-1">Save Alert</Button>
         <Button size="sm" variant="outline" onClick={onClose}>Cancel</Button>
       </div>
-      {msg && <p className={`text-xs ${msg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{msg}</p>}
+      {msg && <p className={`text-xs ${msg.startsWith('Error') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
     </div>
   );
 }

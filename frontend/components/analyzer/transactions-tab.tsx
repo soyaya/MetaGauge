@@ -98,7 +98,7 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
     <div className="space-y-6">
       {error && (
         <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
-          ⚠ Using cached data. ({error})
+          Using cached data. ({error})
         </p>
       )}
 
@@ -223,7 +223,7 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
                           <td className="py-2 px-2 hidden lg:table-cell">{methodLabel(tx.input)}</td>
                           <td className="py-2 px-2">
                             <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${tx.status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {tx.status ? '✓' : '✗'}
+                              {tx.status ? 'OK' : 'Fail'}
                             </span>
                           </td>
                         </tr>

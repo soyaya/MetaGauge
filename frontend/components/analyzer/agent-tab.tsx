@@ -104,7 +104,7 @@ export function AgentTab() {
             {profile.milestones?.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-3">
                 {profile.milestones.map((m: string) => (
-                  <Badge key={m} variant="secondary" className="text-xs">🏆 {m.replace(/_/g, ' ')}</Badge>
+                  <Badge key={m} variant="secondary" className="text-xs">{m.replace(/_/g, ' ')}</Badge>
                 ))}
               </div>
             )}

@@ -289,7 +289,7 @@ export function IntelligenceTab({ contractAddress, chain, githubUrl, twitterHand
               </div>
             </div>
             <div className="flex gap-3 text-xs">
-              <span className="text-green-500">✓ {position.benchmarkSummary?.good} good</span>
+              <span className="text-green-500">{position.benchmarkSummary?.good} good</span>
               <span className="text-yellow-500">→ {position.benchmarkSummary?.warn} average</span>
               <span className="text-red-500">↓ {position.benchmarkSummary?.bad} below avg</span>
             </div>

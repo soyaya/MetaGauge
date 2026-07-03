@@ -236,7 +236,7 @@ export default function ProfilePage() {
           try {
             const result = await api.users.verifyWithGoogle(tr.access_token)
             login(result.token, { ...user, ...result.user })
-            toast({ title: '✅ Email verified via Google!' })
+            toast({ title: 'Email verified via Google!' })
             await loadProfile()
           } catch (err: any) {
             toast({ title: err.message || 'Google verification failed', variant: 'destructive' })
@@ -278,7 +278,7 @@ export default function ProfilePage() {
     try {
       const result = await api.post('/api/auth/verify-otp', { email: profile.email, otp })
       login(result.token, { ...user, ...result.user })
-      toast({ title: '✅ Email verified!' })
+      toast({ title: 'Email verified!' })
       setOtpSent(false)
       setOtp('')
       await loadProfile()

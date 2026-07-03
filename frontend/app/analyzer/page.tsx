@@ -78,32 +78,32 @@ export default function TractionPage() {
       [''],
       ['=== RETENTION ==='],
       ['Metric,Value,Target,Status'],
-      [`D1 Retention,${r.d1Retention}%,20%,${r.d1Retention>=20?'✅ Good':'⚠️ Below target'}`],
-      [`D7 Retention,${r.d7Retention}%,15%,${r.d7Retention>=15?'✅ Good':'⚠️ Below target'}`],
-      [`D30 Retention,${r.d30Retention}%,10%,${r.d30Retention>=10?'✅ Good':'⚠️ Below target'}`],
-      [`Churn Rate,${r.churnRate}%,<25%,${r.churnRate<=25?'✅ Good':'⚠️ High'}`],
-      [`Resurrection Rate,${r.resurrectionRate}%,10%,${r.resurrectionRate>=10?'✅ Good':'⚠️ Below target'}`],
-      [`Overall Retention,${r.retentionRate}%,40%,${r.retentionRate>=40?'✅ Good':'⚠️ Below target'}`],
+      [`D1 Retention,${r.d1Retention}%,20%,${r.d1Retention>=20?'Good':'Below target'}`],
+      [`D7 Retention,${r.d7Retention}%,15%,${r.d7Retention>=15?'Good':'Below target'}`],
+      [`D30 Retention,${r.d30Retention}%,10%,${r.d30Retention>=10?'Good':'Below target'}`],
+      [`Churn Rate,${r.churnRate}%,<25%,${r.churnRate<=25?'Good':'High'}`],
+      [`Resurrection Rate,${r.resurrectionRate}%,10%,${r.resurrectionRate>=10?'Good':'Below target'}`],
+      [`Overall Retention,${r.retentionRate}%,40%,${r.retentionRate>=40?'Good':'Below target'}`],
       [''],
       ['=== ACTIVATION & ADOPTION ==='],
       ['Metric,Value,Target,Status'],
-      [`Activation Rate,${a.activationRate}%,50%,${a.activationRate>=50?'✅ Good':'⚠️ Below target'}`],
-      [`Bounce Rate,${data.defiMetrics?.bounceRate||0}%,<30%,${(data.defiMetrics?.bounceRate||0)<=30?'✅ Good':'⚠️ High'}`],
+      [`Activation Rate,${a.activationRate}%,50%,${a.activationRate>=50?'Good':'Below target'}`],
+      [`Bounce Rate,${data.defiMetrics?.bounceRate||0}%,<30%,${(data.defiMetrics?.bounceRate||0)<=30?'Good':'High'}`],
       [`Time to Activation,${a.avgTimeToActivation||'N/A'},,`],
       [`Avg Session Duration,${data.defiMetrics?.avgSessionDuration||'N/A'},,`],
       [''],
       ['=== GAS & COST ==='],
       ['Metric,Value,Target,Status'],
-      [`Avg Gas Cost (USD),$${g?.averageGasCostUSD||0},$0.50,${(g?.averageGasCostUSD||0)<=0.5?'✅ Good':'⚠️ High'}`],
+      [`Avg Gas Cost (USD),$${g?.averageGasCostUSD||0},$0.50,${(g?.averageGasCostUSD||0)<=0.5?'Good':'High'}`],
       [`Total Gas Cost (USD),$${g?.totalGasCostUSD||0},,`],
-      [`Failed Transactions,${g?.failedTransactions||0},0,${(g?.failedTransactions||0)===0?'✅ Good':'⚠️ Has failures'}`],
-      [`Gas Efficiency Score,${g?.gasEfficiencyScore||0}%,90%,${(g?.gasEfficiencyScore||0)>=90?'✅ Good':'⚠️ Below target'}`],
+      [`Failed Transactions,${g?.failedTransactions||0},0,${(g?.failedTransactions||0)===0?'Good':'Has failures'}`],
+      [`Gas Efficiency Score,${g?.gasEfficiencyScore||0}%,90%,${(g?.gasEfficiencyScore||0)>=90?'Good':'Below target'}`],
       [''],
       ['=== USER QUALITY ==='],
       ['Metric,Value,Target,Status'],
-      [`Wallet Quality Score,${q?.avgWalletQuality||0}/100,65/100,${(q?.avgWalletQuality||0)>=65?'✅ Good':'⚠️ Below target'}`],
-      [`Power User Rate,${q?.powerUserRate||0}%,15%,${(q?.powerUserRate||0)>=15?'✅ Good':'⚠️ Below target'}`],
-      [`Bot Activity,${q?.botPct||0}%,<5%,${(q?.botPct||0)<=5?'✅ Good':'⚠️ High'}`],
+      [`Wallet Quality Score,${q?.avgWalletQuality||0}/100,65/100,${(q?.avgWalletQuality||0)>=65?'Good':'Below target'}`],
+      [`Power User Rate,${q?.powerUserRate||0}%,15%,${(q?.powerUserRate||0)>=15?'Good':'Below target'}`],
+      [`Bot Activity,${q?.botPct||0}%,<5%,${(q?.botPct||0)<=5?'Good':'High'}`],
       [`Unique Users,${growth.totalUsers},,`],
       [''],
       ['=== OPEN TASKS (Fix to improve score) ==='],
@@ -138,7 +138,18 @@ export default function TractionPage() {
     </div>
   );
 
-  const { ops, tasks, growth, featureInsights, recommendations, retentionMetrics: ret, activationMetrics: act, contract, labels } = data;
+  const {
+    ops: rawOps,
+    tasks = [],
+    growth = {},
+    featureInsights = [],
+    recommendations = [],
+    retentionMetrics: ret = {},
+    activationMetrics: act = {},
+    contract,
+    labels = [],
+  } = data;
+  const ops = { total: 0, label: 'N/A', pillars: {}, ...rawOps };
 
   const opsRing = ops.total >= 75 ? '#22c55e' : ops.total >= 50 ? '#eab308' : '#ef4444';
 
@@ -172,7 +183,7 @@ export default function TractionPage() {
             <p className="text-sm text-muted-foreground mt-1">{contract.chain} · <span className="font-mono">{contract.address?.slice(0,14)}...</span></p>
             <div className="flex flex-wrap gap-2 mt-2">
               {labels.map((l: any) => (
-                <Badge key={l.label} variant="outline" className="text-xs">⭐ {l.label}</Badge>
+                <Badge key={l.label} variant="outline" className="text-xs">{l.label}</Badge>
               ))}
             </div>
           </div>
@@ -265,7 +276,7 @@ export default function TractionPage() {
         <Card>
           <CardHeader className="pb-3"><CardTitle className="text-sm">Activation Funnel</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {growth.activationFunnel.map((step: any) => (
+            {(growth.activationFunnel || []).map((step: any) => (
               <div key={step.step}>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-muted-foreground">{step.step}</span>
@@ -394,9 +405,9 @@ function SendReportButton({ contractName }: { contractName: string }) {
     setSending(true);
     try {
       await (api as any).traction.sendReport({ email, sections: selected });
-      setMsg(`✅ Report sent to ${email}`);
+      setMsg(`Report sent to ${email}`);
       setTimeout(() => { setOpen(false); setMsg(''); }, 2000);
-    } catch (e: any) { setMsg(`❌ ${e.message}`); }
+    } catch (e: any) { setMsg(`Error: ${e.message}`); }
     finally { setSending(false); }
   };
 
@@ -431,7 +442,7 @@ function SendReportButton({ contractName }: { contractName: string }) {
           </Button>
           <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
         </div>
-        {msg && <p className={`text-xs ${msg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{msg}</p>}
+        {msg && <p className={`text-xs ${msg.startsWith('Error') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
       </CardContent>
     </Card>
   );
@@ -551,11 +562,11 @@ function TaskCard({ task, onResolved }: { task: any; onResolved?: (score: number
             <span className={`text-sm font-medium ${resolved ? 'line-through text-muted-foreground' : ''}`}>{task.title}</span>
             <Badge variant="outline" className="text-xs">{task.pillar}</Badge>
             {task.priority === 'high' && !resolved && <Badge className="text-xs bg-red-50 text-red-700 border-red-200">High</Badge>}
-            {resolved && !pending && <Badge className="text-xs bg-green-50 text-green-700 border-green-200">✓ Confirmed</Badge>}
-            {resolved && pending && <Badge className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">⏳ Pending confirmation</Badge>}
+            {resolved && !pending && <Badge className="text-xs bg-green-50 text-green-700 border-green-200">Confirmed</Badge>}
+            {resolved && pending && <Badge className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">Pending confirmation</Badge>}
           </div>
           <p className="text-xs text-muted-foreground mb-1.5">{task.description}</p>
-          <p className="text-xs text-muted-foreground bg-muted/40 rounded px-2 py-1">💡 {task.action}</p>
+          <p className="text-xs text-muted-foreground bg-muted/40 rounded px-2 py-1">{task.action}</p>
 
           {task.target != null && (
             <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
@@ -570,7 +581,7 @@ function TaskCard({ task, onResolved }: { task: any; onResolved?: (score: number
 
           {checkResult && (
             <div className={`mt-2 rounded px-2 py-1.5 text-xs ${checkResult.resolved ? 'bg-green-50 text-green-800' : 'bg-blue-50 text-blue-800'}`}>
-              <strong>{checkResult.resolved ? '✅ On track!' : '🤖 AI:'}</strong> {checkResult.aiGuidance}
+              <strong>{checkResult.resolved ? 'On track!' : 'AI:'}</strong> {checkResult.aiGuidance}
             </div>
           )}
 

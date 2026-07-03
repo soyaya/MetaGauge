@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, LabelList, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface UsersTabProps { analysisResults: any }
 
@@ -49,6 +49,22 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
   const formatAddr = (a: string) => a ? `${a.slice(0,6)}...${a.slice(-4)}` : 'N/A';
   const formatEth  = (v: number) => v > 0 ? `${v.toFixed(6)} ETH` : '0 ETH';
 
+  // Top 10 users sorted by tx count for the bar chart
+  const topUsersChart = [...users]
+    .sort((a, b) => (b.transactionCount || 0) - (a.transactionCount || 0))
+    .slice(0, 10)
+    .map(u => ({
+      address: formatAddr(u.address),
+      txs: u.transactionCount || 0,
+      userType: u.userType || 'regular',
+      fill:
+        u.userType === 'whale'   ? 'hsl(270 60% 60%)' :
+        u.userType === 'power'   ? 'hsl(215 70% 55%)' :
+        u.userType === 'regular' ? 'hsl(142 55% 45%)' :
+        'hsl(220 10% 60%)',
+    }))
+    .reverse(); // recharts horizontal layout renders bottom-to-top, reverse gives rank 1 at top
+
   if (loading) return (
     <div className="flex items-center justify-center h-48">
       <Loader2 className="h-6 w-6 animate-spin mr-2" /><span>Loading users...</span>
@@ -59,7 +75,7 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
     <div className="space-y-6">
       {error && (
         <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
-          ⚠ Using cached data. ({error})
+          Using cached data. ({error})
         </p>
       )}
 
@@ -149,44 +165,106 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
         ))}
       </div>
 
-      {/* ── Top users table ───────────────────────────────────────────── */}
+      {/* ── Top users bar chart ───────────────────────────────────────── */}
       <Card>
-        <CardHeader><CardTitle className="text-sm">Top Users by Activity</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-sm">Top Users by Activity</CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">Transaction count per wallet — colored by user type</p>
+        </CardHeader>
         <CardContent>
           {users.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">No user data available.</p>
           ) : (
-              <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[480px]">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">Address</th>
-                    <th className="text-right py-2 px-3 text-muted-foreground font-medium">Txs</th>
-                    <th className="text-right py-2 px-3 text-muted-foreground font-medium hidden sm:table-cell">Total Value</th>
-                    <th className="text-right py-2 px-3 text-muted-foreground font-medium hidden sm:table-cell">Gas Spent</th>
-                    <th className="text-center py-2 px-3 text-muted-foreground font-medium">Type</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u: any, i: number) => (
-                    <tr key={i} className="border-b hover:bg-muted/30 transition-colors">
-                      <td className="py-2 px-3 font-mono text-xs">{formatAddr(u.address)}</td>
-                      <td className="text-right py-2 px-3 font-semibold">{u.transactionCount}</td>
-                      <td className="text-right py-2 px-3 text-muted-foreground hidden sm:table-cell">{formatEth(u.totalValue)}</td>
-                      <td className="text-right py-2 px-3 text-muted-foreground hidden sm:table-cell">{formatEth(u.totalGasSpent)}</td>
-                      <td className="text-center py-2 px-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          u.userType === 'whale'   ? 'bg-purple-100 text-purple-700' :
-                          u.userType === 'power'   ? 'bg-blue-100 text-blue-700'    :
-                          u.userType === 'regular' ? 'bg-green-100 text-green-700'  :
-                          'bg-gray-100 text-gray-600'
-                        }`}>{u.userType}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <>
+              {/* Bar chart — top 10 */}
+              <ResponsiveContainer width="100%" height={topUsersChart.length * 36 + 16}>
+                <BarChart
+                  data={topUsersChart}
+                  layout="vertical"
+                  margin={{ top: 4, right: 56, left: 8, bottom: 4 }}
+                >
+                  <CartesianGrid {...GRID_STYLE} horizontal={false} />
+                  <XAxis type="number" {...AXIS_STYLE} tickFormatter={(v: number) => v.toLocaleString()} />
+                  <YAxis
+                    type="category"
+                    dataKey="address"
+                    width={96}
+                    {...AXIS_STYLE}
+                    tick={{ fontSize: 11, fontFamily: 'monospace', fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <Tooltip
+                    {...TOOLTIP_STYLE}
+                    formatter={(v: any, _: any, props: any) => [
+                      `${Number(v).toLocaleString()} txs`,
+                      props.payload?.userType ?? 'user',
+                    ]}
+                  />
+                  <Bar dataKey="txs" radius={[0, 4, 4, 0]} maxBarSize={22}>
+                    {topUsersChart.map((entry, i) => (
+                      <Cell key={i} fill={entry.fill} />
+                    ))}
+                    <LabelList
+                      dataKey="txs"
+                      position="right"
+                      style={{ fontSize: 11, fill: 'hsl(var(--foreground))', fontWeight: 600 }}
+                      formatter={(v: number) => v.toLocaleString()}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+
+              {/* Legend */}
+              <div className="flex items-center gap-4 mt-3 mb-5 flex-wrap">
+                {[
+                  { type: 'whale',   color: 'bg-purple-400', label: 'Whale' },
+                  { type: 'power',   color: 'bg-blue-500',   label: 'Power' },
+                  { type: 'regular', color: 'bg-green-500',  label: 'Regular' },
+                  { type: 'other',   color: 'bg-gray-400',   label: 'Other' },
+                ].map(({ color, label }) => (
+                  <span key={label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span className={`w-2.5 h-2.5 rounded-sm ${color}`} />
+                    {label}
+                  </span>
+                ))}
               </div>
+
+              {/* Full detail table */}
+              <div className="overflow-x-auto border-t pt-4">
+                <table className="w-full text-sm min-w-[480px]">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">#</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Address</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground font-medium">Txs</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground font-medium hidden sm:table-cell">Total Value</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground font-medium hidden sm:table-cell">Gas Spent</th>
+                      <th className="text-center py-2 px-3 text-muted-foreground font-medium">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...users]
+                      .sort((a, b) => (b.transactionCount || 0) - (a.transactionCount || 0))
+                      .map((u: any, i: number) => (
+                        <tr key={i} className="border-b hover:bg-muted/30 transition-colors">
+                          <td className="py-2 px-3 text-xs text-muted-foreground">{i + 1}</td>
+                          <td className="py-2 px-3 font-mono text-xs">{formatAddr(u.address)}</td>
+                          <td className="text-right py-2 px-3 font-semibold">{u.transactionCount}</td>
+                          <td className="text-right py-2 px-3 text-muted-foreground hidden sm:table-cell">{formatEth(u.totalValue)}</td>
+                          <td className="text-right py-2 px-3 text-muted-foreground hidden sm:table-cell">{formatEth(u.totalGasSpent)}</td>
+                          <td className="text-center py-2 px-3">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              u.userType === 'whale'   ? 'bg-purple-100 text-purple-700' :
+                              u.userType === 'power'   ? 'bg-blue-100 text-blue-700'    :
+                              u.userType === 'regular' ? 'bg-green-100 text-green-700'  :
+                              'bg-gray-100 text-gray-600'
+                            }`}>{u.userType}</span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

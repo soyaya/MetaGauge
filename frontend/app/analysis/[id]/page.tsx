@@ -147,7 +147,7 @@ export default function AnalysisResultPage() {
       `${analysis.contractAddress.slice(0, 10)}...${analysis.contractAddress.slice(-8)}` : 
       'Contract'
     
-    const tweetText = `🔍 Just analyzed ${contractAddr} on ${analysis.analysisType || 'blockchain'} using @MetaGauge!\n\n📊 Key insights:\n• Smart contract analytics\n• User behavior analysis\n• Performance metrics\n\nCheck it out: ${window.location.href}\n\n#DeFi #Analytics #Blockchain`
+    const tweetText = `Just analyzed ${contractAddr} on ${analysis.analysisType || 'blockchain'} using @MetaGauge!\n\nKey insights:\n- Smart contract analytics\n- User behavior analysis\n- Performance metrics\n\nCheck it out: ${window.location.href}\n\n#DeFi #Analytics #Blockchain`
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
     window.open(twitterUrl, '_blank')

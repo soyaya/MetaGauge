@@ -70,7 +70,7 @@ export function UxTab({ analysisResults }: UxTabProps) {
     <div className="space-y-6">
       {error && (
         <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
-          ⚠ Using cached data. ({error})
+          Using cached data. ({error})
         </p>
       )}
 
@@ -121,7 +121,7 @@ export function UxTab({ analysisResults }: UxTabProps) {
               {pct(dm.bounceRate)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">Users with 1 interaction only</p>
-            {(dm.bounceRate||0) > 70 && <p className="text-xs text-red-600 mt-1">⚠ High — improve first experience</p>}
+            {(dm.bounceRate||0) > 70 && <p className="text-xs text-red-600 mt-1">High — improve first experience</p>}
           </CardContent>
         </Card>
 
@@ -175,7 +175,7 @@ export function UxTab({ analysisResults }: UxTabProps) {
                   <Progress value={s.pct} className="h-2" />
                   {i > 0 && funnelData[i-1].pct - s.pct > 20 && (
                     <p className="text-xs text-red-600 mt-0.5">
-                      ⚠ {(funnelData[i-1].pct - s.pct).toFixed(0)}% drop-off here — fix this step
+                      {(funnelData[i-1].pct - s.pct).toFixed(0)}% drop-off here — fix this step
                     </p>
                   )}
                 </div>
@@ -263,7 +263,7 @@ export function UxTab({ analysisResults }: UxTabProps) {
               r.severity === 'medium' ? 'bg-amber-50 border-amber-200 text-amber-800' :
               'bg-green-50 border-green-200 text-green-800'
             }`}>
-              {r.severity === 'high' ? '🔴' : r.severity === 'medium' ? '🟡' : '🟢'} {r.msg}
+              {r.severity === 'high' ? 'High:' : r.severity === 'medium' ? 'Note:' : 'Good:'} {r.msg}
             </div>
           ))}
         </CardContent>

@@ -93,7 +93,7 @@ export function MetricsTab({ analysisResults }: MetricsTabProps) {
     <div className="space-y-6">
       {error && (
         <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
-          ⚠ Live endpoint unavailable — showing cached data. ({error})
+          Live endpoint unavailable — showing cached data. ({error})
         </p>
       )}
 
