@@ -219,9 +219,15 @@ router.post('/register', async (req, res) => {
 
   } catch (error) {
     console.error('Registration error:', error);
+    // Postgres 23505 = unique_violation — a concurrent duplicate-registration race
+    // that slipped past the earlier findByEmail check. Don't echo the raw DB error
+    // (constraint/table names) to this unauthenticated endpoint.
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'Registration failed', message: 'An account with this email already exists' });
+    }
     res.status(500).json({
       error: 'Registration failed',
-      message: error.message
+      message: 'An unexpected error occurred. Please try again.'
     });
   }
 });

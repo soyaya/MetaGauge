@@ -5,7 +5,18 @@
  */
 
 import dotenv from 'dotenv';
+import path from 'path';
+import * as fsp from 'fs/promises';
+import crypto from 'crypto';
+import { createRequire } from 'module';
 dotenv.config();
+
+// Node (22.12+/24) supports synchronously `require()`-ing plain ESM modules
+// (ones without their own top-level await). We use this instead of top-level
+// `await import(...)` so this file has no top-level await of its own — that
+// syntax can't be transformed to CommonJS, which breaks Jest's test runtime
+// for every module that transitively imports this storage facade.
+const esmRequire = createRequire(import.meta.url);
 
 const DATABASE_TYPE = process.env.DATABASE_TYPE || 'file';
 
@@ -24,7 +35,7 @@ let UserStorage, ContractStorage, AnalysisStorage,
 
 if (DATABASE_TYPE === 'postgres') {
   console.log('🔄 Loading PostgreSQL storage...');
-  const pg = await import('./postgresStorage.js');
+  const pg = esmRequire('./postgresStorage.js');
   UserStorage              = pg.PostgresUserStorage;
   ContractStorage          = pg.PostgresContractStorage;
   AnalysisStorage          = pg.PostgresAnalysisStorage;
@@ -59,7 +70,7 @@ if (DATABASE_TYPE === 'postgres') {
   WalletPipelineStorage    = pg.PostgresWalletPipelineStorage;
   console.log('✅ PostgreSQL storage loaded');
 } else {
-  const fs = await import('./fileStorage.js');
+  const fs = esmRequire('./fileStorage.js');
   UserStorage              = fs.UserStorage;
   ContractStorage          = fs.ContractStorage;
   AnalysisStorage          = fs.AnalysisStorage;
@@ -70,9 +81,6 @@ if (DATABASE_TYPE === 'postgres') {
   LivePollStorage          = fs.LivePollStorage;
 
   const { readJsonFile, writeJsonFile } = fs;
-  const path   = await import('path');
-  const fsp    = await import('fs/promises');
-  const crypto = await import('crypto');
   const DATA_DIR = './data';
   const uFile = (userId, name) => path.join(DATA_DIR, 'users', userId, name);
 
@@ -130,7 +138,7 @@ if (DATABASE_TYPE === 'postgres') {
     },
   };
 
-  AlertConfigStorage = (await import('./AlertConfigurationStorage.js')).default;
+  AlertConfigStorage = esmRequire('./AlertConfigurationStorage.js').default;
 
   AlertsStorage = {
     findByUserId: async (userId) => {
@@ -169,7 +177,7 @@ if (DATABASE_TYPE === 'postgres') {
     },
   };
 
-  AgentMemoryStorage = (await import('../../services/AgentMemory.js')).AgentMemory;
+  AgentMemoryStorage = esmRequire('../../services/AgentMemory.js').AgentMemory;
 
   AITasksStorage = {
     readAll: async () => readJsonFile(path.join(DATA_DIR, 'ai-tasks.json'), []),

@@ -1,0 +1,67 @@
+[
+  {
+    "name": "Uniswap V2 (Early 2020)",
+    "category": "Dex",
+    "chain": "ethereum",
+    "userGrowthVelocity": { "w1": 1, "w4": 8, "w12": 45 },
+    "retentionCurveShape": { "d1": 62, "d7": 38, "d30": 22 },
+    "revenueAcceleration": [0, 1.8, 3.2, 2.1, 4.5],
+    "cacTrend": "improving",
+    "onchainDensity": 3.2,
+    "tvlGrowthShape": [0.05, 0.12, 0.25, 0.40, 0.65, 1.0],
+    "stage": "early",
+    "successIndicators": ["organic user growth", "improving CAC", "high D7 retention", "TVL acceleration"]
+  },
+  {
+    "name": "Aave V1 (Early 2020)",
+    "category": "Lending",
+    "chain": "ethereum",
+    "userGrowthVelocity": { "w1": 1, "w4": 5, "w12": 28 },
+    "retentionCurveShape": { "d1": 71, "d7": 52, "d30": 34 },
+    "revenueAcceleration": [0, 1.2, 2.8, 3.5, 5.0],
+    "cacTrend": "improving",
+    "onchainDensity": 1.8,
+    "tvlGrowthShape": [0.03, 0.08, 0.18, 0.35, 0.60, 1.0],
+    "stage": "early",
+    "successIndicators": ["high D30 retention", "protocol fee growth", "TVL compounding"]
+  },
+  {
+    "name": "GMX (Early 2022)",
+    "category": "Derivatives",
+    "chain": "arbitrum",
+    "userGrowthVelocity": { "w1": 1, "w4": 6, "w12": 32 },
+    "retentionCurveShape": { "d1": 58, "d7": 44, "d30": 28 },
+    "revenueAcceleration": [0, 2.1, 4.3, 6.0, 8.5],
+    "cacTrend": "improving",
+    "onchainDensity": 4.5,
+    "tvlGrowthShape": [0.02, 0.07, 0.20, 0.45, 0.75, 1.0],
+    "stage": "early",
+    "successIndicators": ["high tx density", "revenue acceleration", "improving CAC", "whale retention"]
+  },
+  {
+    "name": "Blur NFT (Early 2022)",
+    "category": "NFT",
+    "chain": "ethereum",
+    "userGrowthVelocity": { "w1": 1, "w4": 12, "w12": 80 },
+    "retentionCurveShape": { "d1": 45, "d7": 28, "d30": 14 },
+    "revenueAcceleration": [0, 3.5, 7.0, 4.0, 9.0],
+    "cacTrend": "stable",
+    "onchainDensity": 6.8,
+    "tvlGrowthShape": [0.01, 0.05, 0.18, 0.50, 0.80, 1.0],
+    "stage": "early",
+    "successIndicators": ["viral user growth", "high volume per user", "aggressive expansion"]
+  },
+  {
+    "name": "Curve Finance (Early 2020)",
+    "category": "Dex",
+    "chain": "ethereum",
+    "userGrowthVelocity": { "w1": 1, "w4": 4, "w12": 18 },
+    "retentionCurveShape": { "d1": 75, "d7": 60, "d30": 42 },
+    "revenueAcceleration": [0, 1.1, 1.8, 2.5, 3.0],
+    "cacTrend": "stable",
+    "onchainDensity": 2.1,
+    "tvlGrowthShape": [0.04, 0.10, 0.22, 0.42, 0.68, 1.0],
+    "stage": "early",
+    "successIndicators": ["exceptional D30 retention", "steady compounding", "protocol stickiness"]
+  }
+]

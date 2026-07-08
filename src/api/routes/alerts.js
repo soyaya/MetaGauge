@@ -25,6 +25,9 @@ router.get('/config', async (req, res) => {
 
 router.post('/config', async (req, res) => {
   try {
+    if (!req.body?.contractId) {
+      return res.status(400).json({ error: 'contractId is required' });
+    }
     const config = await AlertConfigStorage.create({ userId: req.user.id, ...req.body });
     res.status(201).json({ config });
   } catch (error) {
@@ -79,16 +82,24 @@ router.post('/test', async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-  const alerts = await AlertsStorage.findByUserId(req.user.id);
-  res.json({ alerts });
+  try {
+    const alerts = await AlertsStorage.findByUserId(req.user.id);
+    res.json({ alerts });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get alerts', message: error.message });
+  }
 });
 
 router.patch('/:id/acknowledge', async (req, res) => {
-  await AlertsStorage.acknowledge(req.params.id, req.user.id);
-  const alerts = await AlertsStorage.findByUserId(req.user.id);
-  const alert = alerts.find(a => a.id === req.params.id);
-  if (!alert) return res.status(404).json({ error: 'Alert not found' });
-  res.json({ alert });
+  try {
+    await AlertsStorage.acknowledge(req.params.id, req.user.id);
+    const alerts = await AlertsStorage.findByUserId(req.user.id);
+    const alert = alerts.find(a => a.id === req.params.id);
+    if (!alert) return res.status(404).json({ error: 'Alert not found' });
+    res.json({ alert });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to acknowledge alert', message: error.message });
+  }
 });
 
 router.get('/agent-config', async (req, res) => {

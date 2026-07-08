@@ -391,44 +391,56 @@ router.post('/change-password', async (req, res) => {
 
 // ── Per-user social credentials ───────────────────────────────────────────────
 router.get('/social-credentials', async (req, res) => {
-  const user = await UserStorage.findById(req.user.id);
-  const creds = user?.socialCredentials || {};
-  // Never expose secrets — just tell the frontend which are connected
-  res.json({
-    twitter:  { connected: !!(creds.twitterApiKey && creds.twitterAccessToken) },
-    linkedin: { connected: !!(creds.linkedinAccessToken && creds.linkedinPersonUrn) },
-  });
+  try {
+    const user = await UserStorage.findById(req.user.id);
+    const creds = user?.socialCredentials || {};
+    // Never expose secrets — just tell the frontend which are connected
+    res.json({
+      twitter:  { connected: !!(creds.twitterApiKey && creds.twitterAccessToken) },
+      linkedin: { connected: !!(creds.linkedinAccessToken && creds.linkedinPersonUrn) },
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get social credentials', message: error.message });
+  }
 });
 
 router.put('/social-credentials', async (req, res) => {
-  const { twitterApiKey, twitterApiSecret, twitterAccessToken, twitterAccessSecret, linkedinAccessToken, linkedinPersonUrn } = req.body;
-  const user = await UserStorage.findById(req.user.id);
-  const existing = user?.socialCredentials || {};
-  await UserStorage.update(req.user.id, {
-    socialCredentials: {
-      ...existing,
-      ...(twitterApiKey        && { twitterApiKey }),
-      ...(twitterApiSecret     && { twitterApiSecret }),
-      ...(twitterAccessToken   && { twitterAccessToken }),
-      ...(twitterAccessSecret  && { twitterAccessSecret }),
-      ...(linkedinAccessToken  && { linkedinAccessToken }),
-      ...(linkedinPersonUrn    && { linkedinPersonUrn }),
-    },
-  });
-  res.json({ message: 'Social credentials saved' });
+  try {
+    const { twitterApiKey, twitterApiSecret, twitterAccessToken, twitterAccessSecret, linkedinAccessToken, linkedinPersonUrn } = req.body;
+    const user = await UserStorage.findById(req.user.id);
+    const existing = user?.socialCredentials || {};
+    await UserStorage.update(req.user.id, {
+      socialCredentials: {
+        ...existing,
+        ...(twitterApiKey        && { twitterApiKey }),
+        ...(twitterApiSecret     && { twitterApiSecret }),
+        ...(twitterAccessToken   && { twitterAccessToken }),
+        ...(twitterAccessSecret  && { twitterAccessSecret }),
+        ...(linkedinAccessToken  && { linkedinAccessToken }),
+        ...(linkedinPersonUrn    && { linkedinPersonUrn }),
+      },
+    });
+    res.json({ message: 'Social credentials saved' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to save social credentials', message: error.message });
+  }
 });
 
 router.delete('/social-credentials/:platform', async (req, res) => {
-  const user = await UserStorage.findById(req.user.id);
-  const creds = { ...(user?.socialCredentials || {}) };
-  if (req.params.platform === 'twitter') {
-    delete creds.twitterApiKey; delete creds.twitterApiSecret;
-    delete creds.twitterAccessToken; delete creds.twitterAccessSecret;
-  } else if (req.params.platform === 'linkedin') {
-    delete creds.linkedinAccessToken; delete creds.linkedinPersonUrn;
+  try {
+    const user = await UserStorage.findById(req.user.id);
+    const creds = { ...(user?.socialCredentials || {}) };
+    if (req.params.platform === 'twitter') {
+      delete creds.twitterApiKey; delete creds.twitterApiSecret;
+      delete creds.twitterAccessToken; delete creds.twitterAccessSecret;
+    } else if (req.params.platform === 'linkedin') {
+      delete creds.linkedinAccessToken; delete creds.linkedinPersonUrn;
+    }
+    await UserStorage.update(req.user.id, { socialCredentials: creds });
+    res.json({ message: `${req.params.platform} disconnected` });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to disconnect', message: error.message });
   }
-  await UserStorage.update(req.user.id, { socialCredentials: creds });
-  res.json({ message: `${req.params.platform} disconnected` });
 });
 
 export default router;

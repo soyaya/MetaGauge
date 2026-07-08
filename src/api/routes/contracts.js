@@ -17,6 +17,8 @@ import { requireTier } from '../middleware/auth.js';
 
 dotenv.config();
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * Validate contract exists on chain via RPC
  */
@@ -263,6 +265,10 @@ router.post('/', async (req, res) => {
       tags = []
     } = req.body;
 
+    if (!Array.isArray(competitors)) {
+      return res.status(400).json({ error: 'competitors must be an array' });
+    }
+
     const userId = req.user.id;
 
     // Validation - name and targetContract are always required
@@ -403,6 +409,13 @@ router.post('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
+    if (!UUID_RE.test(req.params.id)) {
+      return res.status(404).json({
+        error: 'Configuration not found',
+        message: 'Contract configuration not found or access denied'
+      });
+    }
+
     const config = await ContractStorage.findById(req.params.id);
 
     if (!config || config.userId !== req.user.id || !config.isActive) {
@@ -450,6 +463,13 @@ router.get('/:id', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
   try {
+    if (!UUID_RE.test(req.params.id)) {
+      return res.status(404).json({
+        error: 'Configuration not found',
+        message: 'Contract configuration not found or access denied'
+      });
+    }
+
     const config = await ContractStorage.findById(req.params.id);
 
     if (!config || config.userId !== req.user.id || config.isActive === false) {
@@ -509,6 +529,13 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
+    if (!UUID_RE.test(req.params.id)) {
+      return res.status(404).json({
+        error: 'Configuration not found',
+        message: 'Contract configuration not found or access denied'
+      });
+    }
+
     const config = await ContractStorage.findById(req.params.id);
 
     if (!config || config.userId !== req.user.id || config.isActive === false) {
@@ -638,35 +665,66 @@ router.get('/:id/competitor-suggestions', async (req, res) => {
 });
 
 // Task 7.1: Competitor CRUD
+
+/** Verify the contract exists and is owned by the requesting user. */
+async function ownedContractOrNull(contractId, userId) {
+  const contract = await ContractStorage.findById(contractId);
+  if (!contract || contract.userId !== userId) return null;
+  return contract;
+}
+
 router.get('/:id/competitors', async (req, res) => {
-  res.json({ competitors: CompetitorStorage.findByContractId(req.params.id) });
+  try {
+    if (!(await ownedContractOrNull(req.params.id, req.user.id))) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    const competitors = await CompetitorStorage.findByContractId(req.params.id);
+    res.json({ competitors });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve competitors', message: error.message });
+  }
 });
 
 router.post('/:id/competitors', async (req, res) => {
-  const { address, chain, name, group } = req.body;
-  if (!address || !chain) return res.status(400).json({ error: 'address and chain required' });
+  try {
+    if (!(await ownedContractOrNull(req.params.id, req.user.id))) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
 
-  // Validate address format
-  if (!/^0x[0-9a-fA-F]{40}$/.test(address) && chain !== 'starknet') {
-    return res.status(400).json({ error: 'Invalid contract address format' });
+    const { address, chain, name, group } = req.body;
+    if (!address || !chain) return res.status(400).json({ error: 'address and chain required' });
+
+    // Validate address format
+    if (!/^0x[0-9a-fA-F]{40}$/.test(address) && chain !== 'starknet') {
+      return res.status(400).json({ error: 'Invalid contract address format' });
+    }
+
+    const competitor = await CompetitorStorage.create({ contractId: req.params.id, address, chain, name: name || address, group: group || null, addedBy: req.user.id });
+    // Index this competitor per-user (non-blocking)
+    const crypto = await import('crypto');
+    setImmediate(() =>
+      indexCompetitor(req.user.id, {
+        id: crypto.randomUUID(),
+        address, chain, name: name || address,
+      }).catch(err => console.warn(`⚠️ Competitor indexing failed: ${err.message}`))
+    );
+    res.status(201).json({ competitor });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add competitor', message: error.message });
   }
-
-  const competitor = CompetitorStorage.create({ contractId: req.params.id, address, chain, name: name || address, group: group || null, addedBy: req.user.id });
-  // Index this competitor per-user (non-blocking)
-  const crypto = await import('crypto');
-  setImmediate(() =>
-    indexCompetitor(req.user.id, {
-      id: crypto.randomUUID(),
-      address, chain, name: name || address,
-    }).catch(err => console.warn(`⚠️ Competitor indexing failed: ${err.message}`))
-  );
-  res.status(201).json({ competitor });
 });
 
 router.delete('/:id/competitors/:competitorId', async (req, res) => {
-  const removed = CompetitorStorage.remove(req.params.competitorId, req.params.id);
-  if (!removed) return res.status(404).json({ error: 'Competitor not found' });
-  res.json({ message: 'Competitor removed' });
+  try {
+    if (!(await ownedContractOrNull(req.params.id, req.user.id))) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    const removed = await CompetitorStorage.remove(req.params.competitorId, req.params.id);
+    if (!removed) return res.status(404).json({ error: 'Competitor not found' });
+    res.json({ message: 'Competitor removed' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to remove competitor', message: error.message });
+  }
 });
 
 export default router;

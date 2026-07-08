@@ -523,28 +523,30 @@ data/
 
 | Phase | Task | Status |
 |-------|------|--------|
-| 1 | FinancialProfileService.js | Pending |
-| 1 | Input field schema + storage | Pending |
-| 1 | AI chat input collector | Pending |
-| 1 | FinancialDocumentEngine.js | Pending |
-| 1 | FinancialNarrativeService.js | Pending |
-| 1 | API routes /api/financial/* | Pending |
-| 1 | FinancialPDFGenerator.js | Pending |
-| 1 | Frontend financials-tab.tsx | Pending |
-| 1 | Add Financials tab to dashboard | Pending |
-| 1 | Phase 1 verification | Pending |
-| 2 | ResearchAgent.js | Pending |
-| 2 | ResearchStore.js | Pending |
-| 2 | API routes /api/research/* | Pending |
-| 2 | Scheduler integration | Pending |
-| 2 | Gemini context injection | Pending |
-| 2 | Frontend sector benchmarks section | Pending |
-| 2 | Phase 2 verification | Pending |
-| 3 | GrowthFingerprintEngine.js | Pending |
-| 3 | Seed successful project fingerprints | Pending |
-| 3 | ProjectRegistryService.js | Pending |
-| 3 | RecommendationEngine.js | Pending |
-| 3 | API routes /api/registry/* | Pending |
-| 3 | Frontend featured-projects-tab.tsx | Pending |
-| 3 | Frontend opt-in settings on profile | Pending |
-| 3 | Phase 3 verification | Pending |
+| 1 | FinancialProfileService.js | ✅ Done |
+| 1 | Input field schema + storage | ✅ Done |
+| 1 | AI chat input collector | ✅ Done |
+| 1 | FinancialDocumentEngine.js | ✅ Done |
+| 1 | FinancialNarrativeService.js | ✅ Done |
+| 1 | API routes /api/financial/* | ✅ Done |
+| 1 | FinancialPDFGenerator.js | ✅ Done |
+| 1 | Frontend financials-tab.tsx | ✅ Done |
+| 1 | Add Financials tab to dashboard | ✅ Done |
+| 1 | financialApi methods in lib/api.ts | ✅ Done |
+| 1 | DB migration (9 tables) | ✅ Done |
+| 1 | Phase 1 verification | Pending (needs live API keys + running server) |
+| 2 | ResearchAgent.js | ✅ Done |
+| 2 | ResearchStore.js | ✅ Done (inline in ResearchAgent + research_data table) |
+| 2 | API routes /api/research/* | ✅ Done |
+| 2 | Scheduler integration | ✅ Done (24h cycle in server.js) |
+| 2 | Gemini context injection | ✅ Done (research RAG → generateAll) |
+| 2 | Frontend sector benchmarks section | ✅ Done |
+| 2 | Phase 2 verification | ✅ Done (live API tests passed) |
+| 3 | GrowthFingerprintEngine.js | ✅ Done |
+| 3 | Seed successful project fingerprints | ✅ Done (Uniswap, Aave, GMX, Blur, Curve) |
+| 3 | ProjectRegistryService.js | ✅ Done |
+| 3 | RecommendationEngine.js | ✅ Done |
+| 3 | API routes /api/registry/* | ✅ Done |
+| 3 | Frontend featured-projects-tab.tsx | ✅ Done |
+| 3 | Frontend opt-in settings on profile | ✅ Done |
+| 3 | Phase 3 verification | ✅ Done (imports clean, build passes) |

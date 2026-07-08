@@ -402,6 +402,13 @@ export async function triggerDefaultContractIndexing(req, res) {
         // Update pattern profile with latest metrics
         PatternProfileService.update(req.user.id, metrics).catch(() => {});
 
+        // Auto-compute growth fingerprint after successful analysis (Phase 3 §3.6)
+        import('../../services/GrowthFingerprintEngine.js').then(({ default: GrowthFingerprintEngine }) => {
+          GrowthFingerprintEngine.computeAndSave(contract.address, contract.chain, metrics, [])
+            .then(() => console.log(`[GrowthFingerprint] Auto-computed for ${contract.address}`))
+            .catch(e => console.warn(`[GrowthFingerprint] Auto-compute failed: ${e.message}`));
+        }).catch(() => {});
+
         // Re-fetch user to get latest onboarding state before updating
         const freshUser = await UserStorage.findById(req.user.id);
         await UserStorage.update(req.user.id, {

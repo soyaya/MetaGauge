@@ -42,6 +42,9 @@ import { resumeLivePoll } from './routes/trigger-indexing.js';
 import agentRoutes from './routes/agent.js';
 import predictionsRoutes from './routes/predictions.js';
 import shareRoutes from './routes/share.js';
+import financialRoutes from './routes/financial.js';
+import researchRoutes from './routes/research.js';
+import registryRoutes from './routes/registry.js';
 
 // Import middleware
 import { authenticateToken, verifyToken } from './middleware/auth.js';
@@ -67,6 +70,14 @@ const server = http.createServer(app);
 
 // Initialize WebSocket server
 const wss = new WebSocketServer({ server, path: '/ws' });
+
+// `ws` re-emits the underlying http.Server's 'error' event on the
+// WebSocketServer instance itself — without a listener here, a recoverable
+// condition like EADDRINUSE (e.g. this module imported by tests while
+// another instance already holds the port) crashes the whole process.
+wss.on('error', (err) => {
+  console.error('❌ WebSocket server error:', err.code === 'EADDRINUSE' ? `Port already in use` : err);
+});
 
 // Initialize streaming indexer
 let streamingIndexer = null;
@@ -268,6 +279,9 @@ app.use('/api/traction', authenticateToken, tractionRoutes);
 app.use('/api/agent', authenticateToken, agentRoutes);
 app.use('/api/predictions', authenticateToken, predictionsRoutes);
 app.use('/api/share', shareRoutes); // mixed auth — POST requires token, GET /:token/data is public
+app.use('/api/financial', financialRoutes); // financial intelligence — auth handled inside router
+app.use('/api/research', researchRoutes);   // research agent — auth handled inside router
+app.use('/api/registry', registryRoutes);   // project registry + recommendations
 
 app.use('/api/competitive', authenticateToken, competitiveRouter);
 
@@ -292,8 +306,25 @@ app.use((req, res) => {
 // Start server with WebSocket support
 async function startServer() {
   try {
-    // Initialize file-based storage
-    await initializeDatabase();
+    // Initialize storage, retrying on transient connection failures (e.g. a
+    // momentary network blip to the DB host) rather than hard-crashing the
+    // whole process on the first hiccup.
+    const DB_INIT_RETRIES = 3;
+    let dbInitError = null;
+    for (let attempt = 1; attempt <= DB_INIT_RETRIES; attempt++) {
+      try {
+        await initializeDatabase();
+        dbInitError = null;
+        break;
+      } catch (err) {
+        dbInitError = err;
+        if (attempt < DB_INIT_RETRIES) {
+          console.warn(`⚠️  Database init attempt ${attempt}/${DB_INIT_RETRIES} failed (${err.message}), retrying in ${attempt * 2}s...`);
+          await new Promise(r => setTimeout(r, attempt * 2000));
+        }
+      }
+    }
+    if (dbInitError) throw dbInitError;
 
     // Connect MongoDB (optional — won't block startup if unavailable)
     await connectMongo();
@@ -356,6 +387,17 @@ async function startServer() {
       console.error('⚠️  Failed to check stuck analyses:', error.message);
     }
 
+    // Guard against an unhandled 'error' event crashing the whole process
+    // (e.g. EADDRINUSE when the port is already bound by another instance —
+    // recoverable, and expected when this module is imported by tests).
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`⚠️  Port ${PORT} is already in use — this process will not accept new connections on it.`);
+      } else {
+        console.error('❌ Server error:', err);
+      }
+    });
+
     // Start listening
     server.listen(PORT, () => {
       console.log(`🚀 Multi-Chain Analytics API Server running on port ${PORT}`);
@@ -379,6 +421,42 @@ async function startServer() {
       import('../scripts/monitoring-billing.js').then(({ startMonitoringBillingScheduler }) => {
         startMonitoringBillingScheduler();
       }).catch(err => console.warn('⚠️ Monitoring billing scheduler failed:', err.message));
+
+      // Research Agent — weekly refresh for all contracts with expired TTL
+      import('../services/ResearchAgent.js').then(async ({ default: ResearchAgent }) => {
+        const scheduleResearchRefresh = async () => {
+          try {
+            // Find all contracts whose research data has expired (or never ran)
+            const { query: dbQuery } = await import('./database/postgres.js');
+            const contracts = await dbQuery(
+              `SELECT DISTINCT c.target_address AS address, c.target_chain AS chain, c.name
+               FROM contracts c
+               LEFT JOIN research_data r
+                 ON r.contract_address = c.target_address AND r.chain = c.target_chain
+               WHERE r.id IS NULL OR r.expires_at < NOW()
+               LIMIT 50`
+            );
+            if (contracts.rows.length > 0) {
+              console.log(`[ResearchAgent] Refreshing ${contracts.rows.length} expired contract(s)...`);
+              for (const row of contracts.rows) {
+                try {
+                  await ResearchAgent.run({ contractAddress: row.address, chain: row.chain });
+                } catch (e) {
+                  console.warn(`[ResearchAgent] Failed for ${row.address}: ${e.message}`);
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('[ResearchAgent] Scheduler error:', e.message);
+          }
+        };
+
+        // Run once on startup (after 30s to not block boot)
+        setTimeout(scheduleResearchRefresh, 30000);
+        // Then every 24 hours
+        setInterval(scheduleResearchRefresh, 24 * 60 * 60 * 1000);
+        console.log('🔬 Research Agent scheduler started (24h refresh cycle)');
+      }).catch(err => console.warn('⚠️ Research Agent scheduler failed to start:', err.message));
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

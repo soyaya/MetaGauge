@@ -12,7 +12,144 @@ import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/ui/header"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
-import { User, Mail, Shield, Activity, Save, CheckCircle, AlertCircle, Loader2, KeyRound, Twitter, Linkedin } from "lucide-react"
+import { User, Mail, Shield, Activity, Save, CheckCircle, AlertCircle, Loader2, KeyRound, Twitter, Linkedin, Zap } from "lucide-react"
+
+// ── Discover opt-in card ──────────────────────────────────────────────────
+
+function DiscoverOptInCard() {
+  const [contracts, setContracts] = useState<any[]>([])
+  const [selected, setSelected] = useState('')
+  const [status, setStatus] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [contactWebsite, setContactWebsite] = useState('')
+  const [documentsPublic, setDocumentsPublic] = useState(false)
+
+  useEffect(() => {
+    api.contracts.list().then((res: any) => {
+      const list = res.contracts || res || []
+      setContracts(list)
+      if (list.length > 0) setSelected(list[0].address + ':' + list[0].chain)
+    }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (!selected) return
+    const [addr, chain] = selected.split(':')
+    setLoading(true)
+    api.get(`/api/registry/status?contractAddress=${addr}&chain=${chain}`)
+      .then((res: any) => {
+        setStatus(res)
+        setContactWebsite(res.registration?.contact_website || '')
+        setDocumentsPublic(res.registration?.documents_public || false)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [selected])
+
+  const handleToggle = async () => {
+    const [addr, chain] = selected.split(':')
+    const contract = contracts.find(c => c.address === addr)
+    setSaving(true)
+    try {
+      if (status?.registered) {
+        await api.post('/api/registry/opt-out', { contractAddress: addr, chain })
+      } else {
+        await api.post('/api/registry/opt-in', {
+          contractAddress: addr, chain,
+          displayName: contract?.name,
+          contactWebsite: contactWebsite || undefined,
+          documentsPublic,
+        })
+      }
+      // Reload status
+      const res: any = await api.get(`/api/registry/status?contractAddress=${addr}&chain=${chain}`)
+      setStatus(res)
+    } catch { /* silent */ }
+    finally { setSaving(false) }
+  }
+
+  if (contracts.length === 0) return null
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Zap className="h-4 w-4 text-primary" />
+          Feature My Project
+        </CardTitle>
+        <CardDescription className="text-xs">
+          Allow MetaGauge to show your project in the Discover tab for investors.
+          Your growth pattern and match score will be visible. Financial documents
+          are only shown if you enable public documents below.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {contracts.length > 1 && (
+          <div>
+            <Label className="text-xs">Select Contract</Label>
+            <select value={selected} onChange={e => setSelected(e.target.value)}
+              className="mt-1 w-full text-sm border rounded-md px-2 py-1.5 bg-background">
+              {contracts.map((c: any) => (
+                <option key={c.address} value={c.address + ':' + c.chain}>
+                  {c.name || c.address.slice(0, 16) + '...'} ({c.chain})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading status...
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between p-3 rounded-lg border">
+              <div>
+                <div className="text-sm font-medium">
+                  {status?.registered ? '✅ Featured in Discover' : '⚪ Not featured'}
+                </div>
+                {status?.fingerprint && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Match score: <span className="font-semibold">{status.fingerprint.match_score}/100</span>
+                    {status.fingerprint.matched_comps?.[0] && (
+                      <span> · {status.fingerprint.matched_comps[0].name.split(' ')[0]} pattern</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <Button size="sm" variant={status?.registered ? 'outline' : 'default'}
+                onClick={handleToggle} disabled={saving}>
+                {saving && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                {status?.registered ? 'Remove' : 'Feature Project'}
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs">Website / Contact URL (optional)</Label>
+                <Input value={contactWebsite} onChange={e => setContactWebsite(e.target.value)}
+                  placeholder="https://yourproject.io" className="mt-1 text-sm" />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="docsPublic" checked={documentsPublic}
+                  onChange={e => setDocumentsPublic(e.target.checked)} />
+                <label htmlFor="docsPublic" className="text-xs text-muted-foreground cursor-pointer">
+                  Make financial documents visible to investors in Discover
+                </label>
+              </div>
+              <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2">
+                Privacy: Your wallet address and contract data are always visible. Financial documents
+                are only shown if you check the box above. You can opt out at any time.
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 
@@ -475,6 +612,8 @@ export default function ProfilePage() {
             </Card>
 
             <SocialAccountsCard />
+
+            <DiscoverOptInCard />
           </div>
         </div>
       </div>

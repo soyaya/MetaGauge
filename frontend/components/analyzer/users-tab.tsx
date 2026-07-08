@@ -207,7 +207,7 @@ export function UsersTab({ analysisResults }: UsersTabProps) {
                       dataKey="txs"
                       position="right"
                       style={{ fontSize: 11, fill: 'hsl(var(--foreground))', fontWeight: 600 }}
-                      formatter={(v: number) => v.toLocaleString()}
+                      formatter={(v: any) => (typeof v === 'number' ? v.toLocaleString() : v)}
                     />
                   </Bar>
                 </BarChart>

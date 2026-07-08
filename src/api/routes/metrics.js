@@ -63,7 +63,9 @@ router.get('/dashboard', async (req, res) => {
 router.get('/analysis/:analysisId', async (req, res) => {
   try {
     const analysis = await AnalysisStorage.findById(req.params.analysisId);
-    if (!analysis) return res.status(404).json({ error: 'Analysis not found' });
+    if (!analysis || analysis.userId !== req.user.id) {
+      return res.status(404).json({ error: 'Analysis not found' });
+    }
 
     const rawTarget  = analysis.results?.target || {};
     const rawMetrics = rawTarget.metrics || {};

@@ -578,6 +578,17 @@ router.post('/complete', async (req, res) => {
         
         if (indexingSuccess) {
           console.log('✅ [ONBOARDING] Background indexing completed successfully');
+
+          // Auto-trigger Research Agent for newly indexed contract (Phase 2 §2.4)
+          const newContractAddress = req.body?.contractAddress || req.body?.contract_address;
+          const newChain           = req.body?.chain || 'ethereum';
+          if (newContractAddress) {
+            import('../../services/ResearchAgent.js').then(({ default: ResearchAgent }) => {
+              ResearchAgent.run({ contractAddress: newContractAddress, chain: newChain })
+                .then(() => console.log(`[ResearchAgent] Auto-triggered for newly indexed contract ${newContractAddress}`))
+                .catch(e => console.warn(`[ResearchAgent] Auto-trigger failed for ${newContractAddress}: ${e.message}`));
+            }).catch(() => {});
+          }
         } else {
           console.error('❌ [ONBOARDING] Background indexing may have failed - check logs above');
         }

@@ -27,3 +27,10 @@ export async function revokeShareToken(token) {
   await s.revoke(token);
   return true;
 }
+
+/** Returns the userId that owns this token, or null if the token doesn't exist. */
+export async function getShareTokenOwner(token) {
+  const s = await storage();
+  const t = await s.findByToken(token);
+  return t?.userId ?? null;
+}

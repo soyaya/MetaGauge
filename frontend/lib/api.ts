@@ -767,4 +767,145 @@ export const alertsApi = {
 // Extend api object with alerts
 (api as any).alerts = alertsApi;
 
+// Financial Intelligence API
+export const financialApi = {
+  // Get all saved inputs for a contract
+  getInputs: async (contractAddress: string, chain: string, period?: string) => {
+    const p = period ? `&period=${period}` : '';
+    return apiRequest(`/api/financial/inputs?contractAddress=${contractAddress}&chain=${chain}${p}`);
+  },
+
+  // Get missing fields — drives the AI chat collector
+  getMissing: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/financial/inputs/missing?contractAddress=${contractAddress}&chain=${chain}`),
+
+  // Save a single field value
+  saveField: async (contractAddress: string, chain: string, field: string, value: any, period?: string) =>
+    apiRequest('/api/financial/inputs', {
+      method: 'POST',
+      body: JSON.stringify({ contractAddress, chain, field, value, period }),
+    }),
+
+  // Save a funding round
+  saveFundingRound: async (contractAddress: string, chain: string, round: any) =>
+    apiRequest('/api/financial/inputs', {
+      method: 'POST',
+      body: JSON.stringify({ contractAddress, chain, fundingRound: round }),
+    }),
+
+  // Generate all 6 financial documents
+  generateDocuments: async (contractAddress: string, chain: string, period?: string) =>
+    apiRequest('/api/financial/documents/generate', {
+      method: 'POST',
+      body: JSON.stringify({ contractAddress, chain, period }),
+    }),
+
+  // Get latest generated documents
+  getLatestDocuments: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/financial/documents/latest?contractAddress=${contractAddress}&chain=${chain}`),
+
+  // Get documents for a specific period
+  getDocuments: async (contractAddress: string, chain: string, period: string) =>
+    apiRequest(`/api/financial/documents/${period}?contractAddress=${contractAddress}&chain=${chain}`),
+
+  // Get available periods
+  getPeriods: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/financial/periods?contractAddress=${contractAddress}&chain=${chain}`),
+
+  // Financial AI chat (persistent context per user per contract)
+  chat: async (contractAddress: string, chain: string, message: string) =>
+    apiRequest('/api/financial/chat', {
+      method: 'POST',
+      body: JSON.stringify({ contractAddress, chain, message }),
+    }),
+
+  // Get chat history
+  getChatHistory: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/financial/chat/history?contractAddress=${contractAddress}&chain=${chain}`),
+
+  // Export PDF — returns a download URL trigger
+  exportPDF: async (contractAddress: string, chain: string, period?: string) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/financial/export/pdf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ contractAddress, chain, period }),
+    });
+    if (!response.ok) throw new Error('PDF export failed');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `MetaGauge_Financial_${period || 'Report'}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    return { success: true };
+  },
+};
+
+(api as any).financial = financialApi;
+
+// Research Agent API
+export const researchApi = {
+  run: async (contractAddress: string, chain: string, opts: {
+    tokenSymbol?: string; projectSlug?: string; githubRepo?: string; category?: string; force?: boolean
+  } = {}) =>
+    apiRequest('/api/research/run', {
+      method: 'POST',
+      body: JSON.stringify({ contractAddress, chain, ...opts }),
+    }),
+
+  get: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/research/${contractAddress}/${chain}`),
+
+  getBenchmarks: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/research/${contractAddress}/${chain}/benchmarks`),
+
+  getSummary: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/research/${contractAddress}/${chain}/summary`),
+};
+
+(api as any).research = researchApi;
+
+// Registry & Recommendations API
+export const registryApi = {
+  optIn: async (contractAddress: string, chain: string, meta: any) =>
+    apiRequest('/api/registry/opt-in', { method: 'POST', body: JSON.stringify({ contractAddress, chain, ...meta }) }),
+
+  optOut: async (contractAddress: string, chain: string) =>
+    apiRequest('/api/registry/opt-out', { method: 'POST', body: JSON.stringify({ contractAddress, chain }) }),
+
+  getStatus: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/registry/status?contractAddress=${contractAddress}&chain=${chain}`),
+
+  getProjects: async (filters: any = {}) => {
+    const params = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(filters).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)])
+      )
+    );
+    return apiRequest(`/api/registry/projects?${params}`);
+  },
+
+  getProject: async (contractAddress: string, chain: string) =>
+    apiRequest(`/api/registry/projects/${contractAddress}/${chain}`),
+
+  getRecommendations: async (filters: any = {}) => {
+    const params = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(filters).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)])
+      )
+    );
+    return apiRequest(`/api/registry/recommendations?${params}`);
+  },
+
+  search: async (query: string) =>
+    apiRequest('/api/registry/recommendations/search', { method: 'POST', body: JSON.stringify({ query }) }),
+
+  computeFingerprint: async (contractAddress: string, chain: string) =>
+    apiRequest('/api/registry/fingerprint/compute', { method: 'POST', body: JSON.stringify({ contractAddress, chain }) }),
+};
+
+(api as any).registry = registryApi;
+
 export { getAuthToken, setAuthToken, removeAuthToken };

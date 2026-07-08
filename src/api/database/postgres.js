@@ -93,14 +93,23 @@ export async function query(text, params = []) {
   try {
     const result = await pool.query(text, params);
     const duration = Date.now() - start;
-    
+
     // Log slow queries (> 1 second)
     if (duration > 1000) {
       console.warn(`⚠️  Slow query (${duration}ms):`, text.substring(0, 100));
     }
-    
+
     return result;
   } catch (error) {
+    // Postgres code 22P02 = invalid_text_representation (e.g. a malformed UUID
+    // in a WHERE clause, such as a route param a client passed as-is). For SELECTs
+    // this means "no row could possibly match" — treat it as an empty result
+    // rather than a 500, matching what nearly every findById-style caller wants.
+    // Writes (INSERT/UPDATE/DELETE) still throw, since a malformed value there is a real bug.
+    if (error.code === '22P02' && /^\s*(select|with)\b/i.test(text)) {
+      console.warn('⚠️  Invalid input for query (treated as no match):', error.message);
+      return { rows: [], rowCount: 0 };
+    }
     console.error('Database query error:', error.message);
     console.error('Query:', text);
     throw error;

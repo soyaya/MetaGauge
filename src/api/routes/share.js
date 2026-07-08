@@ -1,5 +1,5 @@
 import express from 'express';
-import { createShareToken, validateShareToken, revokeShareToken } from '../../services/ShareTokenService.js';
+import { createShareToken, validateShareToken, revokeShareToken, getShareTokenOwner } from '../../services/ShareTokenService.js';
 import { AnalysisStorage, ContractStorage } from '../database/index.js';
 import { ScoringEngine } from '../../services/ScoringEngine.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -23,6 +23,10 @@ router.post('/', authenticateToken, async (req, res) => {
 // DELETE /api/share/:token — revoke a token
 router.delete('/:token', authenticateToken, async (req, res) => {
   try {
+    const ownerId = await getShareTokenOwner(req.params.token);
+    if (!ownerId || ownerId !== req.user.id) {
+      return res.status(404).json({ error: 'Token not found' });
+    }
     await revokeShareToken(req.params.token);
     res.json({ ok: true });
   } catch (err) {

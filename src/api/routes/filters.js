@@ -11,7 +11,7 @@ const router = express.Router();
 // Save filter preset
 router.post('/presets', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user.id;
     const { name, config } = req.body;
 
     const pool = getPool();
@@ -32,7 +32,7 @@ router.post('/presets', authenticateToken, async (req, res) => {
 // Get user's filter presets
 router.get('/presets', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user.id;
     const pool = getPool();
     
     const result = await pool.query(
@@ -53,7 +53,7 @@ router.get('/presets', authenticateToken, async (req, res) => {
 // Delete filter preset
 router.delete('/presets/:id', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user.id;
     const { id } = req.params;
     const pool = getPool();
 
@@ -64,6 +64,11 @@ router.delete('/presets/:id', authenticateToken, async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
+    // Postgres 22P02 = invalid_text_representation — a malformed :id (e.g. wrong
+    // type/format) can never match a row, so treat it as "not found" not a 500.
+    if (error.code === '22P02') {
+      return res.status(404).json({ success: false, error: 'Preset not found' });
+    }
     console.error('Error deleting filter preset:', error);
     res.status(500).json({ success: false, error: error.message });
   }
