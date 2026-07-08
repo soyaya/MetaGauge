@@ -76,7 +76,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@next/swc-win32-x64-msvc": "^16.2.9",
     "@opennextjs/cloudflare": "^1.20.1",
     "@tailwindcss/postcss": "^4.1.9",
     "@testing-library/jest-dom": "^6.9.1",
