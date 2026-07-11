@@ -13,6 +13,7 @@ import { initializeStreamingIndexer } from '../../indexer/index.js';
 import SubscriptionService from '../../services/SubscriptionService.js';
 import { PRICING, FREE_QUOTA } from '../../config/pricing.js';
 import { triggerDefaultContractIndexing } from './trigger-indexing.js';
+import { UxBottleneckDetector } from '../../services/UxBottleneckDetector.js';
 import { MetricsNormalizer } from '../../services/MetricsNormalizer.js';
 import { isBot } from '../../services/BotDetectionService.js';
 import { priceService } from '../../services/PriceService.js';
@@ -23,12 +24,140 @@ export function setStreamingIndexer(indexer) {
   streamingIndexer = indexer;
 }
 
+// Single source of truth for UX grade thresholds — same instance/defaults used
+// by UxBottleneckDetector.gradeUxQuality(), so a contract can't grade differently
+// depending on which code path built its report.
+const uxGrader = new UxBottleneckDetector();
+
+/**
+ * Grade UX quality from completion rate, failure rate, and avg session time
+ * (all on the same 0-100 / minutes scale used elsewhere in this file).
+ * Requires ALL three thresholds to pass for a given grade — a high completion
+ * rate alone no longer masks a high failure rate.
+ */
+function gradeUx(successRate, failureRate, avgSessionMinutes) {
+  if (successRate == null) return 'F';
+  const completionRate = successRate / 100;
+  const failRate = (failureRate || 0) / 100;
+  for (const [grade, t] of Object.entries(uxGrader.uxGradeThresholds)) {
+    if (grade === 'F') continue;
+    if (completionRate >= t.completionRate && failRate <= t.failureRate && avgSessionMinutes <= t.avgTimeMinutes) {
+      return grade;
+    }
+  }
+  return 'F';
+}
+
+/**
+ * The continuous-sync flow (continuous-sync-improved.js) builds its own
+ * fullReport with a completely different shape (snake_case tx fields, no
+ * retentionMetrics/activationFunnel/userQualityMetrics/gasAnalysis/interactions).
+ * This adapts it to the shape every dashboard tab is written against, so
+ * contracts on continuous sync don't silently show blank/undefined data.
+ * Fields the continuous-sync path never computes are left `null` (same
+ * "not computed yet" convention already used throughout this file) rather
+ * than guessed.
+ */
+function adaptContinuousSyncReport(fr) {
+  const USER_TYPE_MAP = { whale: 'whale', power_user: 'power', active: 'regular', event_active: 'regular', casual: 'new' };
+
+  const transactions = (fr.transactions || []).map(t => ({
+    hash: t.hash,
+    from: t.from_address,
+    to: t.to_address,
+    value: t.value_wei,
+    gasUsed: t.gas_used,
+    gasPrice: t.gas_price_wei,
+    blockNumber: t.block_number,
+    blockTimestamp: t.block_timestamp,
+    status: t.status,
+    input: t.input || '0x',
+    chain: t.chain,
+  }));
+
+  const users = (fr.users || []).map(u => ({
+    address: u.address,
+    transactionCount: u.transactionCount,
+    totalValue: u.totalValue,
+    totalGasSpent: u.totalGasSpent,
+    userType: USER_TYPE_MAP[u.userType] || 'regular',
+  }));
+
+  const successCount = transactions.filter(t => t.status === true).length;
+  const successRate  = transactions.length ? Math.round((successCount / transactions.length) * 100) : null;
+  const failedCount  = transactions.length - successCount;
+  const failureRate  = transactions.length ? Math.round((failedCount / transactions.length) * 100) : 0;
+
+  const uxGrade    = fr.uxAnalysis?.uxGrade || {};
+  const lifecycle  = fr.userLifecycle || {};
+  const journeys   = fr.userJourneys || {};
+
+  return {
+    summary: {
+      totalTransactions: fr.summary?.totalTransactions ?? transactions.length,
+      uniqueUsers:        fr.summary?.uniqueUsers ?? users.length,
+      successRate,
+      totalValueEth:      fr.defiMetrics?.totalValue ?? null,
+    },
+    transactions,
+    gasAnalysis: {
+      averageGasPrice: null, averageGasUsed: null,
+      totalGasCostUSD: null, averageGasCostUSD: null,
+      gasEfficiencyScore: successRate, failedTransactions: failedCount, failureRate,
+      ethPriceUsed: null,
+    },
+    defiMetrics: {
+      dau: null, wau: null, mau: null, bounceRate: null,
+      activationRate:  lifecycle.activationMetrics?.activationRate ?? null,
+      txSuccessRate:   successRate,
+      avgSessionDuration: fr.uxAnalysis?.sessionDurations?.averageDuration ?? null,
+      avgTimeToActivation: null, avgTimeToFirstInteraction: null,
+      totalVolumeEth:  fr.defiMetrics?.totalValue ?? null,
+      tvl: null, protocolRevenue: null, feeRateBps: null,
+    },
+    userBehavior: { loyaltyScore: null, whaleRatio: null, userClassifications: null },
+    userLifecycle: { summary: lifecycle.summary || {} },
+    retentionMetrics: {
+      d1Retention: null, d7Retention: null, d30Retention: null,
+      churnRate:      lifecycle.summary?.churnRate ?? null,
+      retentionRate:  lifecycle.summary?.retentionRate ?? null,
+      resurrectionRate: 0,
+    },
+    activationMetrics: {
+      activationRate: lifecycle.activationMetrics?.activationRate ?? null,
+      avgTimeToActivation: null, avgGasToActivateETH: null, avgGasToActivateUSD: null,
+      activationFunnel: [], featureFirstUse: [],
+    },
+    uxAnalysis: {
+      uxGrade: {
+        grade: uxGrade.grade || 'F',
+        score: Math.round((uxGrade.completionRate || 0) * 100),
+        completionRate: uxGrade.completionRate ?? null,
+        failureRate:    uxGrade.failureRate ?? null,
+      },
+      sessionDurations: fr.uxAnalysis?.sessionDurations || {},
+      bounceRate: null,
+    },
+    userJourneys: { averageJourneyLength: journeys.averageJourneyLength ?? null },
+    userQualityMetrics: { powerUserRate: null, botPct: null, avgSophistication: null, avgWalletQuality: null },
+    interactions: { peakInteractionTimes: [] },
+    users,
+    recommendations: [],
+    alerts: [],
+  };
+}
+
 /**
  * Builds the fullReport shape expected by all dashboard tabs from raw analysis data.
  * Exported so other routes (competitive, metrics) can reuse the same shape.
  */
 export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTarget = {}) {
-  if (rawTarget?.fullReport) return rawTarget.fullReport;
+  if (rawTarget?.fullReport) {
+    if (rawTarget.fullReport.metadata?.continuousSync) {
+      return adaptContinuousSyncReport(rawTarget.fullReport);
+    }
+    return rawTarget.fullReport;
+  }
 
   const hexToNum = v => {
     if (typeof v === 'number') return v;
@@ -190,6 +319,7 @@ export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTar
       failedTransactions: failedCount,
       failureRate,
       gasEfficiencyScore: successRate,
+      ethPriceUsed:       ETH_PRICE,
     },
     defiMetrics: {
       totalVolumeEth:            totalETH,
@@ -234,7 +364,7 @@ export function buildFullReportFromAnalysis(rawTxs = [], rawMetrics = {}, rawTar
     },
     uxAnalysis: {
       uxGrade: {
-        grade: successRate>=95?'A':successRate>=80?'B':successRate>=60?'C':'D',
+        grade: gradeUx(successRate, failureRate, medSession / 60),
         score: successRate,
         completionRate: successRate!=null ? successRate/100 : null,
         failureRate:    failureRate/100,

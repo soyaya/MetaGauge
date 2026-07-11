@@ -127,7 +127,7 @@ class AgentService {
     if (source !== 'chat') {
       const permMap = { analyzer: 'autoAnalyze', proactive: 'autoAnalyze', briefing: 'sendDigests' };
       const perm = permMap[source] || 'autoAnalyze';
-      if (!isAgentPermitted(userId, perm)) {
+      if (!await isAgentPermitted(userId, perm)) {
         return { content: `Agent action "${source}" is disabled. Enable it in Alerts → Agent Controls.`, components: [], toolsUsed: [], iterations: 0 };
       }
     }

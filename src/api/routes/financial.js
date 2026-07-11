@@ -21,6 +21,47 @@ import {
   MONTHLY_FIELDS,
   currentPeriod,
 } from '../../services/FinancialProfileService.js';
+
+// ── Helper: parse and persist a [[SAVE:field|value]] tag emitted by the AI ──
+// This is the ONLY mechanism that turns a chat answer into a saved financial
+// input — without it, the conversation collects nothing (see /chat below).
+
+const SAVE_TAG_RE = /\[\[SAVE:([a-z_]+)\|([\s\S]+?)\]\]\s*$/i;
+
+async function applySaveTag(rawResponse, userId, contractId, period) {
+  const match = rawResponse.match(SAVE_TAG_RE);
+  if (!match) return { text: rawResponse, saved: null };
+
+  const [, field, rawValue] = match;
+  const text = rawResponse.replace(SAVE_TAG_RE, '').trim();
+
+  try {
+    if (field === 'funding_round') {
+      const round = JSON.parse(rawValue);
+      if (!round.round || round.amount_usd == null) throw new Error('incomplete funding round');
+      await addFundingRound(userId, contractId, round);
+      return { text, saved: 'funding_round' };
+    }
+
+    const oneTimeDef = ONE_TIME_FIELDS.find(f => f.key === field);
+    const monthlyDef = MONTHLY_FIELDS.find(f => f.key === field);
+    const fieldDef = oneTimeDef || monthlyDef;
+    if (!fieldDef) throw new Error(`unknown field in SAVE tag: ${field}`);
+
+    const parsedValue = parseFieldValue(fieldDef, rawValue.trim());
+    if (oneTimeDef) {
+      await saveProfileField(userId, contractId, field, parsedValue);
+    } else {
+      await savePeriodField(userId, contractId, period, field, parsedValue);
+    }
+    return { text, saved: field };
+  } catch (err) {
+    // A malformed/invalid SAVE tag should never break the chat — just skip persisting
+    // and let the AI re-ask on the next turn (the field will still show as missing).
+    console.warn('[financial/chat] Failed to apply SAVE tag:', err.message);
+    return { text, saved: null };
+  }
+}
 import {
   getOrCreateSession,
   updateSession,
@@ -47,7 +88,7 @@ router.use(authenticateToken);
 async function resolveContractId(userId, contractAddress, chain) {
   if (!contractAddress) return null;
   const result = await query(
-    `SELECT id FROM contracts WHERE user_id = $1 AND target_address = $2 AND target_chain = $3 LIMIT 1`,
+    `SELECT id FROM contracts WHERE user_id = $1 AND LOWER(target_address) = $2 AND target_chain = $3 LIMIT 1`,
     [userId, contractAddress.toLowerCase(), chain || 'ethereum']
   );
   return result.rows[0]?.id || null;
@@ -208,8 +249,23 @@ router.post('/documents/generate', async (req, res) => {
       }
     } catch { /* research context is optional */ }
 
+    // Cumulative net profit from all earlier periods — the balance sheet needs
+    // this so retained earnings reflects real profit history, not a plug.
+    let priorRetainedEarnings = 0;
+    try {
+      const priorDocs = await query(
+        `SELECT income_statement FROM financial_documents
+         WHERE user_id=$1 AND contract_id=$2 AND period < $3`,
+        [req.user.id, contractId, targetPeriod]
+      );
+      priorRetainedEarnings = priorDocs.rows.reduce(
+        (sum, row) => sum + (typeof row.income_statement?.net_profit === 'number' ? row.income_statement.net_profit : 0),
+        0
+      );
+    } catch { /* default to 0 — first period or lookup failure */ }
+
     // Calculate documents
-    const documents = await buildAllDocuments(onChain, inputs, {});
+    const documents = await buildAllDocuments(onChain, inputs, {}, null, { priorRetainedEarnings });
 
     // Generate Gemini narratives (with research context injected)
     const narratives = await narrativeService.generateAll(documents, inputs.profile, researchContext);
@@ -399,14 +455,12 @@ router.post('/chat', async (req, res) => {
       aiResponse = await narrativeService._generate(fullPrompt) || aiResponse;
     }
 
-    // Detect if AI collected a field — parse from response
-    // Simple heuristic: if mode is input_collection, extract the next field key
-    let fieldCollected = null;
-    if (mode !== 'analysis' && missing.missingOneTime.length > 0) {
-      fieldCollected = missing.missingOneTime[0]?.key || null;
-    } else if (mode === 'monthly_collection' && missing.missingMonthly.length > 0) {
-      fieldCollected = missing.missingMonthly[0]?.key || null;
-    }
+    // Parse and persist any [[SAVE:field|value]] tag the AI emitted — this is
+    // what actually turns the conversation into saved financial_profiles /
+    // financial_period_inputs rows. The tag is stripped before the user sees it.
+    const { text: visibleResponse, saved: fieldCollected } =
+      await applySaveTag(aiResponse, req.user.id, contractId, missing.period);
+    aiResponse = visibleResponse;
 
     // Save AI response
     await saveMessage(session.id, 'assistant', aiResponse, fieldCollected);
@@ -419,16 +473,26 @@ router.post('/chat', async (req, res) => {
       if (newSummary) await updateSession(session.id, { contextSummary: newSummary });
     }
 
+    // If a field was just saved, re-check completeness so the response (and the
+    // frontend's auto-generate-documents trigger) reflect the new state, not
+    // the stale pre-save snapshot.
+    let finalMissing = missing;
+    let finalMode = mode;
+    if (fieldCollected) {
+      finalMissing = await getMissingFields(req.user.id, contractId);
+      finalMode = finalMissing.complete ? 'analysis' : finalMissing.mode;
+    }
+
     // Update session mode
-    await updateSession(session.id, { mode });
+    await updateSession(session.id, { mode: finalMode });
 
     res.json({
       success: true,
       response: aiResponse,
-      mode,
-      period:  missing.period,
-      complete: missing.complete,
-      missingCount: missing.missingOneTime.length + missing.missingMonthly.length,
+      mode: finalMode,
+      period:  finalMissing.period,
+      complete: finalMissing.complete,
+      missingCount: finalMissing.missingOneTime.length + finalMissing.missingMonthly.length,
     });
   } catch (err) {
     console.error('[financial/chat]', err);

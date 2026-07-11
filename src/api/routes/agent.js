@@ -96,7 +96,7 @@ router.get('/business-intelligence', async (req, res) => {
     const { AnalysisStorage } = await import('../database/index.js');
     const { BusinessIntelligenceEngine: BI } = await import('../../services/BusinessIntelligenceEngine.js');
     const analyses = await AnalysisStorage.findByUserId(req.user.id);
-    const latest = analyses.find(a => a.status === 'completed');
+    const latest = analyses.find(a => a.metadata?.isDefaultContract && a.status === 'completed');
     if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
     const txs = latest.results?.target?.transactions || [];
     if (!txs.length) return res.json({ error: 'No transactions indexed yet', txCount: 0 });
@@ -165,7 +165,7 @@ router.get('/intelligence-scores', async (req, res) => {
     const { AnalysisStorage } = await import('../database/index.js');
     const { ScoringEngine } = await import('../../services/ScoringEngine.js');
     const analyses = await AnalysisStorage.findByUserId(req.user.id);
-    const latest = analyses.find(a => a.status === 'completed');
+    const latest = analyses.find(a => a.metadata?.isDefaultContract && a.status === 'completed');
     if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
     const scores = ScoringEngine.compute(null, latest);
     res.json(scores);
@@ -183,7 +183,7 @@ router.get('/benchmarks', async (req, res) => {
       AnalysisStorage.findByUserId(req.user.id),
       ContractStorage.findByUserId(req.user.id),
     ]);
-    const latest = analyses.find(a => a.status === 'completed');
+    const latest = analyses.find(a => a.metadata?.isDefaultContract && a.status === 'completed');
     if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
     const category = contracts[0]?.category || req.query.category || 'defi';
     const metrics  = latest.results?.target?.metrics || {};
@@ -205,7 +205,7 @@ router.get('/playbooks', async (req, res) => {
       AnalysisStorage.findByUserId(req.user.id),
       ContractStorage.findByUserId(req.user.id),
     ]);
-    const latest = analyses.find(a => a.status === 'completed');
+    const latest = analyses.find(a => a.metadata?.isDefaultContract && a.status === 'completed');
     if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
     const category = contracts[0]?.category || 'defi';
     const metrics  = latest.results?.target?.metrics || {};
@@ -231,7 +231,7 @@ router.get('/market-position', async (req, res) => {
       CompetitorDataStorage.findByUserId(req.user.id).catch(() => []),
     ]);
 
-    const latest   = analyses.find(a => a.status === 'completed');
+    const latest   = analyses.find(a => a.metadata?.isDefaultContract && a.status === 'completed');
     if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
 
     const category = contracts[0]?.category || 'defi';
@@ -299,7 +299,7 @@ router.get('/lifecycle-campaigns', async (req, res) => {
     const { BusinessIntelligenceEngine: BI } = await import('../../services/BusinessIntelligenceEngine.js');
     const { LifecycleCampaignService } = await import('../../services/LifecycleCampaignService.js');
     const analyses = await AnalysisStorage.findByUserId(req.user.id);
-    const latest   = analyses.find(a => a.status === 'completed');
+    const latest   = analyses.find(a => a.metadata?.isDefaultContract && a.status === 'completed');
     if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
     const txs       = latest.results?.target?.transactions || [];
     const fr        = latest.results?.target?.fullReport   || {};
@@ -317,7 +317,7 @@ router.get('/at-risk-wallets', async (req, res) => {
     const { AnalysisStorage } = await import('../database/index.js');
     const { BusinessIntelligenceEngine: BI } = await import('../../services/BusinessIntelligenceEngine.js');
     const analyses = await AnalysisStorage.findByUserId(req.user.id);
-    const latest   = analyses.find(a => a.status === 'completed');
+    const latest   = analyses.find(a => a.metadata?.isDefaultContract && a.status === 'completed');
     if (!latest) return res.status(404).json({ error: 'No completed analysis found' });
     const txs = latest.results?.target?.transactions || [];
     if (!txs.length) return res.json({ wallets: [], message: 'No transaction data yet' });

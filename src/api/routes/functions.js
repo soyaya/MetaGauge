@@ -9,6 +9,7 @@ import { JourneyAnalyzerService } from '../../services/JourneyAnalyzerService.js
 import { CohortCalculatorService } from '../../services/CohortCalculatorService.js';
 import { AnalyticsCacheService } from '../../services/AnalyticsCacheService.js';
 import { abiLoader } from '../../services/ABILoaderService.js';
+import { query } from '../database/postgres.js';
 
 const router = express.Router();
 
@@ -34,7 +35,33 @@ async function ensureABILoaded(req, res, next) {
   next();
 }
 
+/**
+ * Ownership guard — every route in this file takes contractAddress/chain from
+ * the query (or body, for cache/invalidate) with no other scoping, so without
+ * this check any authenticated user could read another user's function/journey/
+ * cohort analytics by simply passing a different contractAddress.
+ */
+async function requireContractOwnership(req, res, next) {
+  const contractAddress = req.query.contractAddress || req.body?.contractAddress;
+  const chain = req.query.chain || req.body?.chain;
+  if (!contractAddress || !chain) return next(); // let the route's own validation 400 it
+
+  try {
+    const result = await query(
+      `SELECT id FROM contracts WHERE user_id = $1 AND LOWER(target_address) = $2 AND target_chain = $3 LIMIT 1`,
+      [req.user.id, contractAddress.toLowerCase(), chain]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 // Apply middleware to all routes
+router.use(requireContractOwnership);
 router.use(ensureABILoaded);
 
 /**

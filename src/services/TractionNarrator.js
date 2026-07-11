@@ -50,7 +50,7 @@ async function fetchMetricSnapshot(userId) {
     const { priceService } = await import('./PriceService.js');
     const all = await AnalysisStorage.findByUserId(userId);
     const latest = all
-      .filter(a => a.status === 'completed')
+      .filter(a => a.metadata?.isDefaultContract && a.status === 'completed')
       .sort((a, b) => new Date(b.completedAt || b.createdAt) - new Date(a.completedAt || a.createdAt))[0];
     if (!latest) return null;
     const txs      = latest.results?.target?.transactions || [];

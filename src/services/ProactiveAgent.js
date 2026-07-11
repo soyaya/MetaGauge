@@ -52,8 +52,12 @@ export class ProactiveAgent {
     const users = await UserStorage.findAll().catch(() => []);
     for (const user of users) {
       try {
+        if (!await isAgentPermitted(user.id, 'regressionAlerts')) continue;
+
         const analyses = await AnalysisStorage.findByUserId(user.id);
-        const completed = analyses.filter(a => a.status === 'completed');
+        // Scope to the user's default contract — comparing analyses from two
+        // different contracts would produce a meaningless "drop".
+        const completed = analyses.filter(a => a.metadata?.isDefaultContract && a.status === 'completed');
         if (completed.length < 2) continue;
 
         const latest = completed[0];
@@ -203,6 +207,7 @@ export class ProactiveAgent {
     const users = await UserStorage.findAll().catch(() => []);
     for (const user of users) {
       try {
+        if (!await isAgentPermitted(user.id, 'checkCompetitors')) continue;
         const { CompetitorDataStorage } = await import('../api/database/index.js');
         const competitors = await CompetitorDataStorage.findByUserId(user.id);
         for (const comp of competitors) {
@@ -220,7 +225,7 @@ export class ProactiveAgent {
     for (const user of users) {
       try {
         if (!user.preferences?.notifications?.email) continue;
-        if (!isAgentPermitted(user.id, 'sendDigests')) continue;
+        if (!await isAgentPermitted(user.id, 'sendDigests')) continue;
         const { BriefingScheduler } = await import('./BriefingScheduler.js');
         const scheduler = new BriefingScheduler();
         const briefing = await scheduler.generateDailyBrief(user.id);
@@ -231,7 +236,7 @@ export class ProactiveAgent {
     // Daily social media posts
     for (const user of users) {
       try {
-        if (!isAgentPermitted(user.id, 'postSocial')) continue;
+        if (!await isAgentPermitted(user.id, 'postSocial')) continue;
         const { runDailySocialPost } = await import('./SocialMediaAgent.js');
         await runDailySocialPost(user.id);
       } catch {}
@@ -242,7 +247,7 @@ export class ProactiveAgent {
     const users = await UserStorage.findAll().catch(() => []);
     for (const user of users) {
       try {
-        if (!isAgentPermitted(user.id, 'autoAnalyze')) continue;
+        if (!await isAgentPermitted(user.id, 'autoAnalyze')) continue;
         const contract = user.onboarding?.defaultContract;
         if (!contract?.address) continue;
         const profile = await PatternProfileService.get(user.id);
@@ -266,7 +271,7 @@ export class ProactiveAgent {
     for (const user of users) {
       try {
         if (!user.preferences?.notifications?.email) continue;
-        if (!isAgentPermitted(user.id, 'sendDigests')) continue;
+        if (!await isAgentPermitted(user.id, 'sendDigests')) continue;
         const { BriefingScheduler } = await import('./BriefingScheduler.js');
         const scheduler = new BriefingScheduler();
         const briefing = await scheduler.generateWeeklyStrategy(user.id);

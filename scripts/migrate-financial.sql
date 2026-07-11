@@ -188,6 +188,15 @@ CREATE INDEX IF NOT EXISTS idx_project_registry_active         ON project_regist
 CREATE INDEX IF NOT EXISTS idx_project_registry_contract       ON project_registry(contract_address, chain);
 CREATE INDEX IF NOT EXISTS idx_project_registry_category_chain ON project_registry(category, chain);
 
+-- ── Phase 4: Paid featured listings ($20/mo or $200/yr) ──────────────────────
+
+ALTER TABLE project_registry ADD COLUMN IF NOT EXISTS plan               VARCHAR(10);   -- 'monthly' | 'yearly'
+ALTER TABLE project_registry ADD COLUMN IF NOT EXISTS paid_until         TIMESTAMPTZ;   -- feature expires at this time
+ALTER TABLE project_registry ADD COLUMN IF NOT EXISTS payment_reference  VARCHAR(100);  -- gateway transaction reference
+ALTER TABLE project_registry ADD COLUMN IF NOT EXISTS amount_paid        NUMERIC(10,2);
+
+CREATE INDEX IF NOT EXISTS idx_project_registry_paid_until ON project_registry(paid_until);
+
 -- ── Triggers: auto-update updated_at columns ─────────────────────────────────
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()

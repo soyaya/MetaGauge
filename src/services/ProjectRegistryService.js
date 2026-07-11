@@ -54,6 +54,59 @@ export async function getRegistration(userId, contractId) {
   return result.rows[0] || null;
 }
 
+// ── Paid featured listings ─────────────────────────────────────────────────
+
+/**
+ * Activate (or renew) a paid featured listing after a successful payment.
+ * Called from the payment webhook — never directly from a route, since it
+ * grants `is_active` without re-checking payment.
+ */
+export async function activateFeatured(userId, contractId, contractAddress, chain, plan, reference, amountUSD, meta = {}) {
+  const { displayName, category, stage, contactEmail, contactWebsite, documentsPublic } = meta;
+  const interval = plan === 'yearly' ? `INTERVAL '1 year'` : `INTERVAL '1 month'`;
+
+  await query(
+    `INSERT INTO project_registry
+       (user_id, contract_id, contract_address, chain,
+        display_name, category, stage,
+        contact_email, contact_website, documents_public,
+        is_active, featured_since, plan, paid_until, payment_reference, amount_paid)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true,NOW(),$11,NOW() + ${interval},$12,$13)
+     ON CONFLICT (user_id, contract_id) DO UPDATE SET
+       display_name       = COALESCE(EXCLUDED.display_name, project_registry.display_name),
+       category           = COALESCE(EXCLUDED.category, project_registry.category),
+       stage              = COALESCE(EXCLUDED.stage, project_registry.stage),
+       contact_email      = COALESCE(EXCLUDED.contact_email, project_registry.contact_email),
+       contact_website    = COALESCE(EXCLUDED.contact_website, project_registry.contact_website),
+       documents_public   = EXCLUDED.documents_public,
+       is_active          = true,
+       plan               = EXCLUDED.plan,
+       -- Renewing before expiry extends from the current paid_until; renewing after
+       -- expiry (or first activation) starts fresh from now.
+       paid_until         = GREATEST(project_registry.paid_until, NOW()) + ${interval},
+       payment_reference  = EXCLUDED.payment_reference,
+       amount_paid        = EXCLUDED.amount_paid,
+       updated_at         = NOW()`,
+    [userId, contractId, contractAddress?.toLowerCase(), chain,
+     displayName || null, category || null, stage || null,
+     contactEmail || null, contactWebsite || null, !!documentsPublic,
+     plan, reference || null, amountUSD || null]
+  );
+}
+
+/**
+ * Daily sweep: un-feature any listing whose paid period has lapsed.
+ * Returns the number of listings deactivated.
+ */
+export async function deactivateExpired() {
+  const result = await query(
+    `UPDATE project_registry SET is_active=false, updated_at=NOW()
+     WHERE is_active=true AND paid_until IS NOT NULL AND paid_until < NOW()
+     RETURNING id`
+  );
+  return result.rows.length;
+}
+
 // ── Public registry listing ───────────────────────────────────────────────
 
 /**
@@ -163,4 +216,5 @@ export async function getProjectCard(contractAddress, chain, requestingUserId = 
 
 export default {
   optIn, optOut, getRegistration, getRegistry, getProjectCard,
+  activateFeatured, deactivateExpired,
 };

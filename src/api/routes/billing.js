@@ -8,6 +8,7 @@ import https from 'https';
 import crypto from 'crypto';
 import { UserStorage } from '../database/index.js';
 import subscriptionService, { PRICING } from '../../services/SubscriptionService.js';
+import ProjectRegistryService from '../../services/ProjectRegistryService.js';
 
 const router = express.Router();
 
@@ -59,6 +60,25 @@ function httpsFormPost(hostname, path, formBody) {
 
 function paystackPost(path, body) {
   return httpsPost('api.paystack.co', path, body, { Authorization: `Bearer ${PAYSTACK_SECRET}` });
+}
+
+// Reusable Paystack redirect-checkout builder — shared by wallet top-ups and
+// one-off paid features (e.g. Discover "Feature My Project").
+async function createPaystackCheckout({ user, amountUSD, callbackPath = '/subscription?success=1&provider=paystack', metadata = {} }) {
+  if (!PAYSTACK_SECRET) throw new Error('Paystack not configured. Set PAYSTACK_SECRET_KEY in .env');
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const txRef = `mg-${user.id}-${Date.now()}`;
+
+  const response = await paystackPost('/transaction/initialize', {
+    email:        user.email,
+    amount:       Math.round(amountUSD * 100),
+    currency:     process.env.PAYSTACK_CURRENCY || 'USD',
+    reference:    txRef,
+    callback_url: `${frontendUrl}${callbackPath}`,
+    metadata:     { userId: user.id, amountUSD: String(amountUSD), ...metadata },
+  });
+  if (!response.status) throw new Error(response.message || 'Paystack error');
+  return { url: response.data.authorization_url, reference: txRef };
 }
 
 // ── Flutterwave v4 helpers ────────────────────────────────────────────────
@@ -283,27 +303,21 @@ router.post('/checkout', async (req, res) => {
   const { amount = 10 } = req.body;
   const amountUSD = parseFloat(amount);
   if (!amountUSD || amountUSD < 1) return res.status(400).json({ message: 'Minimum top-up is $1' });
-  if (!PAYSTACK_SECRET) return res.status(503).json({ message: 'Paystack not configured. Set PAYSTACK_SECRET_KEY in .env' });
 
   const user = await UserStorage.findById(req.user.id).catch(() => null);
   if (!user) return res.status(404).json({ message: 'User not found' });
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const txRef = `mg-${req.user.id}-${Date.now()}`;
 
   try {
-    const response = await paystackPost('/transaction/initialize', {
-      email:        user.email,
-      amount:       Math.round(amountUSD * 100),
-      currency:     process.env.PAYSTACK_CURRENCY || 'USD',
-      reference:    txRef,
-      callback_url: `${frontendUrl}/subscription?success=1&provider=paystack`,
-      metadata:     { userId: req.user.id, amountUSD: String(amountUSD), cancel_action: `${frontendUrl}/subscription?cancelled=1` },
+    const { url, reference } = await createPaystackCheckout({
+      user, amountUSD,
+      callbackPath: '/subscription?success=1&provider=paystack',
+      metadata: { cancel_action: `${frontendUrl}/subscription?cancelled=1` },
     });
-    if (!response.status) return res.status(500).json({ message: response.message || 'Paystack error' });
-    res.json({ url: response.data.authorization_url, reference: txRef, provider: 'paystack' });
+    res.json({ url, reference, provider: 'paystack' });
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    res.status(e.message.includes('not configured') ? 503 : 500).json({ message: e.message });
   }
 });
 
@@ -351,7 +365,8 @@ export async function flutterwaveWebhookHandler(req, res) {
   // 4. Only handle successful charges
   if (event.type !== 'charge.completed' || event.data?.status !== 'succeeded') return;
 
-  const { userId, amountUSD } = event.data?.meta || {};
+  const meta = event.data?.meta || {};
+  const { userId, amountUSD, purpose, contractId, contractAddress, chain, plan } = meta;
   const reference = event.data?.reference;
 
   if (!userId || !amountUSD) {
@@ -360,10 +375,15 @@ export async function flutterwaveWebhookHandler(req, res) {
   }
 
   try {
-    await subscriptionService.topUp(userId, parseFloat(amountUSD));
-    console.log(`[FLW webhook] ✅ Topped up $${amountUSD} for user ${userId} (ref: ${reference})`);
+    if (purpose === 'feature_project' && contractId) {
+      await ProjectRegistryService.activateFeatured(userId, contractId, contractAddress, chain, plan, reference, parseFloat(amountUSD));
+      console.log(`[FLW webhook] ✅ Activated featured listing (${plan}) for user ${userId}, contract ${contractId}`);
+    } else {
+      await subscriptionService.topUp(userId, parseFloat(amountUSD));
+      console.log(`[FLW webhook] ✅ Topped up $${amountUSD} for user ${userId} (ref: ${reference})`);
+    }
   } catch (e) {
-    console.error('[FLW webhook] Top-up failed:', e.message);
+    console.error('[FLW webhook] Payment processing failed:', e.message);
   }
 }
 
@@ -380,16 +400,24 @@ export async function paystackWebhookHandler(req, res) {
   try { event = JSON.parse(req.body); } catch { return; }
 
   if (event.event === 'charge.success') {
-    const { userId, amountUSD } = event.data?.metadata || {};
+    const meta = event.data?.metadata || {};
+    const { userId, amountUSD, purpose, contractId, contractAddress, chain, plan } = meta;
+    const reference = event.data?.reference;
     if (userId && amountUSD) {
       try {
-        await subscriptionService.topUp(userId, parseFloat(amountUSD));
-        console.log(`[Paystack webhook] ✅ Topped up $${amountUSD} for user ${userId}`);
+        if (purpose === 'feature_project' && contractId) {
+          await ProjectRegistryService.activateFeatured(userId, contractId, contractAddress, chain, plan, reference, parseFloat(amountUSD));
+          console.log(`[Paystack webhook] ✅ Activated featured listing (${plan}) for user ${userId}, contract ${contractId}`);
+        } else {
+          await subscriptionService.topUp(userId, parseFloat(amountUSD));
+          console.log(`[Paystack webhook] ✅ Topped up $${amountUSD} for user ${userId}`);
+        }
       } catch (e) {
-        console.error('[Paystack webhook] Top-up failed:', e.message);
+        console.error('[Paystack webhook] Payment processing failed:', e.message);
       }
     }
   }
 }
 
+export { createPaystackCheckout };
 export default router;

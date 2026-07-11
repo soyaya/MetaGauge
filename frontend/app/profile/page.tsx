@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, Suspense } from "react"
 import { useAuth } from "@/components/auth/auth-provider"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { api } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,11 +12,14 @@ import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/ui/header"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/hooks/use-toast"
 import { User, Mail, Shield, Activity, Save, CheckCircle, AlertCircle, Loader2, KeyRound, Twitter, Linkedin, Zap } from "lucide-react"
 
 // ── Discover opt-in card ──────────────────────────────────────────────────
 
 function DiscoverOptInCard() {
+  const { toast } = useToast()
+  const searchParams = useSearchParams()
   const [contracts, setContracts] = useState<any[]>([])
   const [selected, setSelected] = useState('')
   const [status, setStatus] = useState<any>(null)
@@ -24,6 +27,9 @@ function DiscoverOptInCard() {
   const [saving, setSaving] = useState(false)
   const [contactWebsite, setContactWebsite] = useState('')
   const [documentsPublic, setDocumentsPublic] = useState(false)
+  const [showPayModal, setShowPayModal] = useState(false)
+  const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly')
+  const [checkingOut, setCheckingOut] = useState(false)
 
   useEffect(() => {
     api.contracts.list().then((res: any) => {
@@ -33,43 +39,75 @@ function DiscoverOptInCard() {
     }).catch(() => {})
   }, [])
 
-  useEffect(() => {
+  const refreshStatus = useCallback(async () => {
     if (!selected) return
     const [addr, chain] = selected.split(':')
     setLoading(true)
-    api.get(`/api/registry/status?contractAddress=${addr}&chain=${chain}`)
-      .then((res: any) => {
-        setStatus(res)
-        setContactWebsite(res.registration?.contact_website || '')
-        setDocumentsPublic(res.registration?.documents_public || false)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [selected])
-
-  const handleToggle = async () => {
-    const [addr, chain] = selected.split(':')
-    const contract = contracts.find(c => c.address === addr)
-    setSaving(true)
     try {
-      if (status?.registered) {
-        await api.post('/api/registry/opt-out', { contractAddress: addr, chain })
-      } else {
-        await api.post('/api/registry/opt-in', {
-          contractAddress: addr, chain,
-          displayName: contract?.name,
-          contactWebsite: contactWebsite || undefined,
-          documentsPublic,
-        })
-      }
-      // Reload status
       const res: any = await api.get(`/api/registry/status?contractAddress=${addr}&chain=${chain}`)
       setStatus(res)
+      setContactWebsite(res.registration?.contact_website || '')
+      setDocumentsPublic(res.registration?.documents_public || false)
+    } catch { /* silent */ }
+    finally { setLoading(false) }
+  }, [selected])
+
+  useEffect(() => { refreshStatus() }, [refreshStatus])
+
+  // Returning from a successful Paystack redirect for a feature payment
+  useEffect(() => {
+    if (searchParams.get('featured') === '1') {
+      toast({ title: 'Payment received!', description: 'Your project is now featured in Discover.' })
+      refreshStatus()
+    }
+  }, [searchParams, toast, refreshStatus])
+
+  const handleRemove = async () => {
+    const [addr, chain] = selected.split(':')
+    setSaving(true)
+    try {
+      await api.post('/api/registry/opt-out', { contractAddress: addr, chain })
+      await refreshStatus()
     } catch { /* silent */ }
     finally { setSaving(false) }
   }
 
+  const handleSaveDetails = async () => {
+    const [addr, chain] = selected.split(':')
+    const contract = contracts.find(c => c.address === addr)
+    setSaving(true)
+    try {
+      await api.post('/api/registry/opt-in', {
+        contractAddress: addr, chain,
+        displayName: contract?.name,
+        contactWebsite: contactWebsite || undefined,
+        documentsPublic,
+      })
+      toast({ title: 'Listing details saved' })
+      await refreshStatus()
+    } catch (err: any) {
+      toast({ title: 'Failed to save', description: err.message, variant: 'destructive' })
+    } finally { setSaving(false) }
+  }
+
+  const handleCheckout = async () => {
+    const [addr, chain] = selected.split(':')
+    setCheckingOut(true)
+    try {
+      const res: any = await api.post('/api/registry/feature/checkout', {
+        contractAddress: addr, chain, plan,
+      })
+      if (res.url) window.location.href = res.url
+    } catch (err: any) {
+      toast({ title: 'Checkout failed', description: err.message, variant: 'destructive' })
+      setCheckingOut(false)
+    }
+  }
+
   if (contracts.length === 0) return null
+
+  const isFeatured = !!status?.registered
+  const pricing = status?.pricing || { monthly: 20, yearly: 200 }
 
   return (
     <Card>
@@ -79,9 +117,9 @@ function DiscoverOptInCard() {
           Feature My Project
         </CardTitle>
         <CardDescription className="text-xs">
-          Allow MetaGauge to show your project in the Discover tab for investors.
-          Your growth pattern and match score will be visible. Financial documents
-          are only shown if you enable public documents below.
+          Get your project in front of investors in the Discover tab — ${pricing.monthly}/month
+          or ${pricing.yearly}/year (2 months free). Your growth pattern and match score are
+          shown to investors; financial documents only if you enable public documents below.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -108,8 +146,17 @@ function DiscoverOptInCard() {
             <div className="flex items-center justify-between p-3 rounded-lg border">
               <div>
                 <div className="text-sm font-medium">
-                  {status?.registered ? '✅ Featured in Discover' : '⚪ Not featured'}
+                  {isFeatured ? '✅ Featured in Discover' : '⚪ Not featured'}
                 </div>
+                {isFeatured && status?.daysRemaining != null && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {status.plan === 'yearly' ? 'Yearly plan' : 'Monthly plan'} · {status.daysRemaining}{' '}
+                    day{status.daysRemaining === 1 ? '' : 's'} left
+                    {status.daysRemaining <= 7 && (
+                      <span className="text-amber-600 font-medium"> — renew soon</span>
+                    )}
+                  </div>
+                )}
                 {status?.fingerprint && (
                   <div className="text-xs text-muted-foreground mt-0.5">
                     Match score: <span className="font-semibold">{status.fingerprint.match_score}/100</span>
@@ -119,11 +166,17 @@ function DiscoverOptInCard() {
                   </div>
                 )}
               </div>
-              <Button size="sm" variant={status?.registered ? 'outline' : 'default'}
-                onClick={handleToggle} disabled={saving}>
-                {saving && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
-                {status?.registered ? 'Remove' : 'Feature Project'}
-              </Button>
+              <div className="flex gap-2">
+                {isFeatured && (
+                  <Button size="sm" variant="outline" onClick={handleRemove} disabled={saving}>
+                    {saving && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                    Remove
+                  </Button>
+                )}
+                <Button size="sm" onClick={() => setShowPayModal(true)}>
+                  {isFeatured ? 'Renew / Change Plan' : 'Feature Project'}
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -139,18 +192,73 @@ function DiscoverOptInCard() {
                   Make financial documents visible to investors in Discover
                 </label>
               </div>
+              {isFeatured && (
+                <Button size="sm" variant="outline" onClick={handleSaveDetails} disabled={saving}>
+                  {saving && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                  Save Details
+                </Button>
+              )}
               <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2">
                 Privacy: Your wallet address and contract data are always visible. Financial documents
-                are only shown if you check the box above. You can opt out at any time.
+                are only shown if you check the box above. Featuring stops automatically if not renewed.
               </div>
             </div>
           </>
         )}
       </CardContent>
+
+      {showPayModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => !checkingOut && setShowPayModal(false)}>
+          <Card className="max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <CardHeader>
+              <CardTitle className="text-base">Feature Your Project</CardTitle>
+              <CardDescription className="text-xs">Choose a plan to continue to payment.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <button
+                type="button"
+                onClick={() => setPlan('monthly')}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  plan === 'monthly' ? 'border-primary bg-primary/5' : 'border-muted'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Monthly</span>
+                  <span className="text-sm font-semibold">${pricing.monthly}/mo</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlan('yearly')}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  plan === 'yearly' ? 'border-primary bg-primary/5' : 'border-muted'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium flex items-center gap-1.5">
+                    Yearly <Badge variant="secondary" className="text-[10px]">2 months free</Badge>
+                  </span>
+                  <span className="text-sm font-semibold">${pricing.yearly}/yr</span>
+                </div>
+              </button>
+
+              <div className="flex gap-2 pt-1">
+                <Button variant="outline" className="flex-1" onClick={() => setShowPayModal(false)} disabled={checkingOut}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={handleCheckout} disabled={checkingOut}>
+                  {checkingOut && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                  Continue to Payment
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </Card>
   )
 }
-import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 
 function ChangePasswordForm() {
@@ -613,7 +721,9 @@ export default function ProfilePage() {
 
             <SocialAccountsCard />
 
-            <DiscoverOptInCard />
+            <Suspense fallback={null}>
+              <DiscoverOptInCard />
+            </Suspense>
           </div>
         </div>
       </div>

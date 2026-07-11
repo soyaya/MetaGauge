@@ -447,7 +447,7 @@ export class PostgresContractStorage {
         contractData.userId,
         contractData.name,
         contractData.description || null,
-        contractData.targetContract?.address,
+        contractData.targetContract?.address?.toLowerCase(),
         contractData.targetContract?.chain,
         contractData.targetContract?.name,
         contractData.targetContract?.abi,
@@ -510,7 +510,7 @@ export class PostgresContractStorage {
   static async update(id, updates) {
     // Handle nested objects separately
     if (updates.targetContract) {
-      updates.targetAddress = updates.targetContract.address;
+      updates.targetAddress = updates.targetContract.address?.toLowerCase();
       updates.targetChain = updates.targetContract.chain;
       updates.targetName = updates.targetContract.name;
       updates.targetAbi = updates.targetContract.abi;

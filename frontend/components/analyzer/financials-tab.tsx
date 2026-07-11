@@ -515,7 +515,7 @@ export function FinancialsTab({ contractAddress, chain }: FinancialTabProps) {
             </select>
           )}
           <Button variant="outline" size="sm" onClick={() => setShowChat(!showChat)}>
-            <Bot className="h-4 w-4 mr-1" /> {showChat ? 'Hide' : 'AI'} Chat
+            <Bot className="h-4 w-4 mr-1" /> {showChat ? 'Hide CFO' : 'CFO'}
           </Button>
           {docs && (
             <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
@@ -555,7 +555,7 @@ export function FinancialsTab({ contractAddress, chain }: FinancialTabProps) {
                 {missingCount} input{missingCount !== 1 ? 's' : ''} needed to generate financial documents
               </div>
               <div className="text-xs text-amber-700 mt-0.5">
-                The AI Financial Advisor will ask for these conversationally in the chat below.
+                CFO will ask for these conversationally in the chat below.
               </div>
             </div>
             <Button size="sm" variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100"
@@ -766,7 +766,7 @@ export function FinancialsTab({ contractAddress, chain }: FinancialTabProps) {
                   <h3 className="font-semibold mb-1">No Financial Documents Yet</h3>
                   <p className="text-sm text-muted-foreground max-w-sm">
                     {missingCount > 0
-                      ? 'Chat with the AI Financial Advisor to provide your cost inputs, then generate your investor-grade documents.'
+                      ? 'Chat with CFO to provide your cost inputs, then generate your investor-grade documents.'
                       : 'Click Generate to create your financial documents from on-chain data.'}
                   </p>
                 </div>
@@ -788,7 +788,7 @@ export function FinancialsTab({ contractAddress, chain }: FinancialTabProps) {
               <CardHeader className="pb-2 border-b">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Bot className="h-4 w-4 text-primary" />
-                  AI Financial Advisor
+                  CFO
                 </CardTitle>
                 <CardDescription className="text-xs">
                   Collects your business inputs and answers questions about your financial data

@@ -16,6 +16,8 @@ import { query } from '../database/postgres.js';
 import ProjectRegistryService from '../../services/ProjectRegistryService.js';
 import RecommendationEngine from '../../services/RecommendationEngine.js';
 import GrowthFingerprintEngine from '../../services/GrowthFingerprintEngine.js';
+import { createPaystackCheckout } from './billing.js';
+import { FEATURED_PRICING } from '../../config/pricing.js';
 
 const router = Router();
 router.use(authenticateToken);
@@ -25,7 +27,7 @@ router.use(authenticateToken);
 async function resolveContract(userId, contractAddress, chain) {
   const result = await query(
     `SELECT id, name, target_address AS address, target_chain AS chain FROM contracts
-     WHERE user_id=$1 AND target_address=$2 AND target_chain=$3 LIMIT 1`,
+     WHERE user_id=$1 AND LOWER(target_address)=$2 AND target_chain=$3 LIMIT 1`,
     [userId, contractAddress?.toLowerCase(), chain || 'ethereum']
   );
   return result.rows[0] || null;
@@ -44,6 +46,17 @@ router.post('/opt-in', async (req, res) => {
     const contract = await resolveContract(req.user.id, contractAddress, chain);
     if (!contract) return res.status(404).json({ error: 'Contract not found' });
 
+    // Featuring is a paid upgrade — this endpoint only edits an *already-paid*
+    // listing's details. First-time activation happens via /feature/checkout
+    // + payment webhook (ProjectRegistryService.activateFeatured).
+    const existing = await ProjectRegistryService.getRegistration(req.user.id, contract.id);
+    if (!existing || !existing.is_active) {
+      return res.status(402).json({
+        error: 'Payment required',
+        message: `Featuring a project costs $${FEATURED_PRICING.monthly}/month or $${FEATURED_PRICING.yearly}/year. Start checkout to activate.`,
+      });
+    }
+
     await ProjectRegistryService.optIn(
       req.user.id, contract.id,
       contractAddress, chain,
@@ -52,8 +65,8 @@ router.post('/opt-in', async (req, res) => {
 
     // Trigger fingerprint computation if not already done
     try {
-      const existing = await GrowthFingerprintEngine.loadFingerprint(contractAddress, chain);
-      if (!existing) {
+      const existingFingerprint = await GrowthFingerprintEngine.loadFingerprint(contractAddress, chain);
+      if (!existingFingerprint) {
         // Pull on-chain data and trigger fingerprint async (don't block response)
         const metricsResult = await query(
           `SELECT data FROM metrics WHERE contract_id=$1 ORDER BY created_at DESC LIMIT 1`,
@@ -64,10 +77,44 @@ router.post('/opt-in', async (req, res) => {
       }
     } catch { /* non-fatal */ }
 
-    res.json({ success: true, message: 'Project featured in Discover tab' });
+    res.json({ success: true, message: 'Project details updated' });
   } catch (err) {
     console.error('[registry/opt-in]', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST /api/registry/feature/checkout ────────────────────────────────────
+// Start a paid checkout to feature (or renew) a project. On successful
+// payment, the Paystack/Flutterwave webhook calls activateFeatured().
+
+router.post('/feature/checkout', async (req, res) => {
+  try {
+    const { contractAddress, chain, plan } = req.body;
+    if (!['monthly', 'yearly'].includes(plan)) {
+      return res.status(400).json({ error: 'plan must be "monthly" or "yearly"' });
+    }
+
+    const contract = await resolveContract(req.user.id, contractAddress, chain);
+    if (!contract) return res.status(404).json({ error: 'Contract not found' });
+
+    const amountUSD = FEATURED_PRICING[plan];
+    const { url, reference } = await createPaystackCheckout({
+      user: req.user,
+      amountUSD,
+      callbackPath: `/profile?featured=1&provider=paystack`,
+      metadata: {
+        purpose: 'feature_project',
+        contractId: contract.id,
+        contractAddress: contract.address,
+        chain: contract.chain,
+        plan,
+      },
+    });
+
+    res.json({ success: true, url, reference, amountUSD, plan });
+  } catch (err) {
+    res.status(err.message.includes('not configured') ? 503 : 500).json({ error: err.message });
   }
 });
 
@@ -97,10 +144,17 @@ router.get('/status', async (req, res) => {
     const reg = await ProjectRegistryService.getRegistration(req.user.id, contract.id);
     const fp  = await GrowthFingerprintEngine.loadFingerprint(contractAddress, chain);
 
+    const paidUntil = reg?.paid_until ? new Date(reg.paid_until) : null;
+    const daysRemaining = paidUntil ? Math.max(0, Math.ceil((paidUntil - Date.now()) / 86400000)) : null;
+
     res.json({
       success: true,
       registered: !!reg && reg.is_active,
       registration: reg || null,
+      plan: reg?.plan || null,
+      paidUntil: reg?.paid_until || null,
+      daysRemaining,
+      pricing: FEATURED_PRICING,
       fingerprint: fp ? {
         match_score:   fp.match_score,
         matched_comps: fp.matched_comps,

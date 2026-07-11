@@ -105,11 +105,11 @@ export function OverviewTab({ analysisResults }: OverviewTabProps) {
 
         <Card className="border-blue-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">Time to First Interaction<MetricInfo text="Average time between contract deployment and a wallet's very first transaction. Measures how quickly new users discover and use the contract." /></CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">Time Since First Interaction<MetricInfo text="How long ago the earliest transaction in this data sample occurred — not an average across wallets, and not tied to the contract's deployment block." /></CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{fmt(defiMetrics.avgTimeToFirstInteraction)}</p>
-            <p className="text-xs text-blue-600 mt-1">Avg time for wallet to first use contract</p>
+            <p className="text-xs text-blue-600 mt-1">Time since the earliest indexed transaction</p>
           </CardContent>
         </Card>
       </div>

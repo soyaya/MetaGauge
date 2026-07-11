@@ -37,6 +37,11 @@ export const FEATURES = {
   extendedHistory:     'balance',
 };
 
+export const FEATURED_PRICING = {
+  monthly: 20,   // $20/month to feature a project in Discover
+  yearly:  200,  // $200/year (~2 months free vs. 12 * $20 = $240)
+};
+
 export const LIMITS = {
   maxContractsFree:  FREE_QUOTA.contracts,
   maxAlertsFree:     FREE_QUOTA.alerts,

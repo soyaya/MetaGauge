@@ -213,13 +213,17 @@ export async function indexCompetitor(userId, competitor) {
         // ── Auto-run competitive alert checks ────────────────────────
         try {
           const { UserStorage, MetricsStorage, AlertConfigStorage } = await import('../database/index.js');
+          const { isAgentPermitted } = await import('../../services/AgentService.js');
           const user = await UserStorage.findById(userId);
           const myContractAddress = user?.onboarding?.defaultContract?.address;
           const { checkCompetitorAcquisitionSpike, checkTVLOvertake, checkMomentumShift, makeAlert, saveAlert } = await import('../../services/AlertEngine.js');
 
           const userAlertConfigs = await AlertConfigStorage.findByUserId(userId);
           const globalCfg = userAlertConfigs.find(c => !c.type && c.enabled);
-          const competitorsEnabled = globalCfg?.categories?.competitors !== false;
+          // Both the general alert-category toggle AND the Agent tab's
+          // "Competitor spike alerts" permission must be on.
+          const competitorsEnabled = globalCfg?.categories?.competitors !== false
+            && await isAgentPermitted(userId, 'checkCompetitors');
           const previousMetrics = current.metrics || {};
 
           if (competitorsEnabled) {

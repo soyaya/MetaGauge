@@ -106,7 +106,7 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Transactions', value: (sum.totalTransactions || txs.length).toLocaleString(), sub: 'All indexed txs' },
-          { label: 'Success Rate',       value: sum.successRate != null ? `${sum.successRate}%` : '100%', sub: 'Successful / total' },
+          { label: 'Success Rate',       value: sum.successRate != null ? `${sum.successRate}%` : 'N/A', sub: 'Successful / total' },
           { label: 'Total Volume',       value: sum.totalValueEth != null ? `${sum.totalValueEth} ETH` : '0 ETH', sub: 'Total inflow' },
           { label: 'Failed Txs',         value: (gas.failedTransactions || 0).toLocaleString(), sub: `${gas.failureRate || 0}% failure rate`, warn: (gas.failureRate||0) > 10 },
         ].map(({ label, value, sub, warn = false }) => (
@@ -125,7 +125,7 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
         {[
           { label: 'Avg Gas Price',     value: gas.averageGasPrice     || 'N/A', sub: 'Network cost' },
           { label: 'Avg Gas Used',      value: (gas.averageGasUsed||0).toLocaleString(), sub: 'Gas units per tx' },
-          { label: 'Total Gas Cost',    value: gas.totalGasCostUSD != null ? `$${gas.totalGasCostUSD}` : 'N/A', sub: 'USD (ETH @ $2500)' },
+          { label: 'Total Gas Cost',    value: gas.totalGasCostUSD != null ? `$${gas.totalGasCostUSD}` : 'N/A', sub: 'USD (live ETH price)' },
           { label: 'Avg Gas Cost / Tx', value: gas.averageGasCostUSD != null ? `$${gas.averageGasCostUSD}` : 'N/A', sub: 'Per transaction' },
         ].map(({ label, value, sub }) => (
           <Card key={label}>
@@ -211,7 +211,7 @@ export function TransactionsTab({ analysisResults }: TransactionsTabProps) {
                     {paginated.map((tx: any, i: number) => {
                       const gasUsed  = hexToNum(tx.gasUsed);
                       const gasPrice = hexToNum(tx.gasPrice);
-                      const gasCostUSD = (gasUsed * gasPrice / 1e18 * 2500).toFixed(4);
+                      const gasCostUSD = (gasUsed * gasPrice / 1e18 * (gas.ethPriceUsed || 2500)).toFixed(4);
                       return (
                         <tr key={i} className="border-b hover:bg-muted/30 transition-colors">
                           <td className="py-2 px-2 font-mono">{formatHash(tx.hash)}</td>

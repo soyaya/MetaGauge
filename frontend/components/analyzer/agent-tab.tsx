@@ -128,7 +128,7 @@ export function AgentTab() {
             {[
               { label: 'Users',        data: p.next30Days?.users },
               { label: 'Transactions', data: p.next30Days?.transactions },
-              { label: 'Retention',    data: p.next30Days?.retentionRate, suffix: '%' },
+              { label: 'Repeat-User Rate', data: p.next30Days?.retentionRate, suffix: '%' },
               { label: 'Churn',        data: p.next30Days?.churnRate,     suffix: '%' },
             ].map(({ label, data, suffix = '' }) => data && (
               <Card key={label}>

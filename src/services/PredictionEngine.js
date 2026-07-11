@@ -57,18 +57,37 @@ export class PredictionEngine {
   // ── Core forecasting ───────────────────────────────────────────────────────
 
   /**
+   * Snapshots are appended at most once per calendar day (deduped on the
+   * `date` column) but NOT on any fixed cadence — an active user can produce
+   * daily snapshots, an inactive one sparse ones. Regressing against the
+   * array index (as if snapshots were always ~1 week apart) makes forecasts
+   * wildly wrong depending on how often the user happened to load the
+   * dashboard. Use real elapsed days since the first snapshot instead, so
+   * `slope` is always "per day" regardless of snapshot spacing.
+   */
+  static _dayIndex(snapshots) {
+    const firstDate = snapshots[0]?.date ? new Date(snapshots[0].date).getTime() : 0;
+    return snapshots.map(s => {
+      const t = s.date ? new Date(s.date).getTime() : firstDate;
+      return Math.round((t - firstDate) / 86400000);
+    });
+  }
+
+  /**
    * Linear regression forecast N days ahead.
    * Returns { value, trend, low, high } (simple confidence interval).
    */
   static _forecast(snapshots, key, days) {
-    const vals = snapshots.map((s, i) => ({ x: i, y: s[key] || 0 }));
+    const dayIndex = this._dayIndex(snapshots);
+    const vals = snapshots.map((s, i) => ({ x: dayIndex[i], y: s[key] || 0 }));
     if (vals.length < 2) return { value: vals[0]?.y || 0, trend: 'unknown' };
 
     const { slope, intercept } = this._linReg(vals);
-    const nextX = vals.length - 1 + (days / 7); // assume ~weekly snapshots
+    const nextX = vals[vals.length - 1].x + days; // slope is per real day now
     const value = Math.max(0, Math.round(slope * nextX + intercept));
     const current = vals[vals.length - 1].y;
-    const trend = slope > 0.5 ? 'up' : slope < -0.5 ? 'down' : 'flat';
+    // slope is per-day; ~0.5/week ≈ 0.07/day is the "meaningful trend" bar
+    const trend = slope > 0.5 / 7 ? 'up' : slope < -0.5 / 7 ? 'down' : 'flat';
 
     // Simple ±15% confidence interval
     return {
@@ -94,19 +113,18 @@ export class PredictionEngine {
    * Estimate days until user count hits each milestone.
    */
   static _milestones(snapshots) {
-    const vals = snapshots.map((s, i) => ({ x: i, y: s.uniqueUsers || 0 }));
+    const dayIndex = this._dayIndex(snapshots);
+    const vals = snapshots.map((s, i) => ({ x: dayIndex[i], y: s.uniqueUsers || 0 }));
     if (vals.length < 2) return {};
-    const { slope } = this._linReg(vals);
+    const { slope } = this._linReg(vals); // users per real day
     if (slope <= 0) return {};
 
     const current = vals[vals.length - 1].y;
-    const daysPerSnapshot = 7; // approximate
     const result = {};
 
     for (const target of [100, 500, 1000, 5000, 10000]) {
       if (current >= target) continue;
-      const snapshotsNeeded = (target - current) / slope;
-      const days = Math.round(snapshotsNeeded * daysPerSnapshot);
+      const days = Math.round((target - current) / slope);
       if (days > 0 && days < 3650) result[`${target}_users`] = { days, date: this._futureDate(days) };
     }
     return result;
@@ -136,11 +154,12 @@ export class PredictionEngine {
    * Growth score 0-100.
    */
   static _growthScore(snapshots) {
-    const vals = snapshots.map((s, i) => ({ x: i, y: s.uniqueUsers || 0 }));
+    const dayIndex = this._dayIndex(snapshots);
+    const vals = snapshots.map((s, i) => ({ x: dayIndex[i], y: s.uniqueUsers || 0 }));
     if (vals.length < 2) return { score: 0, label: 'insufficient data' };
-    const { slope } = this._linReg(vals);
+    const { slope } = this._linReg(vals); // users per real day
     const current = vals[vals.length - 1].y;
-    const pctPerWeek = current > 0 ? (slope / current) * 100 : 0;
+    const pctPerWeek = current > 0 ? ((slope * 7) / current) * 100 : 0;
     const score = Math.min(100, Math.max(0, Math.round(50 + pctPerWeek * 5)));
     const label = score >= 75 ? 'strong' : score >= 50 ? 'moderate' : score >= 25 ? 'weak' : 'declining';
     return { score, label, weeklyGrowthPct: Math.round(pctPerWeek * 10) / 10 };

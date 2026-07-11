@@ -457,6 +457,22 @@ async function startServer() {
         setInterval(scheduleResearchRefresh, 24 * 60 * 60 * 1000);
         console.log('🔬 Research Agent scheduler started (24h refresh cycle)');
       }).catch(err => console.warn('⚠️ Research Agent scheduler failed to start:', err.message));
+
+      // Featured Projects — daily sweep to un-feature expired paid listings
+      import('../services/ProjectRegistryService.js').then(({ default: ProjectRegistryService }) => {
+        const sweepExpiredFeatures = async () => {
+          try {
+            const count = await ProjectRegistryService.deactivateExpired();
+            if (count > 0) console.log(`[FeaturedProjects] Un-featured ${count} expired listing(s)`);
+          } catch (e) {
+            console.warn('[FeaturedProjects] Expiry sweep error:', e.message);
+          }
+        };
+
+        setTimeout(sweepExpiredFeatures, 45000);
+        setInterval(sweepExpiredFeatures, 24 * 60 * 60 * 1000);
+        console.log('⭐ Featured Projects expiry sweep started (24h cycle)');
+      }).catch(err => console.warn('⚠️ Featured Projects scheduler failed to start:', err.message));
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

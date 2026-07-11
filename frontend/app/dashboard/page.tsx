@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth/auth-provider"
 import { api } from "@/lib/api"
@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/ui/header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Activity, Plus, Globe, Loader2, AlertCircle } from "lucide-react"
+import { Activity, Plus, Globe, Loader2, AlertCircle, HelpCircle } from "lucide-react"
 import Link from "next/link"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
+import { TabGuideButton } from "@/components/dashboard/tab-guide-button"
+import { HelpModal } from "@/components/dashboard/help-modal"
+import { DashboardTour, type DashboardTourHandle } from "@/components/dashboard/dashboard-tour"
 
 // Import analyzer components for detailed metrics display
 import { OverviewTab } from "@/components/analyzer/overview-tab"
@@ -159,6 +162,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
+  const [helpOpen, setHelpOpen] = useState(false)
+  const tourRef = useRef<DashboardTourHandle>(null)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -418,13 +423,28 @@ export default function DashboardPage() {
 
             {/* Detailed Metrics Tabs - Always Show */}
             <div className="mb-6">
+              <DashboardTour ref={tourRef} activeTab={activeTab} setActiveTab={setActiveTab} />
+
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="overflow-x-auto pb-1 -mx-1 px-1">
-                  <TabsList className="flex w-max gap-1 h-auto p-1">
-                    {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Txns'],['wallets','Wallets'],['functions','Functions'],['ux','UX'],['intelligence','Intelligence'],['playbooks','Playbooks'],['outreach','Outreach'],['campaigns','Campaigns'],['financials','Financials'],['discover','Discover'],['export','Export'],['agent','Agent'],['competitive','Competitive']].map(([v,l])=>(
-                      <TabsTrigger key={v} value={v} className="text-xs whitespace-nowrap px-3 py-1.5">{l}</TabsTrigger>
-                    ))}
-                  </TabsList>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="overflow-x-auto pb-1 -mx-1 px-1 flex-1 min-w-0">
+                    <TabsList className="flex w-max gap-1 h-auto p-1">
+                      {[['overview','Overview'],['metrics','Metrics'],['users','Users'],['transactions','Txns'],['wallets','Wallets'],['functions','Functions'],['ux','UX'],['intelligence','Intelligence'],['playbooks','Playbooks'],['outreach','Outreach'],['campaigns','Campaigns'],['financials','Financials'],['discover','Discover'],['export','Export'],['agent','Agent'],['competitive','Competitive']].map(([v,l])=>(
+                        <TabsTrigger key={v} value={v} className="text-xs whitespace-nowrap px-3 py-1.5">{l}</TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <TabGuideButton tabKey={activeTab} />
+                    <button
+                      type="button"
+                      onClick={() => setHelpOpen(true)}
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <HelpCircle className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Help</span>
+                    </button>
+                  </div>
                 </div>
 
                 <TabsContent value="overview">
@@ -546,6 +566,12 @@ export default function DashboardPage() {
                 </TabsContent>
               </Tabs>
             </div>
+
+            <HelpModal
+              open={helpOpen}
+              onOpenChange={setHelpOpen}
+              onRestartTour={() => tourRef.current?.restart()}
+            />
 
             {/* Indexing Progress — only show if 0% and no banner above */}
             {!defaultContract.indexingStatus.isIndexed && defaultContract.indexingStatus.progress === 0 && (

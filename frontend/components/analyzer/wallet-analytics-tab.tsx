@@ -153,7 +153,7 @@ export function WalletAnalyticsTab({ contractAddress, chain }: WalletAnalyticsTa
                       { name: 'Dormant', value: dormantWallets.length },
                     ]}
                     cx="50%" cy="50%" innerRadius={40} outerRadius={75} dataKey="value" paddingAngle={3} strokeWidth={0}>
-                    <Cell fill={CHART_SECONDARY} /><Cell fill={CHART_SECONDARY} />
+                    <Cell fill={CHART_PRIMARY} /><Cell fill={CHART_SECONDARY} />
                   </Pie>
                   <Tooltip {...TOOLTIP_STYLE} />
                 <Legend wrapperStyle={{ fontSize: "11px", color: "hsl(var(--foreground))" }} />

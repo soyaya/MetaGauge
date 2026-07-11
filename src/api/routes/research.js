@@ -18,7 +18,7 @@ router.use(authenticateToken);
 async function verifyContract(userId, contractAddress, chain) {
   const result = await query(
     `SELECT id, name, target_address AS address, target_chain AS chain FROM contracts
-     WHERE user_id=$1 AND target_address=$2 AND target_chain=$3 LIMIT 1`,
+     WHERE user_id=$1 AND LOWER(target_address)=$2 AND target_chain=$3 LIMIT 1`,
     [userId, contractAddress?.toLowerCase(), chain || 'ethereum']
   );
   return result.rows[0] || null;

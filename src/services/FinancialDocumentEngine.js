@@ -199,7 +199,14 @@ export function buildCashFlowStatement(onChain, inputs, prices = {}) {
 
 // ── 3. Balance Sheet ───────────────────────────────────────────────────────
 
-export function buildBalanceSheet(onChain, inputs, prices = {}) {
+/**
+ * @param {object} financials - { currentNetProfit, priorRetainedEarnings }
+ *   currentNetProfit: this period's net_profit from the income statement.
+ *   priorRetainedEarnings: cumulative net_profit from all earlier periods (0 for the first period).
+ *   Retained earnings is computed from actual profit history, not backed into
+ *   balance as a plug — so balance_check is a real sanity check, not a tautology.
+ */
+export function buildBalanceSheet(onChain, inputs, prices = {}, financials = {}) {
   const { profile = {}, periodInputs = {}, fundingRounds = [] } = inputs;
   const ethUsd = prices.ethUsd || 2500;
 
@@ -219,9 +226,10 @@ export function buildBalanceSheet(onChain, inputs, prices = {}) {
   const totalAssets         = round2(totalCurrentAssets + totalNonCurrentAssets);
 
   // ── Liabilities ──
-  // Current liabilities
-  const accruedPayroll      = round2(safe(periodInputs.payroll) * 0); // assume paid — 0
-  const accruedOther        = round2(safe(periodInputs.other_opex) * 0);
+  // Current liabilities — placeholder: assumes payroll/opex are paid in the
+  // same period they're incurred (no accrual tracking input exists yet).
+  const accruedPayroll      = 0;
+  const accruedOther        = 0;
   const totalCurrentLiab    = round2(accruedPayroll + accruedOther);
 
   // Non-current liabilities (vesting obligations — estimated from team size)
@@ -233,10 +241,15 @@ export function buildBalanceSheet(onChain, inputs, prices = {}) {
 
   // ── Equity ──
   const totalFundingRaised  = fundingRounds.reduce((sum, r) => sum + safe(r.amount_usd), 0);
-  const retainedEarnings    = round2(totalAssets - totalLiabilities - totalFundingRaised);
+  // Retained earnings = actual cumulative profit/loss (prior periods + this one),
+  // not a residual plug — so the balance check below is meaningful.
+  const retainedEarnings    = round2(safe(financials.priorRetainedEarnings) + safe(financials.currentNetProfit));
   const totalEquity         = round2(totalFundingRaised + retainedEarnings);
 
-  // Sanity check: assets = liabilities + equity (should balance)
+  // Sanity check: assets = liabilities + equity. A non-zero value here is
+  // expected and reflects the conservative exclusions above (goodwill,
+  // accounts receivable, vesting obligations all reported as 0) — it is NOT
+  // forced to zero.
   const balanceCheck        = round2(totalAssets - totalLiabilities - totalEquity);
 
   return {
@@ -445,8 +458,9 @@ export function buildKPIDashboard(onChain, inputs, researchData = null) {
 
 /**
  * Generates Base, Bull, Bear scenarios.
- * Growth assumptions are derived from on-chain trajectory where possible,
- * otherwise sensible conservative defaults are used.
+ * Growth assumptions are fixed illustrative rates (8%/20%/1% monthly revenue
+ * growth for base/bull/bear) — NOT derived from this contract's actual
+ * on-chain trajectory. Treat these as planning scenarios, not a forecast.
  */
 export function build12MonthModel(onChain, inputs, prices = {}) {
   const { periodInputs = {} } = inputs;
@@ -516,7 +530,7 @@ export function build12MonthModel(onChain, inputs, prices = {}) {
     bull:  buildScenario(scenarios.bull),
     bear:  buildScenario(scenarios.bear),
     notes: [
-      'Revenue growth rates derived from on-chain activity trajectory where available.',
+      'Growth rates are fixed illustrative assumptions (base/bull/bear), not derived from this project\'s historical trajectory.',
       'Cost growth assumes linear scaling with team and infrastructure.',
       'Token price movements excluded from projections — consult a financial advisor.',
       'This model is for planning purposes only and does not constitute financial advice.',
@@ -528,20 +542,27 @@ export function build12MonthModel(onChain, inputs, prices = {}) {
 
 /**
  * Build all 6 documents in one call.
+ * @param {object} financials - { priorRetainedEarnings } cumulative net_profit
+ *   from all periods before this one — needed so the balance sheet's retained
+ *   earnings reflects real profit history instead of a residual plug.
  * Returns { incomeStatement, cashFlow, balanceSheet, unitEconomics, kpiDashboard, forwardModel }
  */
-export async function buildAllDocuments(onChain, inputs, prices = {}, researchData = null) {
+export async function buildAllDocuments(onChain, inputs, prices = {}, researchData = null, financials = {}) {
+  // Income statement is computed first — the balance sheet needs its net_profit.
+  const incomeStatement = buildIncomeStatement(onChain, inputs, prices);
+
   const [
-    incomeStatement,
     cashFlow,
     balanceSheet,
     unitEconomics,
     kpiDashboard,
     forwardModel,
   ] = await Promise.all([
-    Promise.resolve(buildIncomeStatement(onChain, inputs, prices)),
     Promise.resolve(buildCashFlowStatement(onChain, inputs, prices)),
-    Promise.resolve(buildBalanceSheet(onChain, inputs, prices)),
+    Promise.resolve(buildBalanceSheet(onChain, inputs, prices, {
+      currentNetProfit: incomeStatement.net_profit,
+      priorRetainedEarnings: financials.priorRetainedEarnings || 0,
+    })),
     Promise.resolve(buildUnitEconomics(onChain, inputs, prices)),
     Promise.resolve(buildKPIDashboard(onChain, inputs, researchData)),
     Promise.resolve(build12MonthModel(onChain, inputs, prices)),
