@@ -37,6 +37,36 @@ https://www.metagauge.xyz
 a8e77faafea5b731307c059411dffc6620965a302e3063284194e94447ae660adb531b259ed61a02a69376f008a757ef06132e7add6f3fa7aff96fb009f255ee
 ```
 
+### POSTGRES_HOST
+```
+ep-orange-mountain-ayvxv4gp-pooler.c-5.us-east-2.aws.neon.tech
+```
+
+### POSTGRES_PORT
+```
+5432
+```
+
+### POSTGRES_DB
+```
+neondb
+```
+
+### POSTGRES_USER
+```
+neondb_owner
+```
+
+### POSTGRES_PASSWORD
+```
+npg_DrCVPcg3aJ0E
+```
+
+### POSTGRES_SSL
+```
+true
+```
+
 ---
 
 ## ⚠️ IMPORTANT - Add Your API Keys
@@ -95,11 +125,6 @@ YOUR_WALLET_ADDRESS
 5
 ```
 
-### POSTGRES_SSL
-```
-true
-```
-
 ### RATE_LIMIT_MAX_REQUESTS
 ```
 200
@@ -125,13 +150,19 @@ true
 
 If you want to deploy IMMEDIATELY with basic functionality:
 
-**Just add these 6 variables:**
+**Just add these 12 variables:**
 1. DATABASE_TYPE = `postgres`
 2. DATABASE_URL = `(your Neon connection string)`
-3. NODE_ENV = `production`
-4. PORT = `10000`
-5. FRONTEND_URL = `https://www.metagauge.xyz`
-6. JWT_SECRET = `(generated secret above)`
+3. POSTGRES_HOST = `ep-orange-mountain-ayvxv4gp-pooler.c-5.us-east-2.aws.neon.tech`
+4. POSTGRES_PORT = `5432`
+5. POSTGRES_DB = `neondb`
+6. POSTGRES_USER = `neondb_owner`
+7. POSTGRES_PASSWORD = `npg_DrCVPcg3aJ0E`
+8. POSTGRES_SSL = `true`
+9. NODE_ENV = `production`
+10. PORT = `10000`
+11. FRONTEND_URL = `https://www.metagauge.xyz`
+12. JWT_SECRET = `(generated secret above)`
 
 **Everything else can be added later!**
 
