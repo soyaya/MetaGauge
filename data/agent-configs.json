@@ -50,5 +50,18 @@
       "postSocial": false
     },
     "updatedAt": "2026-06-14T11:38:33.181Z"
+  },
+  {
+    "userId": "09e68ddd-75c8-4b8f-8dde-9c32ea51d2a6",
+    "enabled": true,
+    "permissions": {
+      "regressionAlerts": true,
+      "sendDigests": true,
+      "createTasks": true,
+      "autoAnalyze": true,
+      "checkCompetitors": false,
+      "postSocial": false
+    },
+    "updatedAt": "2026-07-15T10:21:16.432Z"
   }
 ]

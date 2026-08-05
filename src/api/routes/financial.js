@@ -95,40 +95,93 @@ async function resolveContractId(userId, contractAddress, chain) {
 }
 
 // ── Helper: fetch on-chain metrics snapshot for document engine ────────────
+//
+// Two bugs fixed here (see plan doc / AI walkthrough notes):
+//  1. This used to query `metrics WHERE contract_id = $1` — but `metrics` is
+//     keyed by `user_id` only (no contract_id column exists), so this threw
+//     on every call, was silently swallowed, and always returned `{}`. Every
+//     P&L/CF/BS ever generated computed revenue/costs from an empty on-chain
+//     snapshot. Fixed to query by user_id, matching the actual schema.
+//  2. Revenue/expense figures now come from real per-transaction ledger data
+//     (see src/services/ledger/) instead of never having been populated at
+//     all. `totalFeeEth` is set to (ledger revenue in USD) / ethUsd so that
+//     FinancialDocumentEngine's existing `protocolRevenue = onChainFeeEth *
+//     ethUsd` arithmetic recovers the real USD figure without any changes
+//     to that engine's revenue calculation. `onChainOpexUsd` is a new field
+//     carrying ledger-derived operating expenses (see FinancialDocumentEngine
+//     changes for where it's folded in).
 
-async function fetchOnChainSnapshot(contractId) {
-  if (!contractId) return {};
+const REVENUE_ACCOUNT_CODES = ['4010', '4020', '4030', '4040'];
+const OPEX_ACCOUNT_CODES    = ['6010', '6040', '6060'];
+
+async function fetchLedgerAmounts(userId, contractId, period) {
+  if (!contractId || !period) return { revenueUsd: 0, opexUsd: 0 };
   try {
     const result = await query(
-      `SELECT data FROM metrics WHERE contract_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [contractId]
+      `SELECT account_code, SUM(debit) AS total_debit, SUM(credit) AS total_credit
+       FROM ledger_entries
+       WHERE user_id = $1 AND contract_id = $2 AND period = $3
+       GROUP BY account_code`,
+      [userId, contractId, period]
     );
-    const raw = result.rows[0]?.data || {};
 
-    // Normalise field names to what FinancialDocumentEngine expects
-    return {
-      totalTransactions:  raw.totalTransactions  || raw.total_transactions  || 0,
-      uniqueUsers:        raw.uniqueUsers         || raw.unique_users        || 0,
-      newUsers:           raw.newUsers            || raw.new_users           || 0,
-      activeUsers:        raw.activeUsers         || raw.active_users        || 0,
-      dau:                raw.dau                 || 0,
-      wau:                raw.wau                 || 0,
-      mau:                raw.mau                 || 0,
-      totalVolumeEth:     raw.totalVolumeEth      || raw.total_volume_eth    || 0,
-      totalFeeEth:        raw.totalFeeEth         || raw.total_fee_eth       || 0,
-      retentionRate:      raw.retentionRate       || raw.retention_rate      || 0,
-      churnRate:          raw.churnRate           || raw.churn_rate          || 0,
-      d1Retention:        raw.d1Retention         || 0,
-      d7Retention:        raw.d7Retention         || 0,
-      d30Retention:       raw.d30Retention        || 0,
-      bounceRate:         raw.bounceRate          || raw.bounce_rate         || 0,
-      activationRate:     raw.activationRate      || raw.activation_rate     || 0,
-      txSuccessRate:      raw.txSuccessRate       || raw.tx_success_rate     || 0,
-      averageGasCostUSD:  raw.averageGasCostUSD   || raw.avg_gas_cost_usd    || 0,
-    };
-  } catch {
-    return {};
+    let revenueUsd = 0;
+    let opexUsd = 0;
+    for (const row of result.rows) {
+      const debit  = Number(row.total_debit)  || 0;
+      const credit = Number(row.total_credit) || 0;
+      if (REVENUE_ACCOUNT_CODES.includes(row.account_code)) {
+        // Revenue = inflow; this ledger's convention posts inflows as debit (see
+        // ClassificationEngine/LedgerIngestionService — matches classification_engine.py).
+        revenueUsd += debit - credit;
+      } else if (OPEX_ACCOUNT_CODES.includes(row.account_code)) {
+        // Expense = outflow; posted as credit.
+        opexUsd += credit - debit;
+      }
+    }
+    return { revenueUsd: Math.max(0, revenueUsd), opexUsd: Math.max(0, opexUsd) };
+  } catch (err) {
+    console.warn('[financial] fetchLedgerAmounts failed:', err.message);
+    return { revenueUsd: 0, opexUsd: 0 };
   }
+}
+
+async function fetchOnChainSnapshot(userId, contractId, period) {
+  if (!contractId) return {};
+
+  const ethUsd = 2500; // matches FinancialDocumentEngine's own fallback — no price oracle in this app yet
+
+  const [metricsResult, ledgerAmounts] = await Promise.all([
+    query(`SELECT data FROM metrics WHERE user_id = $1`, [userId]).catch(() => ({ rows: [] })),
+    fetchLedgerAmounts(userId, contractId, period),
+  ]);
+
+  const raw = metricsResult.rows[0]?.data || {};
+
+  // Normalise field names to what FinancialDocumentEngine expects
+  return {
+    totalTransactions:  raw.totalTransactions  || raw.total_transactions  || 0,
+    uniqueUsers:        raw.uniqueUsers         || raw.unique_users        || 0,
+    newUsers:           raw.newUsers            || raw.new_users           || 0,
+    activeUsers:        raw.activeUsers         || raw.active_users        || 0,
+    dau:                raw.dau                 || 0,
+    wau:                raw.wau                 || 0,
+    mau:                raw.mau                 || 0,
+    totalVolumeEth:     raw.totalVolumeEth      || raw.total_volume_eth    || 0,
+    // Revenue recovered from real ledger data (see comment above) instead of
+    // the always-empty snapshot this used to be.
+    totalFeeEth:        ledgerAmounts.revenueUsd / ethUsd,
+    onChainOpexUsd:     ledgerAmounts.opexUsd,
+    retentionRate:      raw.retentionRate       || raw.retention_rate      || 0,
+    churnRate:          raw.churnRate           || raw.churn_rate          || 0,
+    d1Retention:        raw.d1Retention         || 0,
+    d7Retention:        raw.d7Retention         || 0,
+    d30Retention:       raw.d30Retention        || 0,
+    bounceRate:         raw.bounceRate          || raw.bounce_rate         || 0,
+    activationRate:     raw.activationRate      || raw.activation_rate     || 0,
+    txSuccessRate:      raw.txSuccessRate       || raw.tx_success_rate     || 0,
+    averageGasCostUSD:  raw.averageGasCostUSD   || raw.avg_gas_cost_usd    || 0,
+  };
 }
 
 // ── GET /api/financial/inputs ─────────────────────────────────────────────
@@ -234,7 +287,7 @@ router.post('/documents/generate', async (req, res) => {
     // Gather all data
     const [inputs, onChain] = await Promise.all([
       getAllInputs(req.user.id, contractId, targetPeriod),
-      fetchOnChainSnapshot(contractId),
+      fetchOnChainSnapshot(req.user.id, contractId, targetPeriod),
     ]);
     inputs.period = targetPeriod;
 
@@ -374,6 +427,50 @@ router.get('/documents/:period', async (req, res) => {
     if (result.rows.length === 0) return res.json({ success: true, documents: null });
     res.json({ success: true, documents: result.rows[0] });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── GET /api/financial/ledger ─────────────────────────────────────────────
+// Read-only: inspect ledger_entries + classification_results for a period.
+// Phase 1 verification/debugging endpoint — no corrections UI yet.
+
+router.get('/ledger', async (req, res) => {
+  try {
+    const { contractAddress, chain } = req.query;
+    const contractId = await resolveContractId(req.user.id, contractAddress, chain);
+    if (!contractId) return res.status(404).json({ error: 'Contract not found' });
+
+    const period = req.query.period || currentPeriod();
+
+    const [entries, classifications] = await Promise.all([
+      query(
+        `SELECT id, period, account_code, debit, credit, source, tx_id, confidence, created_at
+         FROM ledger_entries
+         WHERE user_id = $1 AND contract_id = $2 AND period = $3
+         ORDER BY created_at DESC`,
+        [req.user.id, contractId, period]
+      ),
+      query(
+        `SELECT cr.id, cr.proposed_account_code, cr.confidence, cr.source, cr.rationale, cr.status,
+                tt.from_address, tt.to_address, tt.token_symbol, tt.amount
+         FROM classification_results cr
+         JOIN token_transfers tt ON tt.id = cr.transfer_id
+         WHERE cr.user_id = $1 AND cr.contract_id = $2
+         ORDER BY cr.created_at DESC
+         LIMIT 200`,
+        [req.user.id, contractId]
+      ),
+    ]);
+
+    res.json({
+      success: true,
+      period,
+      ledgerEntries: entries.rows,
+      classifications: classifications.rows,
+    });
+  } catch (err) {
+    console.error('[financial/ledger]', err);
     res.status(500).json({ error: err.message });
   }
 });

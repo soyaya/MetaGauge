@@ -61,7 +61,9 @@ export function buildIncomeStatement(onChain, inputs, prices = {}) {
   const marketing        = round2(safe(periodInputs.marketing_spend));
   const payroll          = round2(safe(periodInputs.payroll));
   const legalAudit       = round2(safe(periodInputs.legal_audit_cost));
-  const otherOpex        = round2(safe(periodInputs.other_opex));
+  // Ledger-derived on-chain opex (payroll/G&A/software paid from monitored
+  // wallets — see src/services/ledger/) folded in alongside the form-input figure.
+  const otherOpex        = round2(safe(periodInputs.other_opex) + safe(onChain.onChainOpexUsd));
   const totalOpex        = round2(marketing + payroll + legalAudit + otherOpex);
 
   // ── Profitability ──
@@ -127,7 +129,7 @@ export function buildCashFlowStatement(onChain, inputs, prices = {}) {
   const cashPaidMarketing  = round2(safe(periodInputs.marketing_spend));
   const cashPaidInfra      = round2(safe(periodInputs.infra_cost));
   const cashPaidLegal      = round2(safe(periodInputs.legal_audit_cost));
-  const cashPaidOther      = round2(safe(periodInputs.other_opex));
+  const cashPaidOther      = round2(safe(periodInputs.other_opex) + safe(onChain.onChainOpexUsd));
   const cashPaidGasSubsidy = round2(safe(profile.cost_per_tx_subsidy) * safe(onChain.totalTransactions));
   const totalCashOut       = round2(cashPaidPayroll + cashPaidMarketing + cashPaidInfra +
                                     cashPaidLegal + cashPaidOther + cashPaidGasSubsidy);
@@ -335,7 +337,8 @@ export function buildUnitEconomics(onChain, inputs, prices = {}) {
     safe(periodInputs.payroll) +
     safe(periodInputs.infra_cost) +
     safe(periodInputs.legal_audit_cost) +
-    safe(periodInputs.other_opex)
+    safe(periodInputs.other_opex) +
+    safe(onChain.onChainOpexUsd)
   );
   const monthlyBurn     = round2(totalOpex + safe(profile.cost_per_tx_subsidy) * txCount);
   const cashBalance     = safe(periodInputs.cash_balance);
@@ -426,7 +429,8 @@ export function buildKPIDashboard(onChain, inputs, researchData = null) {
         safe(periodInputs.marketing_spend) +
         safe(periodInputs.infra_cost) +
         safe(periodInputs.legal_audit_cost) +
-        safe(periodInputs.other_opex)
+        safe(periodInputs.other_opex) +
+        safe(onChain.onChainOpexUsd)
       ),
       cash_balance:     safe(periodInputs.cash_balance),
     },
@@ -473,7 +477,8 @@ export function build12MonthModel(onChain, inputs, prices = {}) {
     safe(periodInputs.marketing_spend) +
     safe(periodInputs.infra_cost) +
     safe(periodInputs.legal_audit_cost) +
-    safe(periodInputs.other_opex)
+    safe(periodInputs.other_opex) +
+    safe(onChain.onChainOpexUsd)
   );
 
   // Growth rates per month

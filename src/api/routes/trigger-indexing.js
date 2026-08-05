@@ -18,6 +18,7 @@ import { checkRetentionDrop, checkBotSurge, checkChurnSpike } from '../../servic
 import { PatternProfileService } from '../../services/PatternProfileService.js';
 import subscriptionService from '../../services/SubscriptionService.js';
 import { getRpcUrls } from '../../config/env.js';
+import { ingestTransactions } from '../../services/ledger/LedgerIngestionService.js';
 
 const HISTORY_LIMIT = 50;       // max historical transactions to fetch
 const CHUNK_SIZE   = 10000;     // blocks per eth_getLogs call (increased for faster scanning)
@@ -429,6 +430,15 @@ export async function triggerDefaultContractIndexing(req, res) {
         // Extract function signatures from historical transactions
         await extractAndStoreFunctionSignatures(contract.address, contract.chain, collectedTxs);
 
+        // Decode + classify + post to the ledger (Postgres only — no-op in file-storage dev mode)
+        const ledgerResult = await ingestTransactions({
+          userId: req.user.id, contractAddress: contract.address, chain: contract.chain,
+          collectedTxs, rpcClient,
+        });
+        if (ledgerResult) {
+          console.log(`   📒 Ledger: ${ledgerResult.transfersProcessed} transfers processed, ${ledgerResult.ledgerEntriesWritten} entries posted`);
+        }
+
         // ── PHASE 2: Live monitoring ─────────────────────────────────────────
         console.log(`📡 PHASE 2: Live monitoring from block ${historicalEndBlock + 1}`);
         let lastBlock = historicalEndBlock;
@@ -493,6 +503,10 @@ export async function triggerDefaultContractIndexing(req, res) {
                     rpcClient._makeRpcCall('eth_getTransactionByHash', [txHash]),
                     rpcClient._makeRpcCall('eth_getTransactionReceipt', [txHash]),
                   ]);
+                  // Keep the matching raw logs (already fetched above for logTsMap) so
+                  // ERC-20 Transfer events can be decoded for the ledger — same as the
+                  // historical deploy-block-forward-scan path does.
+                  const matchingLogs = (Array.isArray(logs) ? logs : []).filter(l => l.transactionHash === txHash);
                   if (tx) newTxs.push({
                     hash:           tx.hash,
                     from:           tx.from,
@@ -505,6 +519,7 @@ export async function triggerDefaultContractIndexing(req, res) {
                     status:         receipt?.status === '0x1' || receipt?.status === 1,
                     input:          tx.input || '0x',
                     chain:          contract.chain,
+                    events:         matchingLogs.length > 0 ? matchingLogs : undefined,
                   });
                 } catch (e) {
                   console.warn(`   ⚠️ Live tx fetch failed ${txHash}: ${e.message}`);
@@ -595,6 +610,15 @@ export async function triggerDefaultContractIndexing(req, res) {
 
               // Extract function signatures from new live transactions
               await extractAndStoreFunctionSignatures(contract.address, contract.chain, newTxs);
+
+              // Decode + classify + post new transfers to the ledger
+              const liveLedgerResult = await ingestTransactions({
+                userId: req.user.id, contractAddress: contract.address, chain: contract.chain,
+                collectedTxs: newTxs, rpcClient,
+              });
+              if (liveLedgerResult) {
+                console.log(`   📒 Live ledger: ${liveLedgerResult.transfersProcessed} transfers, ${liveLedgerResult.ledgerEntriesWritten} entries posted`);
+              }
 
               // Push update to frontend via WebSocket
               try {

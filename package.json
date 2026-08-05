@@ -46,7 +46,8 @@
     "verify:flow": "node test-complete-user-flow.js",
     "test:auth-errors": "node test-auth-errors.js",
     "test:dashboard": "node test-dashboard-endpoints.js",
-    "test:rate-limit": "node test-rate-limit-fix.js"
+    "test:rate-limit": "node test-rate-limit-fix.js",
+    "deploy:check": "node scripts/prepare-neon-deployment.js"
   },
   "keywords": [
     "blockchain",
